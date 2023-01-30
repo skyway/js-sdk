@@ -1,0 +1,45 @@
+{
+  "name": "@skyway-sdk/sfu-bot",
+  "version": "1.0.0",
+  "description": "The official Next Generation JavaScript SDK for SkyWay",
+  "homepage": "https://skyway.ntt.com/",
+  "license": "MIT",
+  "author": "NTT Communications Corp.",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "LICENSE"
+  ],
+  "scripts": {
+    "bootstrap": "lerna bootstrap",
+    "build": "zx bundle.mjs",
+    "compile": "npm run compile:tsc && npm run compile:esbuild",
+    "compile:esbuild": "esbuild src/index.ts --bundle --format=esm --target=es6 --outfile=dist/index.mjs",
+    "compile:tsc": "rm -rf dist && tsc -p tsconfig.build.json",
+    "doc": "npm run doc:html && npm run doc:md",
+    "doc:html": "rm -rf docs/html && typedoc --excludePrivate --disableSources --excludeInternal --tsconfig ./tsconfig.build.json --out docs/html --plugin none ./src/index.ts ",
+    "doc:md": "rm -rf docs/md && typedoc --excludePrivate --disableSources --excludeInternal --tsconfig ./tsconfig.build.json --out docs/md ./src/index.ts ",
+    "e2e": "npm run test",
+    "e2e:dev": "npm run test:dev",
+    "format": "eslint ./src --fix",
+    "graph": "dependency-cruiser --include-only '^src' --output-type dot src | dot -T svg > docs/dependencygraph.svg",
+    "pre:test": "cd ../../ && npm run build && cd packages/core",
+    "publish:npm": "npx can-npm-publish --verbose && npm run build && npm publish --access public",
+    "test": "karma start ./karma.conf.js --single-run --browsers chrome_headless_with_fake_device",
+    "test:dev": "karma start ./karma.conf.js --browsers chrome_with_fake_device",
+    "type": "npm-run-all --parallel type:main",
+    "type:main": "tsc --noEmit -p ./tsconfig.json",
+    "watch": "npm-run-all --parallel watch:tsc watch:esbuild",
+    "watch:esbuild": "esbuild src/index.ts --bundle --watch --format=esm --target=es6 --outfile=dist/index.mjs",
+    "watch:tsc": "tsc -p tsconfig.build.json -w"
+  },
+  "dependencies": {
+    "@skyway-sdk/core": "^1.0.0",
+    "@skyway-sdk/sfu-api-client": "^1.0.0",
+    "lodash": "4.17.21",
+    "mediasoup-client": "^3.6.55"
+  },
+  "devDependencies": {}
+}

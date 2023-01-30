@@ -1,0 +1,27 @@
+node_modules
+dist
+lib
+build
+.parcel-cache
+.cache
+packages/**/reports
+packages/**/coverage
+*.tgz
+
+# internal
+.github/dependabot.yml
+.github/workflows
+CHANGELOG.md
+DEV.md
+env.ts
+Release.md
+.vscode
+examples/playground
+examples/playground-room
+CNAME
+docs
+scripts
+e2e
+tests
+__tests__
+packages/signaling-client/examples

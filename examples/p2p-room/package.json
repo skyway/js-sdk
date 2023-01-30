@@ -1,0 +1,24 @@
+{
+  "name": "p2p-room",
+  "version": "1.0.0",
+  "description": "",
+  "author": "",
+  "scripts": {
+    "build:example": "npm run transpile && parcel build ./src/index.html --public-url ./",
+    "dev": "parcel ./src/index.html",
+    "format": "eslint ./src --fix",
+    "transpile": "babel src/main.ts -o src/main.js"
+  },
+  "browserslist": [
+    "last 3 chrome versions"
+  ],
+  "dependencies": {
+    "@skyway-sdk/room": "^1.0.0-rc.0"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.0.0",
+    "@babel/core": "^7.0.0",
+    "@babel/preset-typescript": "^7.18.6",
+    "parcel": "^2.8.0"
+  }
+}

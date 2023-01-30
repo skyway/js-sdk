@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.build.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@skyway-sdk/*": ["packages/*/src"]
+    },
+    "noEmit": true
+  }
+}

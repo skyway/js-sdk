@@ -1,0 +1,62 @@
+{
+  "name": "skyway-sdk",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "examples/*"
+  ],
+  "scripts": {
+    "bootstrap": "lerna bootstrap",
+    "build": "npm run bootstrap && lerna run build && npm run bootstrap",
+    "build:example": "lerna run build:example && npm run format",
+    "clean": "lerna clean -y && rm -rf ./packages/*/dist && rm -rf ./packages/*/node_modules && rm -rf ./packages/*/bundler && rm -rf node_modules",
+    "type": "lerna run type",
+    "compile": "npm run bootstrap && lerna run compile && lerna run type",
+    "doc": "npm run compile && npm run doc:update",
+    "doc:update": "lerna run doc && zx ./scripts/update-api-reference.mjs",
+    "format": "lerna run format",
+    "graph": "lerna run graph",
+    "playground": "cd examples/playground && npm run dev",
+    "playground-room": "cd examples/playground-room && npm run dev",
+    "test": "npm run compile && zx ./scripts/test.mjs",
+    "test:sfu": "npm run compile && zx ./scripts/test-sfu.mjs",
+    "watch": "lerna run --parallel watch",
+    "upgrade-interactive": "npx npm-check --update",
+    "first": "npm i && npm run bootstrap && npm run compile",
+    "update-mirror": "zx scripts/update-mirror-repo.mjs"
+  },
+  "devDependencies": {
+    "@types/jasmine": "^4.3.0",
+    "@types/jasmine-ajax": "^3.3.3",
+    "@typescript-eslint/eslint-plugin": "^4.32.0",
+    "@typescript-eslint/parser": "^4.32.0",
+    "esbuild": "^0.15.7",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-jest": "^24.5.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "eslint-plugin-simple-import-sort": "^8.0.0",
+    "jasmine-ajax": "^4.0.0",
+    "jasmine-core": "^4.4.0",
+    "karma": "^6.3.4",
+    "karma-chrome-launcher": "^3.1.0",
+    "karma-coverage": "^2.1.0",
+    "karma-firefox-launcher": "^2.1.1",
+    "karma-jasmine": "^5.1.0",
+    "karma-typescript": "^5.5.2",
+    "karma-typescript-es6-transform": "^5.5.2",
+    "lerna": "^5.5.0",
+    "npm-run-all": "^4.1.5",
+    "organize-imports-cli": "^0.10.0",
+    "prettier": "^2.4.1",
+    "typedoc": "^0.22.17",
+    "typedoc-plugin-markdown": "3.12.1",
+    "typescript": "4.7.4",
+    "zx": "^7.0.8"
+  },
+  "packageManager": "npm@7.7.6",
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": "=7.7.6"
+  }
+}

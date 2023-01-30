@@ -1,0 +1,31 @@
+{
+  "name": "@skyway-sdk/model",
+  "version": "1.0.0",
+  "description": "The official Next Generation JavaScript SDK for SkyWay",
+  "homepage": "https://skyway.ntt.com/",
+  "license": "MIT",
+  "author": "NTT Communications Corp.",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "LICENSE"
+  ],
+  "scripts": {
+    "bootstrap": "lerna bootstrap",
+    "build": "cp -r ../../bundler ./ && zx ./bundler/private.mjs && rm -rf ./bundler",
+    "compile": "npm run compile:tsc && npm run compile:esbuild",
+    "compile:esbuild": "esbuild src/index.ts --bundle --format=esm --target=es6 --outfile=dist/index.mjs",
+    "compile:tsc": "rm -rf dist && tsc -p tsconfig.build.json",
+    "format": "eslint ./src --fix",
+    "gen": "openapi-typescript ../../skyway-rest-api-description/descriptions/rtc-api.v3-dev.skyway.io.json --output ./src/schema.ts",
+    "graph": "dependency-cruiser --include-only '^src' --output-type dot src | dot -T svg > docs/dependencygraph.svg",
+    "publish:npm": "npx can-npm-publish --verbose && npm run build && npm publish --access public",
+    "type": "tsc --noEmit -p ./tsconfig.json",
+    "watch": "npm-run-all --parallel watch:tsc watch:esbuild",
+    "watch:esbuild": "esbuild src/index.ts --bundle --watch --format=esm --target=es6 --outfile=dist/index.mjs",
+    "watch:tsc": "tsc -p tsconfig.build.json -w"
+  },
+  "devDependencies": {}
+}

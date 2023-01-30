@@ -1,0 +1,25 @@
+{
+  "name": "sfu-bot-example",
+  "version": "1.0.0",
+  "description": "",
+  "author": "",
+  "scripts": {
+    "dev": "parcel ./src/index.html",
+    "build:example": "npm run transpile && parcel build ./src/index.html --public-url ./",
+    "format": "eslint ./src --fix",
+    "transpile": "babel src/main.ts -o src/main.js"
+  },
+  "browserslist": [
+    "last 3 chrome versions"
+  ],
+  "dependencies": {
+    "@skyway-sdk/core": "^1.0.0-rc.0",
+    "@skyway-sdk/sfu-bot": "^1.0.0-rc.0"
+  },
+  "devDependencies": {
+    "parcel": "^2.8.0",
+    "@babel/cli": "^7.0.0",
+    "@babel/core": "^7.0.0",
+    "@babel/preset-typescript": "^7.18.6"
+  }
+}
