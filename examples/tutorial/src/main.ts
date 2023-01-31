@@ -57,8 +57,8 @@ const token = new SkyWayAuthToken({
   const localVideo = document.getElementById('local-video') as HTMLVideoElement;
   const buttonArea = document.getElementById('button-area');
   const remoteMediaArea = document.getElementById('remote-media-area');
-  const channelNameInput = document.getElementById(
-    'channel-name'
+  const roomNameInput = document.getElementById(
+    'room-name'
   ) as HTMLInputElement;
   const myId = document.getElementById('my-id');
   const joinButton = document.getElementById('join');
@@ -69,14 +69,14 @@ const token = new SkyWayAuthToken({
   await localVideo.play();
 
   joinButton.onclick = async () => {
-    if (channelNameInput.value === '') return;
+    if (roomNameInput.value === '') return;
 
     const context = await SkyWayContext.Create(token);
-    const channel = await SkyWayRoom.FindOrCreate(context, {
+    const room = await SkyWayRoom.FindOrCreate(context, {
       type: 'p2p',
-      name: channelNameInput.value,
+      name: roomNameInput.value,
     });
-    const me = await channel.join();
+    const me = await room.join();
 
     myId.textContent = me.id;
 
@@ -115,7 +115,7 @@ const token = new SkyWayAuthToken({
       };
     };
 
-    channel.publications.forEach(subscribeAndAttach);
-    channel.onStreamPublished.add((e) => subscribeAndAttach(e.publication));
+    room.publications.forEach(subscribeAndAttach);
+    room.onStreamPublished.add((e) => subscribeAndAttach(e.publication));
   };
 })();
