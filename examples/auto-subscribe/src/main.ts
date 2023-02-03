@@ -152,10 +152,10 @@ const token = new SkyWayAuthToken({
       await member.publish(video);
     }
     const disposeVideoElement = (remoteVideo: HTMLVideoElement) => {
-      remoteVideo.remove();
-      remoteVideo.srcObject = null;
       const stream = remoteVideo.srcObject as MediaStream;
       stream.getTracks().forEach((track) => track.stop());
+      remoteVideo.srcObject = null;
+      remoteVideo.remove();
     };
 
     room.onMemberLeft.add((e) => {
