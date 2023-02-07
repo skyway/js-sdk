@@ -1,4 +1,5 @@
 import {
+  deepCopy,
   Event,
   EventDisposer,
   Logger,
@@ -517,7 +518,26 @@ export class Receiver extends Peer {
 
     await this.pc.setRemoteDescription(sdp);
     const answer = await this.pc.createAnswer();
-    await this.pc.setLocalDescription(answer);
+
+    const offerObject = sdpTransform.parse(this.pc.remoteDescription!.sdp);
+    const answerObject = sdpTransform.parse(answer.sdp!);
+
+    // fmtpの一部の設定(stereo)はremote側でも設定しないと効果を発揮しない
+    offerObject.media.forEach((offerMedia, i) => {
+      const answerMedia = answerObject.media[i];
+      answerMedia.fmtp = deepCopy(answerMedia.fmtp).map((answerFmtp) => {
+        const offerFmtp = offerMedia.fmtp.find(
+          (f) => f.payload === answerFmtp.payload
+        );
+        if (offerFmtp) {
+          return offerFmtp;
+        }
+        return answerFmtp;
+      });
+    });
+    const munged = sdpTransform.write(answerObject);
+
+    await this.pc.setLocalDescription({ type: 'answer', sdp: munged });
 
     const message: ReceiverAnswerMessage = {
       kind: 'receiverAnswerMessage',

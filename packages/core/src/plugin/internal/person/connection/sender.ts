@@ -759,8 +759,22 @@ export function applyCodecCapabilities(
     });
   }
 
+  // parametersをfmtp形式に変換
+  codecCapabilities.forEach((cap) => {
+    if (cap.parameters) {
+      for (const [key, value] of Object.entries(cap.parameters ?? {})) {
+        if (value === false || !cap.parameters[key]) {
+          return;
+        }
+        if (key === 'usedtx' && value) {
+          cap.parameters[key] = 1;
+        }
+      }
+    }
+  });
+
   /**codec名とparametersの一致するものを探す */
-  const findPreferCodecsFromCap = (
+  const findCodecFromCodecCapability = (
     cap: Codec,
     rtp: sdpTransform.MediaAttributes['rtp'],
     fmtp: sdpTransform.MediaAttributes['fmtp']
@@ -769,7 +783,7 @@ export function applyCodecCapabilities(
       ...r,
       parameters: getParameters(fmtp, r.payload),
     }));
-    const [, codecName] = cap.mimeType.split('/');
+    const codecName = mimeTypeToCodec(cap.mimeType);
     if (!codecName) {
       return undefined;
     }
@@ -784,6 +798,11 @@ export function applyCodecCapabilities(
           return true;
         }
 
+        // audioはブラウザが勝手にfmtp configを足してくるので厳密にマッチさせる必要がない
+        if (mimeTypeToContentType(cap.mimeType) === 'audio') {
+          return true;
+        }
+
         return isEqual(r.parameters, cap.parameters ?? {});
       }) ?? undefined;
 
@@ -791,7 +810,7 @@ export function applyCodecCapabilities(
   };
 
   const preferredCodecs = codecCapabilities
-    .map((cap) => findPreferCodecsFromCap(cap, media.rtp, media.fmtp))
+    .map((cap) => findCodecFromCodecCapability(cap, media.rtp, media.fmtp))
     .filter((v): v is NonNullable<typeof v> => v != undefined);
 
   const sorted = [
@@ -801,21 +820,58 @@ export function applyCodecCapabilities(
     ),
   ];
 
-  // apply codec params
-  const opus = sorted.find((rtp) => rtp.codec.toLowerCase() === 'opus');
-  const opusDtx = codecCapabilities.find(
-    (f) => f.mimeType.toLowerCase() === 'audio/opus'
-  )?.parameters?.usedtx;
+  // apply codec fmtp
+  for (const fmtp of media.fmtp) {
+    const payloadType = fmtp.payload;
+    const targetCodecWithPayload = sorted.find(
+      (c) => c.payload === payloadType
+    );
 
-  media.fmtp.forEach((fmtp) => {
-    if (opus && fmtp.payload === opus.payload && opusDtx !== false) {
+    if (targetCodecWithPayload) {
+      const targetCodecCapability = codecCapabilities.find((c) =>
+        findCodecFromCodecCapability(c, [targetCodecWithPayload], media.fmtp)
+      );
+      if (targetCodecCapability) {
+        if (
+          targetCodecCapability.parameters &&
+          Object.keys(targetCodecCapability.parameters).length > 0
+        ) {
+          // codecCapabilitiesのfmtpを適用する
+          fmtp.config = '';
+          Object.entries(targetCodecCapability.parameters).forEach(
+            ([key, value]) => {
+              if (value === false || fmtp.config.includes(key)) {
+                return;
+              }
+              if (fmtp.config.length > 0) {
+                fmtp.config += `;${key}=${value}`;
+              } else {
+                fmtp.config = `${key}=${value}`;
+              }
+            }
+          );
+        }
+      }
+    }
+
+    // opusDtxはデフォルトで有効に設定する
+    const opus = sorted.find((rtp) => rtp.codec.toLowerCase() === 'opus');
+    const opusDtx = codecCapabilities.find(
+      (f) => mimeTypeToCodec(f.mimeType).toLowerCase() === 'opus'
+    )?.parameters?.usedtx;
+    if (
+      opus &&
+      opusDtx !== false &&
+      fmtp.payload === opus.payload &&
+      !fmtp.config.includes('usedtx')
+    ) {
       if (fmtp.config.length > 0) {
         fmtp.config += ';usedtx=1';
       } else {
         fmtp.config = 'usedtx=1';
       }
     }
-  });
+  }
 
   media.payloads = sorted.map((rtp) => rtp.payload.toString()).join(' ');
 }
@@ -847,3 +903,6 @@ export interface SenderRestartIceMessage extends P2PMessage {
     sdp: RTCSessionDescriptionInit;
   };
 }
+
+const mimeTypeToCodec = (mimeType: string) => mimeType.split('/')[1];
+const mimeTypeToContentType = (mimeType: string) => mimeType.split('/')[0];

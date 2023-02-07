@@ -94,7 +94,6 @@ export class RoomPublicationImpl<StreamType extends LocalStream = LocalStream>
 {
   readonly id: string;
   readonly contentType: ContentType;
-  readonly codecCapabilities: Codec[];
   readonly publisher: RoomMemberImpl;
   private readonly _origin?: Publication;
   private readonly _disposer = new EventDisposer();
@@ -116,7 +115,6 @@ export class RoomPublicationImpl<StreamType extends LocalStream = LocalStream>
 
     {
       const publication = this._origin ?? this._publication;
-      this.codecCapabilities = publication.codecCapabilities;
       this.publisher = this._room._getMember(publication.publisher.id);
     }
 
@@ -166,6 +164,10 @@ export class RoomPublicationImpl<StreamType extends LocalStream = LocalStream>
 
   private get _preferredPublication() {
     return this._origin ?? this._publication;
+  }
+
+  get codecCapabilities() {
+    return this._preferredPublication.codecCapabilities;
   }
 
   get encodings() {

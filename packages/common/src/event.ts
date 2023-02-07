@@ -1,3 +1,7 @@
+import { Logger } from './logger';
+
+const log = new Logger('packages/common/src/event.ts');
+
 type EventExecute<T extends any> = (arg: T) => void;
 
 export class Event<T extends any> {
@@ -12,7 +16,13 @@ export class Event<T extends any> {
 
   /**@internal */
   emit = (arg: T) => {
-    this._stack.forEach((v) => v.execute(arg));
+    for (const task of this._stack) {
+      try {
+        task.execute(arg);
+      } catch (error) {
+        log.error('task throws error', error);
+      }
+    }
   };
 
   /**@internal */

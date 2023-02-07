@@ -19,7 +19,7 @@ import { getLayerFromEncodings } from '../util';
 import { SfuTransport } from './transport/transport';
 import { TransportRepository } from './transport/transportRepository';
 
-const log = new Logger('packages/sfu-botc/connection/receiver.ts');
+const log = new Logger('packages/sfu-bot/src/connection/receiver.ts');
 
 export class Receiver {
   consumer?: Consumer;
@@ -121,6 +121,7 @@ export class Receiver {
               transportId,
               producerId,
               consumerOptions,
+              subscription: this.subscription,
             },
           });
         });

@@ -1,6 +1,6 @@
 {
   "name": "@skyway-sdk/rtc-api-client",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "The official Next Generation JavaScript SDK for SkyWay",
   "homepage": "https://skyway.ntt.com/",
   "license": "MIT",
@@ -32,8 +32,8 @@
     "watch:tsc": "tsc -p tsconfig.build.json -w"
   },
   "dependencies": {
-    "@skyway-sdk/rtc-rpc-api-client": "^1.0.0",
-    "@skyway-sdk/token": "^1.0.0",
+    "@skyway-sdk/rtc-rpc-api-client": "^1.0.1",
+    "@skyway-sdk/token": "^1.0.1",
     "deepmerge": "^4.2.2",
     "uuid": "^8.3.2"
   },

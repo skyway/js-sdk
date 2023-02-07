@@ -8,7 +8,7 @@ export type Codec = {
 export type CodecParameters = {
   [key: string]: any;
   /** @description [japanese] 発話していない時の音声通信を停止する。デフォルトで有効 */
-  usedtx: boolean;
+  usedtx: boolean | number;
 };
 
 export type DataType = string | Blob | ArrayBuffer;

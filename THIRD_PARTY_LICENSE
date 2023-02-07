@@ -1,4 +1,4 @@
-@skyway-sdk/common@1.0.0
+@skyway-sdk/common@1.0.1
 
 MIT
 
@@ -6,7 +6,7 @@ MIT
 
 ---
 
-@skyway-sdk/core@1.0.0
+@skyway-sdk/core@1.1.0
 
 MIT
 
@@ -22,7 +22,7 @@ MIT
 
 ---
 
-@skyway-sdk/room@1.0.0
+@skyway-sdk/room@1.1.0
 
 MIT
 
@@ -30,7 +30,7 @@ MIT
 
 ---
 
-@skyway-sdk/rtc-api-client@1.0.0
+@skyway-sdk/rtc-api-client@1.0.1
 
 MIT
 
@@ -38,7 +38,7 @@ MIT
 
 ---
 
-@skyway-sdk/rtc-rpc-api-client@1.0.0
+@skyway-sdk/rtc-rpc-api-client@1.0.1
 
 MIT
 
@@ -46,7 +46,7 @@ MIT
 
 ---
 
-@skyway-sdk/sfu-api-client@1.0.0
+@skyway-sdk/sfu-api-client@1.0.1
 
 MIT
 
@@ -54,7 +54,7 @@ MIT
 
 ---
 
-@skyway-sdk/sfu-bot@1.0.0
+@skyway-sdk/sfu-bot@1.0.1
 
 MIT
 
@@ -70,7 +70,7 @@ MIT
 
 ---
 
-@skyway-sdk/token@1.0.0
+@skyway-sdk/token@1.0.1
 
 MIT
 
@@ -281,38 +281,6 @@ https://github.com/TehShrike/deepmerge
 
 ---
 
-event-target-shim@5.0.1
-
-MIT
-
-https://github.com/mysticatea/event-target-shim
-
-The MIT License (MIT)
-
-Copyright (c) 2015 Toru Nagashima
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-
-
-
----
-
 events@3.3.0
 
 MIT
@@ -342,14 +310,6 @@ DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
 OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-
----
-
-fake-mediastreamtrack@1.1.6
-
-ISC
-
-https://github.com/ibc/fake-mediastreamtrack
 
 ---
 
@@ -546,7 +506,7 @@ terms above.
 
 ---
 
-mediasoup-client@3.6.72
+mediasoup-client@3.6.77
 
 ISC
 
@@ -579,7 +539,7 @@ https://github.com/zeit/ms
 
 The MIT License (MIT)
 
-Copyright (c) 2022 Vercel, Inc.
+Copyright (c) 2016 Zeit, Inc.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -602,7 +562,7 @@ SOFTWARE.
 
 ---
 
-node-fetch@2.6.8
+node-fetch@2.6.9
 
 MIT
 
@@ -630,6 +590,36 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
+
+
+---
+
+queue-microtask@1.2.3
+
+MIT
+
+https://github.com/feross/queue-microtask
+
+The MIT License (MIT)
+
+Copyright (c) Feross Aboukhadijeh
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
 ---
@@ -694,37 +684,6 @@ https://github.com/Sebmaster/tr46.js
 The MIT License (MIT)
 
 Copyright (c) Sebastian Mayr
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-
-
----
-
-uuid@3.4.0
-
-MIT
-
-https://github.com/uuidjs/uuid
-
-The MIT License (MIT)
-
-Copyright (c) 2010-2016 Robert Kieffer and other contributors
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

@@ -1,5 +1,4 @@
 import { SkyWayError } from './error';
-import { Event } from './event';
 
 export const logLevelTypes = [
   'disable',
@@ -16,12 +15,12 @@ export class Logger {
   static level: LogLevel = 'error';
   static format: LogFormat = 'object';
   static readonly id = Math.random().toString().slice(2, 7);
-  static readonly onLog = new Event<{
+  static onLog: (props: {
     level: string;
     timestamp: string;
     message: any[];
     id: string;
-  }>();
+  }) => void = () => {};
 
   /**@internal */
   constructor(readonly prefix: string) {}
@@ -96,7 +95,7 @@ export class Logger {
           break;
       }
 
-      Logger.onLog.emit({ id: Logger.id, timestamp, level, message: msg });
+      Logger.onLog({ id: Logger.id, timestamp, level, message: msg });
     }
   }
 

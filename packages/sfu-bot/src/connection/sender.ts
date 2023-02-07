@@ -381,6 +381,28 @@ export class Sender {
           opusDtx: true,
         };
       }
+
+      // apply opusStereo
+      const opusStereo = codecCapabilities.find(
+        (c) => c.mimeType.toLowerCase() === 'audio/opus'
+      )?.parameters?.stereo;
+      if (opusStereo) {
+        producerOptions.codecOptions = {
+          ...producerOptions.codecOptions,
+          opusStereo: true,
+        };
+      }
+
+      // apply opusFec
+      const opusFec = codecCapabilities.find(
+        (c) => c.mimeType.toLowerCase() === 'audio/opus'
+      )?.parameters?.useinbandfec;
+      if (opusFec) {
+        producerOptions.codecOptions = {
+          ...producerOptions.codecOptions,
+          opusFec: true,
+        };
+      }
     }
 
     transport.onProduce

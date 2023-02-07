@@ -42,7 +42,7 @@ export class BackOff {
 }
 
 /**@internal */
-export const deepCopy = (o: object) => JSON.parse(JSON.stringify(o));
+export const deepCopy = <T = object>(o: T): T => JSON.parse(JSON.stringify(o));
 
 /**@internal */
 export const getTimestampSec = () => Date.now() / 1000;
