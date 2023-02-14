@@ -1,8 +1,12 @@
 {
   "name": "@skyway-sdk/token",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "The official Next Generation JavaScript SDK for SkyWay",
   "homepage": "https://skyway.ntt.com/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/skyway/js-sdk.git"
+  },
   "license": "MIT",
   "author": "NTT Communications Corp.",
   "main": "dist/index.js",

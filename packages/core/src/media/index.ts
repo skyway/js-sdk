@@ -1,6 +1,7 @@
 export type Codec = {
   mimeType: string;
-  /**fmtpのconfig */
+  /**
+   * @description [japanese] fmtpのパラメータを設定する */
   parameters?: Partial<CodecParameters>;
   rate?: number;
 };

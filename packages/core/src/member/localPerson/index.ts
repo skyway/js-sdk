@@ -900,6 +900,11 @@ export class LocalPersonImpl extends MemberImpl implements LocalPerson {
 
 export type PublicationOptions = {
   metadata?: string | undefined;
+  /**
+   * @description [japanese]
+   * publishする際に優先して利用するCodec設定を指定する。
+   * 利用するCodecは配列の先頭が優先される。
+   */
   codecCapabilities?: Codec[];
   /**
    * @description [japanese]
