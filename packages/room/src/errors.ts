@@ -1,7 +1,9 @@
-export const errors = {
+import { errors as coreErrors } from '@skyway-sdk/core';
+
+export const roomErrors = {
   invalidParameter: { name: 'invalidParameter', detail: '', solution: '' },
   timeout: { name: 'timeout', detail: '', solution: '' },
-  internal: { name: 'timeout', detail: '', solution: '' },
+  internal: { name: 'internal', detail: '', solution: '' },
   notImplemented: {
     name: 'notImplemented',
     detail: '対応していないRoomTypeです',
@@ -29,3 +31,5 @@ export const errors = {
     solution: 'SfuRoomとP2PRoomを同一のIDで混在させていないか確かめてください',
   },
 } as const;
+
+export const errors = { ...coreErrors, ...roomErrors } as const;

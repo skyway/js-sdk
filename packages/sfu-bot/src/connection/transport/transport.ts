@@ -9,7 +9,7 @@ import {
 } from '@skyway-sdk/core';
 import { SfuRestApiClient } from '@skyway-sdk/sfu-api-client';
 import { DataProducerOptions } from 'mediasoup-client/lib/DataProducer';
-import { ProducerOptions } from 'mediasoup-client/lib/Producer';
+import { MediaKind, RtpParameters } from 'mediasoup-client/lib/RtpParameters';
 import {
   ConnectionState,
   DtlsParameters,
@@ -36,7 +36,11 @@ export class SfuTransport {
   private _options: SfuBotPluginOptions;
 
   readonly onProduce = new Event<{
-    producerOptions: ProducerOptions;
+    producerOptions: {
+      kind: MediaKind;
+      rtpParameters: RtpParameters;
+      appData: any;
+    };
     callback: (props: { id: string }) => void;
     errback: (err: any) => void;
   }>();
@@ -86,20 +90,20 @@ export class SfuTransport {
     msTransport.on('connectionstatechange', (e) =>
       this.onMediasoupConnectionStateChanged.emit(e)
     );
-    msTransport.on('produce', (producerOptions, callback, errback) =>
+    msTransport.on('produce', (producerOptions, callback, errback) => {
       this.onProduce.emit({
-        producerOptions: producerOptions as ProducerOptions,
+        producerOptions,
         callback: callback!,
         errback: errback!,
-      })
-    );
-    msTransport.on('producedata', (producerOptions, callback, errback) =>
+      });
+    });
+    msTransport.on('producedata', (producerOptions, callback, errback) => {
       this.onProduceData.emit({
-        producerOptions: producerOptions as DataProducerOptions,
+        producerOptions,
         callback: callback!,
         errback: errback!,
-      })
-    );
+      });
+    });
 
     this.onMediasoupConnectionStateChanged.add(
       async (state: ConnectionState) => {

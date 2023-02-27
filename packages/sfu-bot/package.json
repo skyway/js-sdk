@@ -43,7 +43,7 @@
     "@skyway-sdk/core": "^1.1.0",
     "@skyway-sdk/sfu-api-client": "^1.0.1",
     "lodash": "4.17.21",
-    "mediasoup-client": "^3.6.55"
+    "mediasoup-client": "3.6.82"
   },
   "devDependencies": {}
 }

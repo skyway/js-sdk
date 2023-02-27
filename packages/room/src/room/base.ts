@@ -30,6 +30,12 @@ export type RoomState = ChannelState;
 
 export interface Room {
   readonly type: RoomType;
+  readonly id: string;
+  readonly name?: string;
+  readonly metadata?: string;
+  readonly state: RoomState;
+  readonly disposed: boolean;
+
   /**
    * @description [japanese] Roomが閉じられたときに発火するイベント
    */
@@ -94,27 +100,22 @@ export interface Room {
    */
   readonly onSubscriptionListChanged: Event<event.ListChangedEvent>;
 
-  readonly id: string;
-  readonly name?: string;
-  readonly metadata?: string;
-  readonly state: RoomState;
-  readonly disposed: boolean;
   /**
-   * @description [japanese] Roomに参加しているMemberのリスト
+   * @description [japanese] Roomに参加しているMemberの一覧を取得する
    */
   readonly members: RemoteRoomMember[];
   /**
-   * @description [japanese] RoomにPublishされているStreamのPublicationのリスト
+   * @description [japanese] RoomにPublishされているStreamのPublicationの一覧を取得する
    */
   readonly publications: RoomPublication[];
   /**
-   * @description [japanese] Room上のStreamのSubscription情報のリスト
+   * @description [japanese] Room上のStreamのSubscriptionの一覧を取得する
    */
   readonly subscriptions: RoomSubscription[];
   localRoomMember?: LocalRoomMember;
 
   /**
-   * @description [japanese] RoomにMemberを参加させる
+   * @description [japanese] RoomにMemberを追加する
    */
   join: (memberInit?: RoomMemberInit) => Promise<LocalRoomMember>;
   /**
@@ -126,14 +127,19 @@ export interface Room {
    */
   moveRoom: (member: LocalRoomMember) => Promise<LocalRoomMember>;
   /**
-   * @description [japanese] metadataを更新する
+   * @description [japanese] Roomのmetadataを更新する
    */
   updateMetadata: (metadata: string) => Promise<void>;
   /**
    * @description [japanese] Roomを閉じる
    */
   close: () => Promise<void>;
-  /**@description [japanese] Roomインスタンスの利用を終了する */
+  /**
+   * @description [japanese] Roomを閉じずにRoomインスタンスの利用を終了し次のリソースを解放する。
+   * - サーバとの通信
+   * - イベントリスナー
+   * - LocalMemberのインスタンス
+   */
   dispose: () => Promise<void>;
 }
 

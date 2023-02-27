@@ -1,3 +1,4 @@
+export { errors } from './errors';
 export * from './member';
 export * from './member/local/base';
 export * from './member/local/p2p';

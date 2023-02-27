@@ -27,7 +27,7 @@
     "doc:md": "rm -rf docs/md && typedoc --excludePrivate --disableSources --excludeInternal --tsconfig ./tsconfig.build.json --out docs/md ./src/index.ts ",
     "e2e": "npm run test-large",
     "e2e:firefox": "karma start ./karma.all.js --single-run --browsers FirefoxHeadlessAutoAllowGUM",
-    "format": "eslint ./src --fix",
+    "format": "eslint ./src --fix && eslint ./tests --fix",
     "graph": "dependency-cruiser --include-only '^src' --output-type dot src | dot -T svg > docs/dependencygraph.svg",
     "pre:test": "cd ../../ && npm run build && cd packages/core",
     "publish:npm": "npx can-npm-publish --verbose && npm run build && npm publish --access public",
