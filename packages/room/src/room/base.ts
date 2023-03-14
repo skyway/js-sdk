@@ -1,6 +1,7 @@
 import { Event, Events, Logger } from '@skyway-sdk/common';
 import {
   ChannelState,
+  LocalStream,
   MemberMetadataUpdatedEvent,
   Publication,
   SkyWayChannelImpl,
@@ -158,13 +159,13 @@ export abstract class RoomImpl implements Room {
     return this._publications[id];
   }
   /**@private */
-  _addPublication(p: Publication) {
+  _addPublication<T extends LocalStream>(p: Publication): RoomPublication<T> {
     const exist = this._publications[p.id];
     if (exist) {
-      return exist;
+      return exist as RoomPublicationImpl<T>;
     }
 
-    const publication = new RoomPublicationImpl(p, this);
+    const publication = new RoomPublicationImpl<T>(p, this);
     this._publications[p.id] = publication;
     return publication;
   }

@@ -18,23 +18,34 @@ export abstract class RemoteStreamBase implements Stream {
   /**@internal */
   _getTransport: () => Transport | undefined = () => undefined;
   /**
-   * @experimental
-   * @description [japanese] RemoteStreamの通信の統計情報を取得する
+   * @deprecated
+   * @use Subscription.getStats
    */
-  getStats: () => Promise<WebRTCStats> = async () => [] as WebRTCStats;
+  readonly getStats = () => {
+    return this._getStats();
+  };
+  /**@internal */
+  _getStats: () => Promise<WebRTCStats> = async () => [] as WebRTCStats;
   /**
-   * @experimental
-   * @description [japanese] 試験的なAPIです。今後インターフェースや仕様が変更される可能性があります
-   * @description [japanese] 対象のMemberとのRTCPeerConnectionを取得する。RTCPeerConnectionを直接操作すると SDK は正しく動作しなくなる可能性があります。
+   * @deprecated
+   * @use Subscription.getRTCPeerConnection
    */
   getRTCPeerConnection() {
+    return this._getRTCPeerConnection();
+  }
+  /**@internal */
+  _getRTCPeerConnection() {
     return this._getTransport()?.rtcPeerConnection;
   }
-
   /**
-   * @description [japanese] メディア通信の状態を取得
+   * @deprecated
+   * @use Subscription.getConnectionState
    */
   getConnectionState() {
+    return this._getConnectionState();
+  }
+  /**@internal */
+  _getConnectionState() {
     return this._getTransport()?.connectionState ?? 'new';
   }
 

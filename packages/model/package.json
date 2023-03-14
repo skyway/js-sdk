@@ -23,6 +23,7 @@
     "compile:esbuild": "esbuild src/index.ts --bundle --format=esm --target=es6 --outfile=dist/index.mjs",
     "compile:tsc": "rm -rf dist && tsc -p tsconfig.build.json",
     "format": "eslint ./src --fix",
+    "lint": "eslint ./src --fix",
     "gen": "openapi-typescript ../../skyway-rest-api-description/descriptions/rtc-api.v3-dev.skyway.io.json --output ./src/schema.ts",
     "graph": "dependency-cruiser --include-only '^src' --output-type dot src | dot -T svg > docs/dependencygraph.svg",
     "publish:npm": "npx can-npm-publish --verbose && npm run build && npm publish --access public",

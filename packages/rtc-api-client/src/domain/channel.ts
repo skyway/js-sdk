@@ -755,6 +755,10 @@ export class ChannelImpl implements model.Channel {
         });
     });
 
+  close() {
+    return this.apiClient.deleteChannel(this.appId, this.id);
+  }
+
   /**
    * リソースの解放
    * - Channelイベントの購読停止

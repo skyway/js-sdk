@@ -182,7 +182,7 @@ export class Receiver {
       connectionState: transport.connectionState,
       info: this,
     });
-    stream.getStats = async () => {
+    stream._getStats = async () => {
       const stats = await consumer.getStats();
       let arr = statsToArray(stats);
       arr = arr.map((stats) => {

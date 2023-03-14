@@ -233,7 +233,7 @@ export class Receiver extends Peer {
       rtcPeerConnection: this.pc,
       connectionState: convertConnectionState(this.pc.connectionState),
     });
-    stream.getStats = async () => {
+    stream._getStats = async () => {
       if (stream.contentType === 'data') {
         const stats = await this.pc.getStats();
         const arr = statsToArray(stats);

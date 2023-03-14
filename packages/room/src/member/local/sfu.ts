@@ -5,7 +5,6 @@ import {
   LocalStream,
   RemoteAudioStream,
   RemoteDataStream,
-  RemoteStream,
   RemoteVideoStream,
   SubscriptionImpl,
   SubscriptionOptions,
@@ -30,10 +29,10 @@ export interface LocalSFURoomMember extends LocalRoomMember {
   /**
    * @description [japanese] RoomにStreamをPublishする
    */
-  publish: (
+  publish: <T extends LocalStream = LocalStream>(
     stream: LocalStream,
     options?: RoomPublicationOptions & SfuRoomPublicationOptions
-  ) => Promise<RoomPublication>;
+  ) => Promise<RoomPublication<T>>;
 }
 
 /**@internal */
@@ -46,10 +45,10 @@ export class LocalSFURoomMemberImpl
     super(member, room);
   }
 
-  async publish(
+  async publish<T extends LocalStream = LocalStream>(
     stream: LocalStream,
     options: RoomPublicationOptions & SfuRoomPublicationOptions = {}
-  ): Promise<RoomPublication> {
+  ): Promise<RoomPublication<T>> {
     if (stream instanceof LocalDataStream) {
       throw createError({
         operationName: 'LocalSFURoomMemberImpl.publish',
@@ -81,7 +80,7 @@ export class LocalSFURoomMemberImpl
     });
     const relayingPublication = forwarding.relayingPublication;
 
-    const roomPublication = this.room._addPublication(relayingPublication);
+    const roomPublication = this.room._addPublication<T>(relayingPublication);
     this.onStreamPublished.emit({ publication: roomPublication });
 
     return roomPublication;

@@ -10,12 +10,13 @@ import {
 import { SkyWayContext } from '../context';
 import { errors } from '../errors';
 import { Codec, EncodingParameters } from '../media';
-import { ContentType } from '../media/stream';
+import { ContentType, WebRTCStats } from '../media/stream';
 import { LocalMediaStreamBase, LocalStream } from '../media/stream/local';
 import { LocalAudioStream } from '../media/stream/local/audio';
 import { LocalVideoStream } from '../media/stream/local/video';
 import { Member } from '../member';
 import { RemoteMemberImplInterface } from '../member/remoteMember';
+import { TransportConnectionState } from '../plugin/interface';
 import { Subscription } from '../subscription';
 import { createError, createLogPayload, createWarnPayload } from '../util';
 
@@ -86,6 +87,25 @@ export interface Publication<T extends LocalStream = LocalStream> {
     stream: LocalAudioStream | LocalVideoStream,
     options?: ReplaceStreamOptions
   ) => void;
+  /**
+   * @experimental
+   * @description [japanese] 試験的なAPIです。今後インターフェースや仕様が変更される可能性があります
+   * @description [japanese] StreamをSubscribeしているMemberとの通信の統計情報を取得する
+   */
+  getStats(selector: Member | string): Promise<WebRTCStats>;
+  /**
+   * @experimental
+   * @description [japanese] 試験的なAPIです。今後インターフェースや仕様が変更される可能性があります
+   * @description [japanese] 対象のMemberとのRTCPeerConnectionを取得する。RTCPeerConnectionを直接操作すると SDK は正しく動作しなくなる可能性があります。
+   */
+  getRTCPeerConnection(
+    selector: Member | string
+  ): RTCPeerConnection | undefined;
+  /**
+   * @description [japanese] メディア通信の状態を取得する
+   * @param selector [japanese] 接続相手
+   */
+  getConnectionState(selector: Member | string): TransportConnectionState;
 }
 
 /**@internal */
@@ -493,6 +513,44 @@ export class PublicationImpl<T extends LocalStream = LocalStream>
     this.stream = stream as T;
 
     this._onReplaceStream.emit(stream);
+  }
+
+  getStats(selector: string | Member): Promise<WebRTCStats> {
+    if (!this.stream) {
+      throw createError({
+        operationName: 'PublicationImpl.getStats',
+        context: this._context,
+        info: errors.streamNotExistInSubscription,
+        path: log.prefix,
+      });
+    }
+    return this.stream._getStats(selector);
+  }
+
+  getRTCPeerConnection(
+    selector: string | Member
+  ): RTCPeerConnection | undefined {
+    if (!this.stream) {
+      throw createError({
+        operationName: 'PublicationImpl.getRTCPeerConnection',
+        context: this._context,
+        info: errors.streamNotExistInSubscription,
+        path: log.prefix,
+      });
+    }
+    return this.stream._getRTCPeerConnection(selector);
+  }
+
+  getConnectionState(selector: string | Member): TransportConnectionState {
+    if (!this.stream) {
+      throw createError({
+        operationName: 'PublicationImpl.getConnectionState',
+        context: this._context,
+        info: errors.streamNotExistInSubscription,
+        path: log.prefix,
+      });
+    }
+    return this.stream._getConnectionState(selector);
   }
 
   /**@private */

@@ -1,6 +1,6 @@
 {
   "name": "@skyway-sdk/sfu-bot",
-  "version": "1.0.2",
+  "version": "1.2.1",
   "description": "The official Next Generation JavaScript SDK for SkyWay",
   "homepage": "https://skyway.ntt.com/",
   "repository": {
@@ -28,6 +28,7 @@
     "e2e": "npm run test",
     "e2e:dev": "npm run test:dev",
     "format": "eslint ./src --fix",
+    "lint": "eslint ./src --fix",
     "graph": "dependency-cruiser --include-only '^src' --output-type dot src | dot -T svg > docs/dependencygraph.svg",
     "pre:test": "cd ../../ && npm run build && cd packages/core",
     "publish:npm": "npx can-npm-publish --verbose && npm run build && npm publish --access public",
@@ -40,7 +41,7 @@
     "watch:tsc": "tsc -p tsconfig.build.json -w"
   },
   "dependencies": {
-    "@skyway-sdk/core": "^1.1.0",
+    "@skyway-sdk/core": "^1.2.1",
     "@skyway-sdk/sfu-api-client": "^1.0.1",
     "lodash": "4.17.21",
     "mediasoup-client": "3.6.82"

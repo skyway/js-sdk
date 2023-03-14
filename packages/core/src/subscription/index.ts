@@ -5,7 +5,7 @@ import { SkyWayChannelImpl } from '../channel';
 import { SkyWayContext } from '../context';
 import { errors } from '../errors';
 import { Codec } from '../media';
-import { ContentType } from '../media/stream';
+import { ContentType, WebRTCStats } from '../media/stream';
 import { RemoteStream } from '../media/stream/remote';
 import { RemoteAudioStream } from '../media/stream/remote/audio';
 import { RemoteDataStream } from '../media/stream/remote/data';
@@ -14,6 +14,7 @@ import {
   RemoteMember,
   RemoteMemberImplInterface,
 } from '../member/remoteMember';
+import { TransportConnectionState } from '../plugin/interface';
 import { Publication, PublicationImpl } from '../publication';
 import { createError } from '../util';
 
@@ -55,6 +56,21 @@ export interface Subscription<
   cancel: () => Promise<void>;
   /** @description [japanese] Streamで優先して受信するエンコード設定の変更 */
   changePreferredEncoding: (id: string) => void;
+  /**
+   * @experimental
+   * @description [japanese] RemoteStreamの通信の統計情報を取得する
+   */
+  getStats(): Promise<WebRTCStats>;
+  /**
+   * @experimental
+   * @description [japanese] 試験的なAPIです。今後インターフェースや仕様が変更される可能性があります
+   * @description [japanese] 対象のMemberとのRTCPeerConnectionを取得する。RTCPeerConnectionを直接操作すると SDK は正しく動作しなくなる可能性があります。
+   */
+  getRTCPeerConnection(): RTCPeerConnection | undefined;
+  /**
+   * @description [japanese] メディア通信の状態を取得
+   */
+  getConnectionState(): TransportConnectionState;
 }
 
 /**@internal */
@@ -203,6 +219,45 @@ export class SubscriptionImpl<
     }
     this.preferredEncoding = id;
     this._onChangeEncoding.emit();
+  }
+
+  getStats(): Promise<WebRTCStats> {
+    if (!this.stream) {
+      throw createError({
+        operationName: 'SubscriptionImpl.getStats',
+        info: errors.streamNotExistInSubscription,
+        path: log.prefix,
+        context: this._context,
+        channel: this._channel,
+      });
+    }
+    return this.stream._getStats();
+  }
+
+  getRTCPeerConnection(): RTCPeerConnection | undefined {
+    if (!this.stream) {
+      throw createError({
+        operationName: 'SubscriptionImpl.getRTCPeerConnection',
+        info: errors.streamNotExistInSubscription,
+        path: log.prefix,
+        context: this._context,
+        channel: this._channel,
+      });
+    }
+    return this.stream._getRTCPeerConnection();
+  }
+
+  getConnectionState(): TransportConnectionState {
+    if (!this.stream) {
+      throw createError({
+        operationName: 'SubscriptionImpl.getConnectionState',
+        info: errors.streamNotExistInSubscription,
+        path: log.prefix,
+        context: this._context,
+        channel: this._channel,
+      });
+    }
+    return this.stream._getConnectionState();
   }
 }
 

@@ -1,6 +1,6 @@
 {
   "name": "@skyway-sdk/core",
-  "version": "1.1.1",
+  "version": "1.2.1",
   "description": "The official Next Generation JavaScript SDK for SkyWay",
   "homepage": "https://skyway.ntt.com/",
   "repository": {
@@ -28,6 +28,7 @@
     "e2e": "npm run test-large",
     "e2e:firefox": "karma start ./karma.all.js --single-run --browsers FirefoxHeadlessAutoAllowGUM",
     "format": "eslint ./src --fix && eslint ./tests --fix",
+    "lint": "eslint ./src --fix && eslint ./tests --fix",
     "graph": "dependency-cruiser --include-only '^src' --output-type dot src | dot -T svg > docs/dependencygraph.svg",
     "pre:test": "cd ../../ && npm run build && cd packages/core",
     "publish:npm": "npx can-npm-publish --verbose && npm run build && npm publish --access public",
@@ -46,7 +47,7 @@
     "watch:tsc": "tsc -p tsconfig.build.json -w"
   },
   "dependencies": {
-    "@skyway-sdk/rtc-api-client": "^1.0.1",
+    "@skyway-sdk/rtc-api-client": "^1.2.0",
     "@skyway-sdk/signaling-client": "^1.0.0",
     "bowser": "^2.11.0",
     "deepmerge": "^4.2.2",

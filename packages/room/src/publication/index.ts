@@ -10,12 +10,19 @@ import {
   Publication,
   PublicationState,
   ReplaceStreamOptions,
+  TransportConnectionState,
+  WebRTCStats,
 } from '@skyway-sdk/core';
+import { SfuBotMember } from '@skyway-sdk/sfu-bot';
 
+import { errors } from '../errors';
 import { RoomMember, RoomMemberImpl } from '../member';
 import { RoomImpl } from '../room/base';
 import { StreamSubscribedEvent, StreamUnsubscribedEvent } from '../room/event';
 import { RoomSubscription } from '../subscription';
+import { createError } from '../util';
+
+const path = 'packages/room/src/publication/index.ts';
 
 export interface RoomPublication<T extends LocalStream = LocalStream> {
   readonly id: string;
@@ -86,6 +93,25 @@ export interface RoomPublication<T extends LocalStream = LocalStream> {
     stream: LocalAudioStream | LocalVideoStream,
     options?: ReplaceStreamOptions
   ) => void;
+  /**
+   * @experimental
+   * @description [japanese] 試験的なAPIです。今後インターフェースや仕様が変更される可能性があります
+   * @description [japanese] StreamをSubscribeしているMemberとの通信の統計情報を取得する
+   */
+  getStats(selector: RoomMember | string): Promise<WebRTCStats>;
+  /**
+   * @experimental
+   * @description [japanese] 試験的なAPIです。今後インターフェースや仕様が変更される可能性があります
+   * @description [japanese] 対象のMemberとのRTCPeerConnectionを取得する。RTCPeerConnectionを直接操作すると SDK は正しく動作しなくなる可能性があります。
+   */
+  getRTCPeerConnection(
+    selector: RoomMember | string
+  ): RTCPeerConnection | undefined;
+  /**
+   * @description [japanese] メディア通信の状態を取得する
+   * @param selector [japanese] 接続相手
+   */
+  getConnectionState(selector: RoomMember | string): TransportConnectionState;
 }
 
 /**@internal */
@@ -239,6 +265,68 @@ export class RoomPublicationImpl<StreamType extends LocalStream = LocalStream>
   /**@internal */
   _dispose() {
     this._disposer.dispose();
+  }
+
+  getStats(selector: string | RoomMember): Promise<WebRTCStats> {
+    if (this._origin) {
+      const bot = this._origin.subscriptions.find(
+        (s) => s.subscriber.subtype === SfuBotMember.subtype
+      )?.subscriber;
+      if (!bot) {
+        throw createError({
+          operationName: 'RoomPublicationImpl.getStats',
+          room: this._room,
+          path,
+          info: { ...errors.notFound, detail: 'bot not found' },
+        });
+      }
+      return this._origin.getStats(bot);
+    } else {
+      const id = typeof selector === 'string' ? selector : selector.id;
+      return this._publication.getStats(id);
+    }
+  }
+
+  getRTCPeerConnection(
+    selector: string | RoomMember
+  ): RTCPeerConnection | undefined {
+    if (this._origin) {
+      const bot = this._origin.subscriptions.find(
+        (s) => s.subscriber.subtype === SfuBotMember.subtype
+      )?.subscriber;
+      if (!bot) {
+        throw createError({
+          operationName: 'RoomPublicationImpl.getRTCPeerConnection',
+          room: this._room,
+          path,
+          info: { ...errors.notFound, detail: 'bot not found' },
+        });
+      }
+      return this._origin.getRTCPeerConnection(bot);
+    } else {
+      const id = typeof selector === 'string' ? selector : selector.id;
+      return this._publication.getRTCPeerConnection(id);
+    }
+  }
+
+  getConnectionState(selector: string | RoomMember): TransportConnectionState {
+    if (this._origin) {
+      const bot = this._origin.subscriptions.find(
+        (s) => s.subscriber.subtype === SfuBotMember.subtype
+      )?.subscriber;
+      if (!bot) {
+        throw createError({
+          operationName: 'RoomPublicationImpl.getConnectionState',
+          room: this._room,
+          path,
+          info: { ...errors.notFound, detail: 'bot not found' },
+        });
+      }
+      return this._origin.getConnectionState(bot);
+    } else {
+      const id = typeof selector === 'string' ? selector : selector.id;
+      return this._publication.getConnectionState(id);
+    }
   }
 
   toJSON() {

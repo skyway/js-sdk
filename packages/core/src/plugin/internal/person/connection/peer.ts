@@ -13,7 +13,9 @@ import { errors } from '../../../../errors';
 import { IceManager } from '../../../../external/ice';
 import { SignalingSession } from '../../../../external/signaling';
 
-const log = new Logger('src/core/dataPlane/peerConnection/peer.ts');
+const log = new Logger(
+  'packages/core/src/plugin/internal/person/connection/peer.ts'
+);
 
 export abstract class Peer {
   private _pendingCandidates: RTCIceCandidate[] = [];

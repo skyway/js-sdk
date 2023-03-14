@@ -26,6 +26,7 @@
     "doc:html": "rm -rf docs/html && typedoc --excludePrivate --disableSources --excludeInternal --tsconfig ./tsconfig.build.json --out docs/html --plugin none ./src/index.ts ",
     "doc:md": "rm -rf docs/md && typedoc --excludePrivate --disableSources --excludeInternal --tsconfig ./tsconfig.build.json --out docs/md ./src/index.ts ",
     "format": "eslint ./src --fix",
+    "lint": "eslint ./src --fix",
     "graph": "dependency-cruiser --include-only '^src' --output-type dot src | dot -T svg > docs/dependencygraph.svg",
     "publish:npm": "npx can-npm-publish --verbose && npm run build && npm publish --access public",
     "watch": "npm-run-all --parallel watch:tsc watch:esbuild",

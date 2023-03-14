@@ -51,11 +51,15 @@ export abstract class LocalStreamBase implements Stream {
   }
 
   /**
-   * @experimental
-   * @description [japanese] 試験的なAPIです。今後インターフェースや仕様が変更される可能性があります
-   * @description [japanese] StreamをSubscribeしているMemberとの通信の統計情報を取得する
+   * @deprecated
+   * @use Publication.getStats
    */
   getStats(selector: Member | string): Promise<WebRTCStats> {
+    return this._getStats(selector);
+  }
+
+  /**@internal */
+  _getStats(selector: Member | string): Promise<WebRTCStats> {
     const id = typeof selector === 'string' ? selector : selector.id;
     return this._getStatsCallbacks[id]?.() ?? [];
   }
@@ -71,22 +75,32 @@ export abstract class LocalStreamBase implements Stream {
   }
 
   /**
-   * @experimental
-   * @description [japanese] 試験的なAPIです。今後インターフェースや仕様が変更される可能性があります
-   * @description [japanese] 対象のMemberとのRTCPeerConnectionを取得する。RTCPeerConnectionを直接操作すると SDK は正しく動作しなくなる可能性があります。
+   * @deprecated
+   * @use Publication.getRTCPeerConnection
    */
   getRTCPeerConnection(
+    selector: Member | string
+  ): RTCPeerConnection | undefined {
+    return this._getRTCPeerConnection(selector);
+  }
+
+  /**@internal */
+  _getRTCPeerConnection(
     selector: Member | string
   ): RTCPeerConnection | undefined {
     return this._getTransport(selector)?.rtcPeerConnection;
   }
 
   /**
-   * @description [japanese] メディア通信の状態を取得する
-   * @param selector [japanese] 接続相手
-   * @returns
+   * @deprecated
+   * @use Publication.getConnectionState
    */
   getConnectionState(selector: Member | string): TransportConnectionState {
+    return this._getConnectionState(selector);
+  }
+
+  /**@internal */
+  _getConnectionState(selector: Member | string): TransportConnectionState {
     return this._getTransport(selector)?.connectionState ?? 'new';
   }
 

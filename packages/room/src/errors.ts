@@ -30,6 +30,11 @@ export const roomErrors = {
     detail: 'SfuRoomで操作するPublicationはOriginをもつ必要があります',
     solution: 'SfuRoomとP2PRoomを同一のIDで混在させていないか確かめてください',
   },
+  notFound: {
+    name: 'notFound',
+    detail: '参照しようとしていたものが見つかりません',
+    solution: '参照しようとしたものが存在するか確かめてください',
+  },
 } as const;
 
 export const errors = { ...coreErrors, ...roomErrors } as const;

@@ -7,6 +7,7 @@
     "dev": "parcel ./src/index.html",
     "build:example": "npm run transpile && parcel build ./src/index.html --public-url ./",
     "format": "eslint ./src --fix",
+    "lint": "eslint ./src --fix",
     "transpile": "babel src/main.ts -o src/main.js"
   },
   "browserslist": [

@@ -262,37 +262,43 @@ export class SfuTransport {
       return;
     }
 
-    const res = await this._api
-      .iceRestart({
-        transportId: this.id,
-      })
-      .catch((e) => e as Error);
-    if (res instanceof Error) {
-      log.warn(
-        'iceRestart failed',
-        createWarnPayload({
-          operationName: 'SfuTransport.restartIce',
-          detail: 'iceRestart failed',
-          bot: this._bot,
-          payload: { transport: this },
-        }),
-        res
-      );
-      await this.restartIce();
-      return;
-    }
-    await this.msTransport.restartIce({ iceParameters: res });
+    const iceParameters = await this._mediasoupRestartIce();
 
     e = await this._waitForMsConnectionState(
       'connected',
       this._options.peerConnectionJitterTimeout
     ).catch((e) => e);
     if (!e && checkNeedEnd()) {
-      return;
+      return iceParameters;
     }
 
     await this.restartIce();
   };
+
+  /**@private */
+  async _mediasoupRestartIce() {
+    const iceParameters = await this._api
+      .iceRestart({
+        transportId: this.id,
+      })
+      .catch((e) => e as Error);
+    if (iceParameters instanceof Error) {
+      log.warn(
+        'iceRestart failed',
+        createWarnPayload({
+          operationName: 'SfuTransport._mediasoupRestartIce',
+          detail: 'iceRestart failed',
+          bot: this._bot,
+          payload: { transport: this },
+        }),
+        iceParameters
+      );
+      await this.restartIce();
+      return;
+    }
+    await this.msTransport.restartIce({ iceParameters });
+    return iceParameters;
+  }
 
   private _waitForMsConnectionState = async (
     state: ConnectionState,

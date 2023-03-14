@@ -652,7 +652,7 @@ export class SkyWayChannelImpl implements Channel {
       );
 
       try {
-        await this._api.deleteChannel(this.id).catch((e) => {
+        await this._channelImpl.close().catch((e) => {
           const error = createError({
             operationName: 'SkyWayChannelImpl.close',
             context: this._context,

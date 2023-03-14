@@ -23,6 +23,7 @@
     "compile:esbuild": "esbuild src/index.ts --bundle --format=esm --target=es6 --outfile=dist/index.mjs",
     "compile:tsc": "rm -rf dist && tsc -p tsconfig.build.json",
     "format": "eslint ./src --fix",
+    "lint": "eslint ./src --fix",
     "graph": "dependency-cruiser --include-only '^src' --output-type dot src | dot -T svg > docs/dependencygraph.svg",
     "publish:npm": "npx can-npm-publish --verbose && npm run build && npm publish --access public",
     "watch": "npm-run-all --parallel watch:tsc watch:esbuild",

@@ -29,7 +29,7 @@ export interface LocalP2PRoomMember extends LocalRoomMember {
   publish: <T extends LocalStream = LocalStream>(
     stream: T,
     options?: RoomPublicationOptions
-  ) => Promise<RoomPublication>;
+  ) => Promise<RoomPublication<T>>;
 }
 
 /**@internal */
@@ -42,13 +42,13 @@ export class LocalP2PRoomMemberImpl
     super(member, room);
   }
 
-  async publish(
+  async publish<T extends LocalStream = LocalStream>(
     stream: LocalStream,
     options: RoomPublicationOptions = {}
-  ): Promise<RoomPublication> {
+  ): Promise<RoomPublication<T>> {
     const publication = await this._local.publish(stream, options);
 
-    const roomPublication = this.room._addPublication(publication);
+    const roomPublication = this.room._addPublication<T>(publication);
     this.onStreamPublished.emit({ publication: roomPublication });
 
     return roomPublication;

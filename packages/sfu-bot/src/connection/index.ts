@@ -30,13 +30,14 @@ export class SFUConnection implements SkyWayConnection {
   readonly onClose = new Event<void>();
   closed = false;
 
-  private _receivers: {
+  /**@private */
+  _receivers: {
     [subscriptionId: string]: Receiver;
   } = {};
-  private _senders: {
+  /**@private */
+  _senders: {
     [forwardingId: string]: Sender;
   } = {};
-  private _consumeQueue = new PromiseQueue();
 
   /**@internal */
   constructor(

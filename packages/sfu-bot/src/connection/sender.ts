@@ -41,10 +41,12 @@ export class Sender {
   forwarding?: Forwarding;
   forwardingId?: string;
   private _producer?: Producer;
-  private _broadcasterTransport?: SfuTransport;
+  /**@private */
+  _broadcasterTransport?: SfuTransport;
   private _ackTransport?: SfuTransport;
   private _disposer = new EventDisposer();
   private _unsubscribeStreamEnableChange?: () => void;
+  closed = false;
 
   constructor(
     readonly publication: PublicationImpl<LocalVideoStream | LocalAudioStream>,
@@ -613,25 +615,34 @@ export class Sender {
                   });
               }
 
-              try {
-                producer.send(JSON.stringify({ type: 'response', id }));
-              } catch (error: any) {
-                throw createError({
-                  operationName: 'Sender._handleMessage',
-                  context: this._context,
-                  info: {
-                    ...errors.internal,
-                    detail: ' An error occurred in producer.send',
-                  },
-                  path: log.prefix,
-                  channel: this.channel,
-                  error,
-                  payload: {
-                    subscriberId,
-                    subscriptions: this.channel.subscriptions,
-                  },
-                });
+              for (let i = 0; i < 10; i++) {
+                try {
+                  producer.send(JSON.stringify({ type: 'response', id }));
+                } catch (error: any) {
+                  log.error(
+                    createError({
+                      operationName: 'Sender._handleMessage',
+                      context: this._context,
+                      info: {
+                        ...errors.internal,
+                        detail: 'An error occurred in producer.send',
+                      },
+                      path: log.prefix,
+                      channel: this.channel,
+                      error,
+                      payload: {
+                        subscriberId,
+                        subscriptions: this.channel.subscriptions,
+                      },
+                    })
+                  );
+                }
+                await new Promise((r) => setTimeout(r, 1000));
+                if (this.closed) {
+                  break;
+                }
               }
+
               log.debug('ackConsume accepted', { subscriberId, publicationId });
             }
             break;
@@ -665,6 +676,7 @@ export class Sender {
   }
 
   close() {
+    this.closed = true;
     this._disposer.dispose();
     if (this._unsubscribeStreamEnableChange) {
       this._unsubscribeStreamEnableChange();

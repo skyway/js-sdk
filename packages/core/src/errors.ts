@@ -98,6 +98,12 @@ export const errors = {
       'SubscriptionにStreamがありません。RemoteMemberのSubscriptionのStreamにはアクセスできません',
     solution: '参照しているSubscriptionが目的のものか確かめてください。',
   },
+  streamNotExistInPublication: {
+    name: 'streamNotExistInPublication',
+    detail:
+      'PublicationにStreamがありません。RemoteMemberのPublicationのStreamにはアクセスできません',
+    solution: '参照しているPublicationが目的のものか確かめてください。',
+  },
   dataStreamNotSupportEncoding: {
     name: 'dataStreamNotSupportEncoding',
     detail: 'dataStreamはEncode設定の変更に対応していません',

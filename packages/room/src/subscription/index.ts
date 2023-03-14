@@ -9,6 +9,8 @@ import {
   RemoteVideoStream,
   SubscriptionImpl,
   SubscriptionState,
+  TransportConnectionState,
+  WebRTCStats,
 } from '@skyway-sdk/core';
 
 import { errors } from '../errors';
@@ -50,6 +52,21 @@ export interface RoomSubscription<
   cancel: () => Promise<void>;
   /**@description [japanese] 優先して受信するエンコード設定を変更する */
   changePreferredEncoding: (id: string) => void;
+  /**
+   * @experimental
+   * @description [japanese] RemoteStreamの通信の統計情報を取得する
+   */
+  getStats(): Promise<WebRTCStats>;
+  /**
+   * @experimental
+   * @description [japanese] 試験的なAPIです。今後インターフェースや仕様が変更される可能性があります
+   * @description [japanese] 対象のMemberとのRTCPeerConnectionを取得する。RTCPeerConnectionを直接操作すると SDK は正しく動作しなくなる可能性があります。
+   */
+  getRTCPeerConnection(): RTCPeerConnection | undefined;
+  /**
+   * @description [japanese] メディア通信の状態を取得
+   */
+  getConnectionState(): TransportConnectionState;
 }
 
 /**@internal */
@@ -129,6 +146,18 @@ export class RoomSubscriptionImpl<
       publication: this.publication,
       codec: this.codec,
     };
+  }
+
+  getStats(): Promise<WebRTCStats> {
+    return this._subscription.getStats();
+  }
+
+  getRTCPeerConnection(): RTCPeerConnection | undefined {
+    return this._subscription.getRTCPeerConnection();
+  }
+
+  getConnectionState(): TransportConnectionState {
+    return this._subscription.getConnectionState();
   }
 }
 
