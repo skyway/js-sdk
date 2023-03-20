@@ -45,9 +45,6 @@ export class BackOff {
 export const deepCopy = <T = object>(o: T): T => JSON.parse(JSON.stringify(o));
 
 /**@internal */
-export const getTimestampSec = () => Date.now() / 1000;
-
-/**@internal */
 export interface RuntimeInfo {
   browserName: string;
   browserVersion: string;

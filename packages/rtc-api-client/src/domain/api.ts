@@ -77,7 +77,7 @@ export interface RtcApi {
     channelId: string,
     subscriptionId: string
   ): Promise<void>;
-
+  getServerUnixtime(appId: string): Promise<number>;
   updateAuthToken(token: string): Promise<void>;
   close(): void;
 }

@@ -62,6 +62,16 @@ export class RtcApiClient {
     await this.apiClient.updateAuthToken(token);
   }
 
+  /**ms */
+  async getServerUnixtimeInMs() {
+    return this.apiClient.getServerUnixtime(this.appId);
+  }
+
+  /**sec */
+  async getServerUnixtimeInSec() {
+    return Math.floor((await this.getServerUnixtimeInMs()) / 1000);
+  }
+
   /**@throws {@link SkyWayError} */
   async createChannel(init: ChannelInit = {}) {
     log.debug('[start] apiClient.createChannel', { init });

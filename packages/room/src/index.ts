@@ -56,5 +56,6 @@ export {
   TurnPolicy,
   TurnProtocol,
   VideoMediaTrackConstraints,
+  TransportConnectionState,
 } from '@skyway-sdk/core';
 export * from '@skyway-sdk/token';

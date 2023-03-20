@@ -1,10 +1,4 @@
-import {
-  Events,
-  getTimestampSec,
-  Logger,
-  RuntimeInfo,
-  SkyWayError,
-} from '@skyway-sdk/common';
+import { Events, Logger, RuntimeInfo, SkyWayError } from '@skyway-sdk/common';
 import model, { MemberType } from '@skyway-sdk/model';
 import { RtcApiClient } from '@skyway-sdk/rtc-api-client';
 import { SkyWayAuthToken } from '@skyway-sdk/token';
@@ -68,7 +62,12 @@ export class SkyWayContext {
         log: config.log,
         rtcApi: config.rtcApi,
       });
-      return new SkyWayContext(api, config, token, { endpoint, runtime });
+      const context = new SkyWayContext(api, config, token, {
+        endpoint,
+        runtime,
+      });
+      await context._setTokenExpireTimer();
+      return context;
     } catch (error: any) {
       throw createError({
         operationName: 'SkyWayContext.Create',
@@ -127,8 +126,6 @@ export class SkyWayContext {
     this._authTokenString = authToken.tokenString!;
     this.appId = this.authToken.scope.app.id;
 
-    this._setTokenExpireTimer();
-
     registerPersonPlugin(this);
 
     this._api = api;
@@ -151,9 +148,11 @@ export class SkyWayContext {
     return this._authTokenString;
   }
 
-  private _setTokenExpireTimer() {
+  /**@internal */
+  async _setTokenExpireTimer() {
     // seconds
-    const now = getTimestampSec();
+    const now = await this._api.getServerUnixtimeInSec();
+
     const expiresInSec = this.authToken.exp - now;
     if (expiresInSec < 0) {
       throw createError({
@@ -221,7 +220,7 @@ export class SkyWayContext {
     this.authToken = newToken;
 
     this._onTokenUpdated.emit(token);
-    this._setTokenExpireTimer();
+    await this._setTokenExpireTimer();
 
     await this._api.updateAuthToken(token);
   }

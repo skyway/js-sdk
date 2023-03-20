@@ -38,8 +38,6 @@ export class RtcApiImpl implements RtcApi {
 
   /** @throws {@link SkyWayError} */
   async connect() {
-    this._checkToken();
-
     await this._client.connect();
   }
 
@@ -60,16 +58,6 @@ export class RtcApiImpl implements RtcApi {
     this.onClose.emit();
 
     this.onClose.removeAllListeners();
-  }
-
-  private _checkToken() {
-    const expiresInSec = this._token.exp - Date.now() / 1000;
-    if (expiresInSec < 0) {
-      throw new SkyWayError({
-        path: log.prefix,
-        info: errors.authTokenExpired,
-      });
-    }
   }
 
   private _commonError(method: string, code: number, detail: any) {
@@ -104,8 +92,6 @@ export class RtcApiImpl implements RtcApi {
     appId: string,
     channelInit: ChannelInit
   ): Promise<Channel> {
-    this._checkToken();
-
     const { id } = await this._client
       .createChannel({
         appId,
@@ -154,8 +140,6 @@ export class RtcApiImpl implements RtcApi {
     appId: string,
     { name, id }: ChannelQuery
   ): Promise<Channel> {
-    this._checkToken();
-
     if (id) {
       return await this._client.getChannel({ appId, id }).catch((e) => {
         const { info } = e as { info: typeof rpcErrors.rpcResponseError };
@@ -226,8 +210,6 @@ export class RtcApiImpl implements RtcApi {
     appId: string,
     query: ChannelInit
   ): Promise<Channel> {
-    this._checkToken();
-
     return this._client.findOrCreateChannel({ ...query, appId }).catch((e) => {
       const { info } = e as { info: typeof rpcErrors.rpcResponseError };
       const error = this._commonError(
@@ -270,8 +252,6 @@ export class RtcApiImpl implements RtcApi {
   }
 
   async deleteChannel(appId: string, id: Channel['id']): Promise<void> {
-    this._checkToken();
-
     await this._client.deleteChannel({ appId, id }).catch((e) => {
       const { info } = e as { info: typeof rpcErrors.rpcResponseError };
       const error = this._commonError(
@@ -306,8 +286,6 @@ export class RtcApiImpl implements RtcApi {
     id: Channel['id'],
     metadata: string
   ): Promise<void> {
-    this._checkToken();
-
     await this._client
       .updateChannelMetadata({ appId, id, metadata })
       .catch((e) => {
@@ -340,8 +318,6 @@ export class RtcApiImpl implements RtcApi {
   }
 
   async join(appId: string, channelId: Channel['id'], memberInit: MemberInit) {
-    this._checkToken();
-
     const { memberId } = await this._client
       .addMember({
         appId,
@@ -403,8 +379,6 @@ export class RtcApiImpl implements RtcApi {
     memberId: Member['id'],
     ttlSec: number
   ): Promise<void> {
-    this._checkToken();
-
     await this._client
       .updateMemberTtl({
         appId,
@@ -441,14 +415,39 @@ export class RtcApiImpl implements RtcApi {
       });
   }
 
+  /**
+   * @returns Date.now()
+   */
+  async getServerUnixtime(appId: string): Promise<number> {
+    return await this._client
+      .getServerUnixtime({
+        appId,
+      })
+      .catch((e) => {
+        const { info } = e as { info: typeof rpcErrors.rpcResponseError };
+        const error = this._commonError(
+          'RtcApiImpl.getServerUnixtime',
+          info?.error?.code ?? -1,
+          e
+        );
+        if (error) {
+          throw error;
+        }
+        throw createError({
+          operationName: 'RtcApiImpl.getServerUnixtime',
+          path: log.prefix,
+          info: errors.internalError,
+          error: e,
+        });
+      });
+  }
+
   async updateMemberMetadata(
     appId: string,
     channelId: Channel['id'],
     memberId: Member['id'],
     metadata: string
   ): Promise<void> {
-    this._checkToken();
-
     await this._client
       .updateMemberMetadata({
         appId,
@@ -490,8 +489,6 @@ export class RtcApiImpl implements RtcApi {
     channelId: Channel['id'],
     memberId: Member['id']
   ): Promise<void> {
-    this._checkToken();
-
     await this._client
       .leaveChannel({
         channelId,
@@ -529,8 +526,6 @@ export class RtcApiImpl implements RtcApi {
 
   /**@throws {@link SkyWayError} */
   async publish(appId: string, init: PublicationInit): Promise<Publication> {
-    this._checkToken();
-
     const { publicationId } = await this._client
       .publishStream({
         channelId: init.channel,
@@ -583,8 +578,6 @@ export class RtcApiImpl implements RtcApi {
     publicationId: Publication['id'],
     metadata: string
   ): Promise<void> {
-    this._checkToken();
-
     await this._client
       .updatePublicationMetadata({
         channelId,
@@ -626,8 +619,6 @@ export class RtcApiImpl implements RtcApi {
     channelId: Channel['id'],
     publicationId: Publication['id']
   ): Promise<void> {
-    this._checkToken();
-
     await this._client
       .disablePublication({
         channelId,
@@ -668,8 +659,6 @@ export class RtcApiImpl implements RtcApi {
     channelId: Channel['id'],
     publicationId: Publication['id']
   ): Promise<void> {
-    this._checkToken();
-
     await this._client
       .enablePublication({
         channelId,
@@ -710,8 +699,6 @@ export class RtcApiImpl implements RtcApi {
     channelId: Channel['id'],
     publicationId: Publication['id']
   ): Promise<void> {
-    this._checkToken();
-
     await this._client
       .unpublishStream({ channelId, publicationId, appId })
       .catch((e) => {
@@ -748,8 +735,6 @@ export class RtcApiImpl implements RtcApi {
     appId: string,
     init: SubscriptionInit
   ): Promise<Subscription> {
-    this._checkToken();
-
     const { subscriptionId } = await this._client
       .subscribeStream({
         channelId: init.channel.id,
@@ -808,8 +793,6 @@ export class RtcApiImpl implements RtcApi {
     channelId: Channel['id'],
     subscriptionId: Subscription['id']
   ): Promise<void> {
-    this._checkToken();
-
     await this._client
       .unsubscribeStream({
         appId,

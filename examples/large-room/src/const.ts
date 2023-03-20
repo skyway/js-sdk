@@ -1,4 +1,5 @@
 import {
+  nowInSec,
   SfuRoomOptions,
   SkyWayAuthToken,
   SkyWayConfigOptions,
@@ -9,8 +10,8 @@ import { appId, secret } from '../../../env';
 
 const testToken = new SkyWayAuthToken({
   jti: uuidV4(),
-  iat: Math.floor(Date.now() / 1000),
-  exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24,
+  iat: nowInSec(),
+  exp: nowInSec() + 60 * 60 * 24,
   scope: {
     app: {
       id: appId,

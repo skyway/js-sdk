@@ -1,5 +1,3 @@
-import { SkyWayError } from './error';
-
 export const logLevelTypes = [
   'disable',
   'error',
@@ -58,8 +56,8 @@ export class Logger {
 
       const parsed = [this.prefix, ...msg].map((m) => {
         if (m instanceof Error) {
-          if ((m as SkyWayError).toJSON) {
-            return (m as SkyWayError).toJSON() as object;
+          if ((m as any).toJSON) {
+            return (m as any).toJSON() as object;
           }
           return { name: m.name, message: m.message, stack: m.stack };
         }

@@ -1,4 +1,7 @@
+import { errors as rpcError } from '@skyway-sdk/rtc-rpc-api-client';
+
 export const errors = {
+  ...rpcError,
   invalidParameter: { name: 'invalidParameter', detail: '', solution: '' },
   notFound: { name: 'notFound', detail: '', solution: '' },
   timeout: { name: 'timeout', detail: '', solution: '' },

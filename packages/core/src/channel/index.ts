@@ -1,4 +1,4 @@
-import { Event, getTimestampSec, SkyWayError } from '@skyway-sdk/common';
+import { Event, SkyWayError } from '@skyway-sdk/common';
 import { Logger } from '@skyway-sdk/common';
 import { Events } from '@skyway-sdk/common';
 import model from '@skyway-sdk/model';
@@ -534,7 +534,9 @@ export class SkyWayChannelImpl implements Channel {
       subtype: 'person',
     };
     if (options.keepaliveIntervalSec !== null) {
-      init['ttlSec'] = getTimestampSec() + options.keepaliveIntervalSec;
+      init['ttlSec'] =
+        (await this._context._api.getServerUnixtimeInSec()) +
+        options.keepaliveIntervalSec;
     }
 
     const member = await this._channelImpl.joinChannel(init).catch((e) => {
@@ -598,7 +600,9 @@ export class SkyWayChannelImpl implements Channel {
       metadata: adapter.metadata,
     };
     if (adapter.keepaliveIntervalSec != undefined) {
-      init['ttlSec'] = Date.now() / 1000 + adapter.keepaliveIntervalSec;
+      init['ttlSec'] =
+        (await this._context._api.getServerUnixtimeInSec()) +
+        adapter.keepaliveIntervalSec;
     }
     const member = await this._channelImpl.joinChannel(init);
     const person = await this._createLocalPerson(member, {

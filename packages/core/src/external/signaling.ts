@@ -6,6 +6,7 @@ import { uuidV4 } from '@skyway-sdk/token';
 import { SkyWayChannelImpl } from '../channel';
 import { SkyWayContext } from '../context';
 import { errors } from '../errors';
+import { RemoteMember } from '../member/remoteMember';
 import { createError, createWarnPayload } from '../util';
 
 const log = new Logger('packages/core/src/external/signaling.ts');
@@ -184,7 +185,7 @@ export class SignalingSession {
 
   /**@throws {@link SkyWayError} */
   async send(
-    target: { id: string; name?: string },
+    target: RemoteMember,
     data: object,
     /**ms */
     timeout = 10_000
@@ -223,14 +224,18 @@ export class SignalingSession {
         await this._client.request(target, chunkMessage as any, timeout / 1000);
       }
     } catch (error: any) {
-      throw createError({
-        operationName: 'SignalingSession.send',
-        context: this.context,
-        info: { ...errors.internal, detail: 'signalingClient' },
-        error,
-        path: log.prefix,
-        payload: { target, data },
-      });
+      if (target.state === 'joined') {
+        throw createError({
+          operationName: 'SignalingSession.send',
+          context: this.context,
+          info: { ...errors.internal, detail: 'signalingClient' },
+          error,
+          path: log.prefix,
+          payload: { target, data },
+        });
+      } else {
+        log.warn('target already left', error);
+      }
     }
   }
 }

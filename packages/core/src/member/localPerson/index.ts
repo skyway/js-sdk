@@ -1,7 +1,6 @@
 import {
   Event,
   EventDisposer,
-  getTimestampSec,
   Logger,
   PromiseQueue,
   SkyWayError,
@@ -223,8 +222,8 @@ export class LocalPersonImpl extends MemberImpl implements LocalPerson {
         return;
       }
 
-      const now = Math.trunc(getTimestampSec());
-      this.ttlSec = Math.ceil(
+      const now = await this.context._api.getServerUnixtimeInSec();
+      this.ttlSec = Math.floor(
         now + keepaliveIntervalSec + (keepaliveIntervalGapSec ?? 0)
       );
       try {
