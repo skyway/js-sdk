@@ -97,7 +97,7 @@ export abstract class LocalMediaStreamBase extends LocalStreamBase {
       this._oldTrack = this.track;
     }
 
-    const track = createEmptyTrack(kind);
+    const track = kind === 'video' ? emptyVideoTrack : emptyAudioTrack;
     track.enabled = false;
     this._onEnableChanged.emit(track);
     this._updateTrack(track);
@@ -139,8 +139,11 @@ export type LocalMediaStreamOptions = {
   isDisplayMedia: boolean;
 };
 
-export function createEmptyTrack(kind: 'audio' | 'video') {
-  const pc = new RTCPeerConnection();
-  const emptyTrack = pc.addTransceiver(kind).receiver.track;
-  return emptyTrack;
-}
+const createEmptyTrack = new RTCPeerConnection();
+/**@internal */
+export const emptyAudioTrack =
+  createEmptyTrack.addTransceiver('audio').receiver.track;
+/**@internal */
+export const emptyVideoTrack =
+  createEmptyTrack.addTransceiver('video').receiver.track;
+createEmptyTrack.close();

@@ -68,7 +68,7 @@ export class SfuTransport {
     public msTransport: Transport,
     private _bot: SfuBotMember,
     private _iceManager: IceManager,
-    private _api: SfuRestApiClient,
+    private _sfuApi: SfuRestApiClient,
     private _context: SkyWayContext
   ) {
     const sfuPlugin = _context.plugins.find(
@@ -277,7 +277,7 @@ export class SfuTransport {
 
   /**@private */
   async _mediasoupRestartIce() {
-    const iceParameters = await this._api
+    const iceParameters = await this._sfuApi
       .iceRestart({
         transportId: this.id,
       })
@@ -332,7 +332,7 @@ export class SfuTransport {
     ) => {
       try {
         log.debug('[start] transport connect', { transportId });
-        await this._api.connect({ transportId, dtlsParameters });
+        await this._sfuApi.connect({ transportId, dtlsParameters });
         log.debug('[end] transport connect', { transportId });
         callback();
       } catch (error) {

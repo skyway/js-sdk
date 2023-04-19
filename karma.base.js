@@ -26,6 +26,9 @@ module.exports = {
       base: 'ChromeHeadless',
       flags: chromeFlags,
     },
+    safari: {
+      base: 'Safari',
+    },
     FirefoxAutoAllowGUM: {
       base: 'Firefox',
       prefs: firefoxFlags,

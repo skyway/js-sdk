@@ -8,11 +8,9 @@ export const logLevelTypes = [
 export type LogLevel = (typeof logLevelTypes)[number];
 export type LogFormat = 'object' | 'string';
 
-/**@internal */
 export class Logger {
   static level: LogLevel = 'error';
   static format: LogFormat = 'object';
-  static readonly id = Math.random().toString().slice(2, 7);
   static onLog: (props: {
     level: string;
     timestamp: string;
@@ -21,26 +19,39 @@ export class Logger {
   }) => void = () => {};
 
   /**@internal */
-  constructor(readonly prefix: string) {}
+  static readonly id = Math.random().toString().slice(2, 7);
 
+  /**@internal */
+  prefix: string;
+
+  /**@internal */
+  constructor(prefix: string) {
+    this.prefix = prefix;
+  }
+
+  /**@internal */
   debug = (...msg: any[]) => {
     this._log('debug', ...msg);
     return Date.now();
   };
 
+  /**@internal */
   info = (...msg: any[]) => {
     this._log('info', ...msg);
     return Date.now();
   };
 
+  /**@internal */
   warn = (...msg: any[]) => {
     this._log('warn', ...msg);
   };
 
+  /**@internal */
   error = (...msg: any[]) => {
     this._log('error', ...msg);
   };
 
+  /**@internal */
   elapsed = (timestamp: number, ...msg: any[]) => {
     const elapsed = Date.now() - timestamp;
     this._log('info', `elapsed ms:${elapsed}`, ...msg);
@@ -97,6 +108,7 @@ export class Logger {
     }
   }
 
+  /**@internal */
   createBlock(info: object) {
     return {
       warn: (...msg: any[]) => {

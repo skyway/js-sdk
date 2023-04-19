@@ -671,14 +671,36 @@ export class RtcRpcApiClient {
   /**
    * @returns Date.now()
    */
-  async getServerUnixtime({ appId }: { appId: string }): Promise<number> {
-    const res = await this._rpc.request<{
-      unixtime: number;
-    }>('getServerUnixtime', {
-      appId,
-      authToken: this.token,
-    });
-    return res.unixtime;
+  async getServerUnixtime(
+    args: { appId: string },
+    backoff = new BackOff({ times: 8 })
+  ): Promise<number> {
+    const { appId } = args;
+    try {
+      const res = await this._rpc.request<{
+        unixtime: number;
+      }>('getServerUnixtime', {
+        appId,
+        authToken: this.token,
+      });
+      return res.unixtime;
+    } catch (error) {
+      if (!backoff.exceeded) {
+        log.warn(
+          createWarnPayload({
+            operationName: 'RtcRpcApiClient.getServerUnixtime',
+            detail: 'retry getServerUnixtime',
+            appId,
+            payload: { backoff: backoff.count },
+          }),
+          error
+        );
+        await backoff.wait();
+        return this.getServerUnixtime(args, backoff);
+      } else {
+        throw error;
+      }
+    }
   }
 
   /**@description [japanese] 現在のセッションに関連付けられている SkyWayAuthToken を更新します */

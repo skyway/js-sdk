@@ -172,11 +172,14 @@ export class RPC {
     }
 
     let promiseResolved = false;
-
     try {
       const request = buildRequest(method, params);
 
-      const handleMessage = async () =>
+      const handleMessage = async (): Promise<
+        ResponseMessage & {
+          result: Result;
+        }
+      > =>
         (await this._onMessage
           .watch((msg) => msg.id === request.id, rpcTimeout)
           .catch(() => {
@@ -200,67 +203,11 @@ export class RPC {
             });
           })) as ResponseMessage & { result: Result };
 
-      if (!this._reconnecting) {
-        this._send(request).catch((e) => {
-          throw e;
-        });
-
-        const message: ResponseMessage & { result: Result } =
-          await Promise.race([
-            handleMessage(),
-            this.onFatalError.asPromise(rpcTimeout + 100).then((e) => {
-              if (promiseResolved) {
-                return {} as any;
-              }
-              throw createError({
-                operationName: 'RPC.request',
-                info: {
-                  ...errors.internalError,
-                  detail: 'onFatalError while requesting',
-                },
-                path: log.prefix,
-                error: e,
-              });
-            }),
-            this.onDisconnected.asPromise(rpcTimeout + 100).then(() => {
-              if (promiseResolved) {
-                return {} as any;
-              }
-              throw createError({
-                operationName: 'RPC.request',
-                info: errors.connectionDisconnected,
-                path: log.prefix,
-              });
-            }),
-            this.onClosed.asPromise(rpcTimeout + 100).then(() => {
-              if (promiseResolved) {
-                return {} as any;
-              }
-              throw createError({
-                operationName: 'RPC.request',
-                info: errors.onClosedWhileRequesting,
-                path: log.prefix,
-                payload: { method, params },
-              });
-            }),
-          ]);
-        promiseResolved = true;
-        if (message.error) {
-          log.warn('[failed] request ', { message, method, params });
-          throw createError({
-            operationName: 'RPC.request',
-            info: {
-              ...errors.rpcResponseError,
-              detail: method,
-              error: message.error,
-            } as typeof errors.rpcResponseError,
-            payload: { message, method, params },
-            path: log.prefix,
-          });
+      const pendingRequest = async (): Promise<
+        ResponseMessage & {
+          result: Result;
         }
-
-        return message.result;
-      } else {
+      > => {
         log.warn(
           '[start] reconnecting. pending request',
           createWarnPayload({
@@ -269,6 +216,7 @@ export class RPC {
             payload: { request, id: this._id },
           })
         );
+        // 再接続後に再送する
         this._pendingRequests.push(request);
 
         const message = await Promise.race([
@@ -291,6 +239,7 @@ export class RPC {
             throw e;
           }),
         ]);
+        promiseResolved = true;
 
         log.warn(
           '[end] reconnecting. pending request',
@@ -301,22 +250,89 @@ export class RPC {
           })
         );
 
-        if (message.error) {
-          throw createError({
-            operationName: 'RPC.request',
-            info: {
-              ...errors.rpcResponseError,
-              detail: method,
-              error: message.error,
-            } as typeof errors.rpcResponseError,
-            payload: { message, method, params },
-            path: log.prefix,
-          });
-        }
+        return message;
+      };
 
+      let message: ResponseMessage & { result: Result };
+
+      if (!this._reconnecting) {
+        this._send(request).catch((e) => {
+          log.error('send error', e);
+        });
+
+        message = await Promise.race([
+          handleMessage(),
+          // 返信待ち中に接続が切れた場合
+          (async (): Promise<ResponseMessage & { result: Result }> => {
+            await this.onDisconnected.asPromise(rpcTimeout + 100);
+            if (promiseResolved) {
+              return {} as any;
+            }
+
+            try {
+              const message = await pendingRequest();
+              log.warn(
+                createWarnPayload({
+                  operationName: 'request.pendingRequest',
+                  detail: 'success to handle disconnected',
+                })
+              );
+              return message;
+            } catch (error: any) {
+              throw createError({
+                operationName: 'RPC.request',
+                info: errors.connectionDisconnected,
+                path: log.prefix,
+                error,
+              });
+            }
+          })(),
+          this.onFatalError.asPromise(rpcTimeout + 100).then((e) => {
+            if (promiseResolved) {
+              return {} as any;
+            }
+            throw createError({
+              operationName: 'RPC.request',
+              info: {
+                ...errors.internalError,
+                detail: 'onFatalError while requesting',
+              },
+              path: log.prefix,
+              error: e,
+            });
+          }),
+          this.onClosed.asPromise(rpcTimeout + 100).then(() => {
+            if (promiseResolved) {
+              return {} as any;
+            }
+            throw createError({
+              operationName: 'RPC.request',
+              info: errors.onClosedWhileRequesting,
+              path: log.prefix,
+              payload: { method, params },
+            });
+          }),
+        ]);
         promiseResolved = true;
-        return message.result;
+      } else {
+        message = await pendingRequest();
       }
+
+      if (message.error) {
+        log.warn('[failed] request ', { message, method, params });
+        throw createError({
+          operationName: 'RPC.request',
+          info: {
+            ...errors.rpcResponseError,
+            detail: method,
+            error: message.error,
+          } as typeof errors.rpcResponseError,
+          payload: { message, method, params },
+          path: log.prefix,
+        });
+      }
+
+      return message.result;
     } catch (error) {
       promiseResolved = true;
       throw error;

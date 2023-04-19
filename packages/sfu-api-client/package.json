@@ -1,6 +1,6 @@
 {
   "name": "@skyway-sdk/sfu-api-client",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "The official Next Generation JavaScript SDK for SkyWay",
   "homepage": "https://skyway.ntt.com/",
   "repository": {
@@ -35,7 +35,7 @@
     "watch:tsc": "tsc -p tsconfig.build.json -w"
   },
   "dependencies": {
-    "@skyway-sdk/common": "^1.2.2",
+    "@skyway-sdk/common": "^1.2.3",
     "mediasoup-client": "^3.6.52"
   },
   "devDependencies": {}
