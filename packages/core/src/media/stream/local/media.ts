@@ -146,4 +146,3 @@ export const emptyAudioTrack =
 /**@internal */
 export const emptyVideoTrack =
   createEmptyTrack.addTransceiver('video').receiver.track;
-createEmptyTrack.close();
