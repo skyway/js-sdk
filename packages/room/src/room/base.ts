@@ -9,21 +9,16 @@ import {
 } from '@skyway-sdk/core';
 import { v4 } from 'uuid';
 
-import {
-  RemoteRoomMember,
-  RemoteRoomMemberImpl,
-  RoomMember,
-  RoomMemberImpl,
-  RoomPublication,
-  RoomPublicationImpl,
-  RoomSubscription,
-  RoomSubscriptionImpl,
-} from '..';
 import { errors } from '../errors';
 import { LocalRoomMember, LocalRoomMemberImpl } from '../member/local/base';
 import { createError } from '../util';
 import { RoomType } from '.';
 import * as event from './event';
+
+import { RoomMember, RoomMemberImpl } from '../member';
+import { RoomPublication, RoomPublicationImpl } from '../publication';
+import { RoomSubscription, RoomSubscriptionImpl } from '../subscription';
+import { RemoteRoomMember, RemoteRoomMemberImpl } from '../member/remote/base';
 
 const log = new Logger('packages/room/src/room/base.ts');
 

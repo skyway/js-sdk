@@ -1,6 +1,6 @@
 {
   "name": "@skyway-sdk/core",
-  "version": "1.2.4",
+  "version": "1.2.5",
   "description": "The official Next Generation JavaScript SDK for SkyWay",
   "homepage": "https://skyway.ntt.com/",
   "repository": {
@@ -37,7 +37,7 @@
     "test-large:dev": "karma start ./karma.large.js --browsers chrome_with_fake_device",
     "test-middle": "karma start ./karma.middle.js --single-run --browsers chrome_headless_with_fake_device",
     "test-middle:dev": "karma start ./karma.middle.js --browsers chrome_with_fake_device",
-    "test-small": "karma start ./karma.small.js --single-run --browsers chrome_headless_with_fake_device",
+    "test-small": "jest && karma start ./karma.small.js --single-run --browsers chrome_headless_with_fake_device",
     "test-small:dev": "karma start ./karma.small.js --browsers chrome_with_fake_device",
     "type": "npm-run-all --parallel type:main",
     "type:main": "tsc --noEmit -p ./tsconfig.json",
@@ -47,14 +47,15 @@
     "watch:tsc": "tsc -p tsconfig.build.json -w"
   },
   "dependencies": {
-    "@skyway-sdk/rtc-api-client": "^1.2.3",
-    "@skyway-sdk/signaling-client": "^1.0.0",
+    "@skyway-sdk/rtc-api-client": "^1.2.4",
+    "@skyway-sdk/signaling-client": "^1.0.1",
     "bowser": "^2.11.0",
     "deepmerge": "^4.2.2",
     "sdp-transform": "^2.14.1",
-    "uuid": "^8.3.2"
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
-    "@types/sdp-transform": "^2.4.5"
+    "@types/sdp-transform": "^2.4.5",
+    "@types/uuid": "^9.0.1"
   }
 }

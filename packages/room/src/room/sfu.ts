@@ -9,13 +9,13 @@ import {
 } from '@skyway-sdk/core';
 import { SfuBotMember, SfuBotPlugin } from '@skyway-sdk/sfu-bot';
 
-import { RoomPublicationImpl } from '..';
 import {
   LocalSFURoomMember,
   LocalSFURoomMemberImpl,
 } from '../member/local/sfu';
 import { RemoteRoomMemberImpl } from '../member/remote/base';
 import { Room, RoomImpl, RoomMemberInit } from './base';
+import { RoomPublicationImpl } from '../publication';
 
 const log = new Logger('packages/room/src/room/sfu.ts');
 

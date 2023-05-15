@@ -8,16 +8,6 @@ import {
 import { Encoding } from '@skyway-sdk/model';
 import { PublicationInit } from '@skyway-sdk/rtc-api-client';
 
-import {
-  createError,
-  createLogPayload,
-  IceManager,
-  MemberKeepAliveConfig,
-  RemoteAudioStream,
-  RemoteDataStream,
-  RemoteVideoStream,
-  SkyWayContext,
-} from '../..';
 import { SkyWayChannelImpl } from '../../channel';
 import { errors } from '../../errors';
 import { SignalingSession } from '../../external/signaling';
@@ -31,10 +21,19 @@ import {
   PublicationImpl,
 } from '../../publication';
 import { Subscription, SubscriptionImpl } from '../../subscription';
-import { Member, MemberImpl } from '..';
+import { MemberImpl } from '../../member';
 import { Person } from '../person';
 import { isRemoteMember } from '../remoteMember';
 import { PublishingAgent, SubscribingAgent } from './agent';
+import { SkyWayContext } from '../../context';
+import { MemberKeepAliveConfig } from '../../config';
+import { IceManager } from '../../external/ice';
+import {
+  RemoteAudioStream,
+  RemoteDataStream,
+  RemoteVideoStream,
+} from '../../media/stream';
+import { createError, createLogPayload } from '../../util';
 
 export * from './adapter';
 export * from './factory';

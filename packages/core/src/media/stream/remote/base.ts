@@ -1,8 +1,8 @@
 import { Event } from '@skyway-sdk/common';
 
 import { Transport, TransportConnectionState } from '../../../plugin/interface';
-import { Codec } from '../..';
-import { ContentType, Stream, WebRTCStats } from '..';
+import type { Codec } from '../../../media';
+import { Stream, ContentType, WebRTCStats } from '../base';
 
 export abstract class RemoteStreamBase implements Stream {
   readonly side = 'remote';

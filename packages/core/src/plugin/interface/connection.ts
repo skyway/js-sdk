@@ -1,11 +1,8 @@
 import { Event } from '@skyway-sdk/common';
-
-import {
-  LocalPersonImpl,
-  Member,
-  PublicationImpl,
-  SubscriptionImpl,
-} from '../..';
+import { Member } from '../../member';
+import { LocalPersonImpl } from '../../member/localPerson';
+import { PublicationImpl } from '../../publication';
+import { SubscriptionImpl } from '../../subscription';
 
 /**@internal */
 export interface SkyWayConnection {

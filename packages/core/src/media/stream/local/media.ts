@@ -5,8 +5,8 @@ import {
   DisplayMediaTrackConstraints,
   VideoMediaTrackConstraints,
 } from '../../factory';
-import { ContentType } from '..';
-import { attachElement, detachElement } from '../share';
+
+import { ContentType, attachElement, detachElement } from '../base';
 import { LocalStreamBase } from './base';
 
 export abstract class LocalMediaStreamBase extends LocalStreamBase {

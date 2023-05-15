@@ -6,12 +6,12 @@ import {
 } from '@skyway-sdk/rtc-rpc-api-client';
 import { SkyWayAuthToken } from '@skyway-sdk/token';
 
-import { RtcApi } from '..';
 import {
   ChannelInit,
   ChannelQuery,
   MemberInit,
   PublicationInit,
+  RtcApi,
   SubscriptionInit,
 } from '../domain/api';
 import { errors } from '../errors';

@@ -4,7 +4,7 @@ import { uuidV4 } from '@skyway-sdk/token';
 import { Member } from '../../../member';
 import { RemoteMember } from '../../../member/remoteMember';
 import { Transport, TransportConnectionState } from '../../../plugin/interface';
-import { ContentType, Stream, WebRTCStats } from '..';
+import { Stream, WebRTCStats, ContentType } from '../base';
 
 export abstract class LocalStreamBase implements Stream {
   readonly side = 'local';

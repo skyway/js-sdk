@@ -11,7 +11,7 @@ import {
 } from '@skyway-sdk/core';
 import { errors as sfuErrors, SfuBotMember } from '@skyway-sdk/sfu-bot';
 
-import { RoomPublication } from '../..';
+import { RoomPublication } from '../../publication';
 import { defaultMaxSubscribers } from '../../const';
 import { errors } from '../../errors';
 import { SfuRoomImpl } from '../../room/sfu';

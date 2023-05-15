@@ -1,4 +1,4 @@
-import { Events, Logger, SkyWayError } from '@skyway-sdk/common';
+import { Events, Logger } from '@skyway-sdk/common';
 import model, {
   Channel,
   Member,
@@ -18,12 +18,12 @@ import {
   StreamUnpublishedEvent,
 } from '@skyway-sdk/rtc-rpc-api-client';
 
-import { MemberInit, PublicationInit, RtcApi, SubscriptionInit } from '..';
 import { Config } from '../config';
 import { errors } from '../errors';
 import * as event from '../model/event';
 import { createError } from '../util';
 import { EventObserver } from './eventObserver';
+import { RtcApi, MemberInit, PublicationInit, SubscriptionInit } from './api';
 
 const log = new Logger('packages/rtc-api-client/src/domain/channel.ts');
 

@@ -4,12 +4,11 @@ import {
   LocalStream,
   RemoteAudioStream,
   RemoteDataStream,
-  RemoteStream,
   RemoteVideoStream,
   SubscriptionImpl,
 } from '@skyway-sdk/core';
 
-import { RoomPublication } from '../..';
+import { RoomPublication } from '../../publication';
 import { errors } from '../../errors';
 import { P2PRoomImpl } from '../../room/p2p';
 import { RoomSubscription } from '../../subscription';

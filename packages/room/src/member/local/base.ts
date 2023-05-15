@@ -5,7 +5,6 @@ import {
   PublicationOptions,
   RemoteAudioStream,
   RemoteDataStream,
-  RemoteStream,
   RemoteVideoStream,
   SubscriptionImpl,
   SubscriptionOptions,
@@ -14,7 +13,7 @@ import {
 import { RoomPublication } from '../../publication';
 import { Room, RoomImpl } from '../../room/base';
 import { RoomSubscription } from '../../subscription';
-import { RoomMember, RoomMemberImpl } from '..';
+import { RoomMember, RoomMemberImpl } from '../../member';
 import { RemoteRoomMemberImpl } from '../remote/base';
 
 export interface LocalRoomMember extends RoomMember {

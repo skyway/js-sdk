@@ -7,19 +7,7 @@ import {
   SkyWayError,
 } from '@skyway-sdk/common';
 import * as sdpTransform from 'sdp-transform';
-
-import {
-  convertConnectionState,
-  createError,
-  createWarnPayload,
-  fmtpConfigParser,
-  LocalPersonImpl,
-  P2PMessage,
-  RemoteMember,
-  statsToArray,
-  TransportConnectionState,
-  uuidV4,
-} from '../../../..';
+import { v4 } from 'uuid';
 import { SkyWayContext } from '../../../../context';
 import { errors } from '../../../../errors';
 import { IceManager } from '../../../../external/ice';
@@ -35,13 +23,25 @@ import {
   SenderRestartIceMessage,
   SenderUnproduceMessage,
 } from './sender';
+import { P2PMessage } from '.';
+
+import { LocalPersonImpl } from '../../../../member/localPerson';
+import { RemoteMember } from '../../../../member/remoteMember';
+import {
+  statsToArray,
+  fmtpConfigParser,
+  createError,
+  createWarnPayload,
+} from '../../../../util';
+import { TransportConnectionState } from '../../../interface';
+import { convertConnectionState } from '../util';
 
 const log = new Logger(
   'packages/core/src/plugin/internal/person/connection/receiver.ts'
 );
 
 export class Receiver extends Peer {
-  readonly id = uuidV4();
+  readonly id = v4();
   readonly onConnectionStateChanged = new Event<TransportConnectionState>();
   readonly onStreamAdded = new Event<{
     publicationId: string;

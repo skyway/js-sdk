@@ -9,4 +9,10 @@ export type RemoteStream =
   | RemoteAudioStream
   | RemoteVideoStream;
 
-export { RemoteMediaStreamBase, RemoteStreamBase };
+export {
+  RemoteMediaStreamBase,
+  RemoteStreamBase,
+  RemoteAudioStream,
+  RemoteDataStream,
+  RemoteVideoStream,
+};

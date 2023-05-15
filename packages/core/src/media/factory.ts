@@ -1,15 +1,11 @@
 import { Event, Logger } from '@skyway-sdk/common';
 
-import {
-  createError,
-  createWarnPayload,
-  DataStreamOptions,
-  LocalDataStream,
-  LocalMediaStreamOptions,
-} from '..';
 import { errors } from '../errors';
 import { LocalAudioStream } from './stream/local/audio';
 import { LocalVideoStream } from './stream/local/video';
+import { createError, createWarnPayload } from '../util';
+import { LocalMediaStreamOptions } from './stream';
+import { DataStreamOptions, LocalDataStream } from './stream/local/data';
 
 const log = new Logger('packages/core/src/media/factory.ts');
 

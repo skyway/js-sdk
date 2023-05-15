@@ -1,13 +1,15 @@
 import { Logger } from '@skyway-sdk/common';
 import model from '@skyway-sdk/model';
 
-import { createError, IceManager, MemberKeepAliveConfig } from '../..';
 import { SkyWayChannelImpl } from '../../channel';
 import { MaxIceParamServerTTL } from '../../const';
 import { SkyWayContext } from '../../context';
 import { errors } from '../../errors';
 import { setupSignalingSession } from '../../external/signaling';
 import { LocalPersonImpl } from '.';
+import { MemberKeepAliveConfig } from '../../config';
+import { IceManager } from '../../external/ice';
+import { createError } from '../../util';
 
 const log = new Logger('packages/core/src/member/person/local/factory.ts');
 

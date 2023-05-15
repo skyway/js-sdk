@@ -1,6 +1,6 @@
 {
   "name": "@skyway-sdk/sfu-bot",
-  "version": "1.2.4",
+  "version": "1.2.5",
   "description": "The official Next Generation JavaScript SDK for SkyWay",
   "homepage": "https://skyway.ntt.com/",
   "repository": {
@@ -32,7 +32,7 @@
     "graph": "dependency-cruiser --include-only '^src' --output-type dot src | dot -T svg > docs/dependencygraph.svg",
     "pre:test": "cd ../../ && npm run build && cd packages/core",
     "publish:npm": "npx can-npm-publish --verbose && npm run build && npm publish --access public",
-    "test": "karma start ./karma.conf.js --single-run --browsers chrome_headless_with_fake_device",
+    "test": "jest && karma start ./karma.conf.js --single-run --browsers chrome_headless_with_fake_device",
     "test:dev": "karma start ./karma.conf.js --browsers chrome_with_fake_device",
     "type": "npm-run-all --parallel type:main",
     "type:main": "tsc --noEmit -p ./tsconfig.json",
@@ -41,7 +41,7 @@
     "watch:tsc": "tsc -p tsconfig.build.json -w"
   },
   "dependencies": {
-    "@skyway-sdk/core": "^1.2.4",
+    "@skyway-sdk/core": "^1.2.5",
     "@skyway-sdk/sfu-api-client": "^1.2.3",
     "lodash": "4.17.21",
     "mediasoup-client": "3.6.82"

@@ -1,6 +1,6 @@
 {
   "name": "@skyway-sdk/room",
-  "version": "1.2.4",
+  "version": "1.2.5",
   "description": "The official Next Generation JavaScript SDK for SkyWay",
   "homepage": "https://skyway.ntt.com/",
   "repository": {
@@ -25,7 +25,7 @@
     "doc": "npm run doc:html && npm run doc:md",
     "doc:html": "rm -rf docs/html && typedoc --excludePrivate --disableSources --excludeInternal --tsconfig ./tsconfig.build.json --out docs/html --plugin none ./src/index.ts ",
     "doc:md": "rm -rf docs/md && typedoc --excludePrivate --disableSources --excludeInternal --tsconfig ./tsconfig.build.json --out docs/md ./src/index.ts ",
-    "e2e": "karma start ./karma.e2e.js --single-run --browsers chrome_headless_with_fake_device",
+    "e2e": "jest && karma start ./karma.e2e.js --single-run --browsers chrome_headless_with_fake_device",
     "e2e:dev": "karma start ./karma.e2e.js --browsers chrome_with_fake_device",
     "e2e:firefox": "karma start ./karma.e2e.js --single-run --browsers FirefoxHeadlessAutoAllowGUM",
     "e2e:safari": "karma start ./karma.e2e.js --single-run --browsers safari",
@@ -41,9 +41,11 @@
     "watch:tsc": "tsc -p tsconfig.build.json -w"
   },
   "dependencies": {
-    "@skyway-sdk/core": "^1.2.4",
-    "@skyway-sdk/sfu-bot": "^1.2.4",
-    "uuid": "^8.3.2"
+    "@skyway-sdk/core": "^1.2.5",
+    "@skyway-sdk/sfu-bot": "^1.2.5",
+    "uuid": "^9.0.0"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "@types/uuid": "^9.0.1"
+  }
 }

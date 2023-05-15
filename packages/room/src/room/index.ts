@@ -12,10 +12,10 @@ import {
 } from '@skyway-sdk/sfu-bot';
 import { v4 as uuidV4 } from 'uuid';
 
-import { P2PRoomImpl, PACKAGE_VERSION, SfuRoomImpl } from '..';
 import { errors } from '../errors';
-import { P2PRoom } from './p2p';
-import { SfuRoom } from './sfu';
+import { P2PRoom, P2PRoomImpl } from './p2p';
+import { SfuRoom, SfuRoomImpl } from './sfu';
+import { PACKAGE_VERSION } from '../version';
 
 const log = new Logger('packages/room/src/room/index.ts');
 

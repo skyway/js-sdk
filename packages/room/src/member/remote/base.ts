@@ -5,7 +5,7 @@ import { errors } from '../../errors';
 import { RoomImpl } from '../../room/base';
 import { RoomSubscription } from '../../subscription';
 import { createError } from '../../util';
-import { RoomMember, RoomMemberImpl } from '..';
+import { RoomMember, RoomMemberImpl } from '../../member';
 
 const log = new Logger('packages/room/src/member/remote/base.ts');
 

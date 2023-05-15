@@ -10,20 +10,12 @@ import {
   PublicationInit,
 } from '@skyway-sdk/rtc-api-client';
 
-import {
-  createError,
-  createLocalPerson,
-  createLogPayload,
-  LocalPerson,
-  LocalPersonAdapter,
-  LocalPersonImpl,
-  MemberKeepAliveConfig,
-  RemoteMember,
-  SkyWayContext,
-} from '..';
 import { errors } from '../errors';
 import { Member } from '../member';
-import { RemoteMemberImplInterface } from '../member/remoteMember';
+import {
+  RemoteMember,
+  RemoteMemberImplInterface,
+} from '../member/remoteMember';
 import { Publication, PublicationImpl } from '../publication';
 import { createPublication } from '../publication/factory';
 import { Subscription, SubscriptionImpl } from '../subscription';
@@ -43,6 +35,16 @@ import {
   StreamUnpublishedEvent,
   StreamUnsubscribedEvent,
 } from './event';
+import { SkyWayContext } from '../context';
+
+import { MemberKeepAliveConfig } from '../config';
+import { createLogPayload, createError } from '../util';
+import {
+  LocalPerson,
+  LocalPersonImpl,
+  LocalPersonAdapter,
+  createLocalPerson,
+} from '../member/localPerson';
 
 export type { ChannelInit, ChannelQuery, MemberInit };
 

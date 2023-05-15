@@ -6,4 +6,11 @@ import { LocalVideoStream } from './video';
 
 export type LocalStream = LocalAudioStream | LocalVideoStream | LocalDataStream;
 
-export { LocalMediaStreamBase, LocalMediaStreamOptions, LocalStreamBase };
+export {
+  LocalMediaStreamBase,
+  LocalMediaStreamOptions,
+  LocalStreamBase,
+  LocalAudioStream,
+  LocalVideoStream,
+  LocalDataStream,
+};

@@ -1,11 +1,5 @@
 import { Event, Logger, PromiseQueue } from '@skyway-sdk/common';
-
-import {
-  createError,
-  LocalPersonImpl,
-  RemoteMember,
-  uuidV4,
-} from '../../../..';
+import { v4 } from 'uuid';
 import { SkyWayContext } from '../../../../context';
 import { errors } from '../../../../errors';
 import { IceManager } from '../../../../external/ice';
@@ -16,13 +10,17 @@ import { SkyWayConnection } from '../../../interface/connection';
 import { Receiver } from './receiver';
 import { Sender } from './sender';
 
+import { LocalPersonImpl } from '../../../../member/localPerson';
+import { RemoteMember } from '../../../../member/remoteMember';
+import { createError } from '../../../../util';
+
 const log = new Logger(
   'packages/core/src/plugin/internal/person/connection/index.ts'
 );
 
 /**@internal */
 export class P2PConnection implements SkyWayConnection {
-  readonly id = uuidV4();
+  readonly id = v4();
   readonly type = 'p2p';
   readonly onDisconnect = new Event<void>();
   readonly onClose = new Event<void>();

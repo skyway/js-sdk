@@ -1,5 +1,5 @@
 import { SubscriptionImpl } from '../../../subscription';
-import { LocalPersonImpl } from '..';
+import type { LocalPersonImpl } from '../../localPerson';
 
 export class SubscribingAgent {
   private _disposers: { [subscriptionId: string]: () => void } = {};

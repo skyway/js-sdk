@@ -8,22 +8,8 @@ import {
 } from '@skyway-sdk/common';
 import isEqual from 'lodash/isEqual';
 import * as sdpTransform from 'sdp-transform';
+import { v4 } from 'uuid';
 
-import {
-  Codec,
-  createError,
-  createWarnPayload,
-  getParameters,
-  LocalAudioStream,
-  LocalPersonImpl,
-  LocalStream,
-  LocalVideoStream,
-  P2PMessage,
-  RemoteMember,
-  statsToArray,
-  TransportConnectionState,
-  uuidV4,
-} from '../../../..';
 import { SkyWayContext } from '../../../../context';
 import { errors } from '../../../../errors';
 import { IceManager } from '../../../../external/ice';
@@ -34,13 +20,30 @@ import { setEncodingParams } from '../util';
 import { DataChannelNegotiationLabel } from './datachannel';
 import { IceCandidateMessage, Peer } from './peer';
 import { ReceiverAnswerMessage } from './receiver';
+import { TransportConnectionState } from '../../../interface';
+
+import { P2PMessage } from '.';
+import { Codec } from '../../../../media';
+import {
+  LocalStream,
+  LocalAudioStream,
+  LocalVideoStream,
+} from '../../../../media/stream';
+import { LocalPersonImpl } from '../../../../member/localPerson';
+import { RemoteMember } from '../../../../member/remoteMember';
+import {
+  statsToArray,
+  getParameters,
+  createError,
+  createWarnPayload,
+} from '../../../../util';
 
 const log = new Logger(
   'packages/core/src/plugin/internal/person/connection/sender.ts'
 );
 
 export class Sender extends Peer {
-  readonly id = uuidV4();
+  readonly id = v4();
   readonly onConnectionStateChanged = new Event<TransportConnectionState>();
 
   publications: { [publicationId: string]: PublicationImpl } = {};

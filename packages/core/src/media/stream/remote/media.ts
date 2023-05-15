@@ -1,5 +1,4 @@
-import { ContentType } from '..';
-import { attachElement, detachElement } from '../share';
+import { ContentType, attachElement, detachElement } from '../base';
 import { RemoteStreamBase } from './base';
 
 export abstract class RemoteMediaStreamBase extends RemoteStreamBase {

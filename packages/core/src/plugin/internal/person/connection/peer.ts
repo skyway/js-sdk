@@ -1,17 +1,15 @@
 import { Event, Logger } from '@skyway-sdk/common';
 
-import {
-  createError,
-  createWarnPayload,
-  LocalPersonImpl,
-  P2PMessage,
-  RemoteMember,
-  statsToJson,
-} from '../../../..';
 import { SkyWayContext } from '../../../../context';
 import { errors } from '../../../../errors';
 import { IceManager } from '../../../../external/ice';
 import { SignalingSession } from '../../../../external/signaling';
+
+import { createError, createWarnPayload } from '../../../../util';
+import { LocalPersonImpl } from '../../../../member/localPerson';
+import { RemoteMember } from '../../../../member/remoteMember';
+import { statsToJson } from '../util';
+import { P2PMessage } from '.';
 
 const log = new Logger(
   'packages/core/src/plugin/internal/person/connection/peer.ts'

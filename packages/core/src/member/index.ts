@@ -1,19 +1,18 @@
 import { Event, Events, Logger } from '@skyway-sdk/common';
 import model from '@skyway-sdk/model';
 
+import { Channel, SkyWayChannelImpl } from '../channel';
+import { SkyWayContext } from '../context';
+import { errors } from '../errors';
+import { LocalStream } from '../media/stream';
 import {
-  createError,
-  createLogPayload,
-  errors,
-  LocalStream,
-  Publication,
   RemoteAudioStream,
   RemoteDataStream,
   RemoteVideoStream,
-  SkyWayContext,
-  Subscription,
-} from '..';
-import { Channel, SkyWayChannelImpl } from '../channel';
+} from '../media/stream';
+import { createLogPayload, createError } from '../util';
+import { Publication } from '../publication';
+import { Subscription } from '../subscription';
 
 const log = new Logger('packages/core/src/member/index.ts');
 

@@ -4,7 +4,7 @@ import { errors } from '../../../errors';
 import { RemoteMemberImplInterface } from '../../../member/remoteMember';
 import { PublicationImpl } from '../../../publication';
 import { createError } from '../../../util';
-import { LocalPersonImpl } from '..';
+import type { LocalPersonImpl } from '../../localPerson';
 
 const log = new Logger('packages/core/src/dataPlane/agent/publishing.ts');
 
