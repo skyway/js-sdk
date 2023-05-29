@@ -194,9 +194,10 @@ export class Receiver {
     this._disposer.push(() => {
       stream._getTransport = () => undefined;
     });
-    transport.onConnectionStateChanged
-      .add((state) => stream.onConnectionStateChanged.emit(state))
-      .disposer(this._disposer);
+    transport.onConnectionStateChanged.add((state) => {
+      log.debug('transport connection state changed', transport.id, state);
+      stream._setConnectionState(state);
+    });
   }
 
   unconsume() {

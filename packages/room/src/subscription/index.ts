@@ -34,6 +34,10 @@ export interface RoomSubscription<
   readonly onStreamAttached: Event<void>;
   /**@description [japanese] このSubscriptionがUnsubscribeされた時に発火する */
   readonly onCanceled: Event<void>;
+  /**
+   * @description [japanese] メディア通信の状態が変化した時に発火するイベント
+   */
+  onConnectionStateChanged: Event<TransportConnectionState>;
   readonly subscriber: RemoteRoomMember;
   /**
    * @description [japanese] subscribeしているStreamの実体。
@@ -85,6 +89,7 @@ export class RoomSubscriptionImpl<
 
   readonly onStreamAttached = new Event<void>();
   readonly onCanceled = new Event<void>();
+  readonly onConnectionStateChanged = new Event<TransportConnectionState>();
 
   constructor(
     /**@private */
@@ -98,6 +103,10 @@ export class RoomSubscriptionImpl<
 
     _subscription.onStreamAttached.pipe(this.onStreamAttached);
     _subscription.onCanceled.pipe(this.onCanceled);
+    _subscription.onConnectionStateChanged.add((state) => {
+      log.debug('_subscription.onConnectionStateChanged', this.id, state);
+      this.onConnectionStateChanged.emit(state);
+    });
   }
 
   get stream() {

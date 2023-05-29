@@ -60,6 +60,7 @@ export class SignalingSession {
   readonly onConnectionFailed = new Event();
   readonly onConnectionStateChanged = new Event<ConnectionState>();
   readonly onMessage = new Event<MessageEvent>();
+  closed = false;
 
   private _chunkedMessageBuffer: { [messageId: string]: string[] } = {};
   private _backoffUpdateSkyWayAuthToken = new BackOff({
@@ -115,6 +116,7 @@ export class SignalingSession {
       }
 
       await reply({}).catch((e) => {
+        if (this.closed) return;
         log.warn(
           'failed to reply',
           createWarnPayload({
@@ -179,7 +181,8 @@ export class SignalingSession {
     log.debug('[end] connect signalingService');
   }
 
-  disconnect() {
+  close() {
+    this.closed = true;
     this._client.disconnect();
   }
 
@@ -224,18 +227,16 @@ export class SignalingSession {
         await this._client.request(target, chunkMessage as any, timeout / 1000);
       }
     } catch (error: any) {
-      if (target.state === 'joined') {
-        throw createError({
-          operationName: 'SignalingSession.send',
-          context: this.context,
-          info: { ...errors.internal, detail: 'signalingClient' },
-          error,
-          path: log.prefix,
-          payload: { target, data },
-        });
-      } else {
-        log.warn('target already left', error);
-      }
+      if (this.closed || target.state !== 'joined') return;
+
+      throw createError({
+        operationName: 'SignalingSession.send',
+        context: this.context,
+        info: { ...errors.internal, detail: 'signalingClient' },
+        error,
+        path: log.prefix,
+        payload: { target, data },
+      });
     }
   }
 }

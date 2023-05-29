@@ -148,7 +148,6 @@ export class SfuRoomImpl extends RoomImpl implements SfuRoom {
 
     const publication = this._getPublication(p.id);
     delete this._publications[p.id];
-    publication._dispose();
 
     this.onStreamUnpublished.emit({ publication });
     this.onPublicationListChanged.emit({});

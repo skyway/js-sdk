@@ -7,13 +7,27 @@ import { Stream, ContentType, WebRTCStats } from '../base';
 export abstract class RemoteStreamBase implements Stream {
   readonly side = 'remote';
   /**
+   * @deprecated
+   * @use Subscription.onConnectionStateChanged
    * @description [japanese] メディア通信の状態が変化した時に発火するイベント
    */
   readonly onConnectionStateChanged = new Event<TransportConnectionState>();
+  /**@internal */
+  readonly _onConnectionStateChanged = new Event<TransportConnectionState>();
   codec!: Codec;
+  private _connectionState: TransportConnectionState = 'new';
 
   /**@internal */
-  constructor(readonly id: string, readonly contentType: ContentType) {}
+  constructor(readonly id: string, readonly contentType: ContentType) {
+    this._onConnectionStateChanged.pipe(this.onConnectionStateChanged);
+  }
+
+  /**@internal */
+  _setConnectionState(state: TransportConnectionState) {
+    if (this._connectionState === state) return;
+    this._connectionState = state;
+    this._onConnectionStateChanged.emit(state);
+  }
 
   /**@internal */
   _getTransport: () => Transport | undefined = () => undefined;
@@ -46,7 +60,7 @@ export abstract class RemoteStreamBase implements Stream {
   }
   /**@internal */
   _getConnectionState() {
-    return this._getTransport()?.connectionState ?? 'new';
+    return this._connectionState;
   }
 
   /**@internal */

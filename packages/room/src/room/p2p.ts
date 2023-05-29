@@ -110,7 +110,6 @@ export class P2PRoomImpl extends RoomImpl implements P2PRoom {
   private _handleOnStreamUnpublish(p: Publication) {
     const publication = this._getPublication(p.id);
     delete this._publications[p.id];
-    publication._dispose();
 
     this.onStreamUnpublished.emit({ publication });
     this.onPublicationListChanged.emit({});

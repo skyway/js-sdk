@@ -1,4 +1,4 @@
-import { EventDisposer } from '@skyway-sdk/common';
+import { EventDisposer, Logger } from '@skyway-sdk/common';
 import { Event, Events } from '@skyway-sdk/common';
 import {
   Codec,
@@ -23,6 +23,7 @@ import { RoomSubscription } from '../subscription';
 import { createError } from '../util';
 
 const path = 'packages/room/src/publication/index.ts';
+const logger = new Logger(path);
 
 export interface RoomPublication<T extends LocalStream = LocalStream> {
   readonly id: string;
@@ -67,6 +68,15 @@ export interface RoomPublication<T extends LocalStream = LocalStream> {
   readonly onDisabled: Event<void>;
   /**@description [japanese] このPublicationの有効化状態が変化したときに発火するイベント */
   readonly onStateChanged: Event<void>;
+  /**
+   * @description [japanese] メディア通信の状態が変化した時に発火するイベント
+   * SFURoomの場合、remoteMemberはundefinedになる
+   * SFURoomの場合、memberがルームを離れたときのみ発火する
+   */
+  readonly onConnectionStateChanged: Event<{
+    remoteMember?: RoomMember;
+    state: TransportConnectionState;
+  }>;
 
   /**
    * @description [japanese] Metadataの更新
@@ -133,6 +143,10 @@ export class RoomPublicationImpl<StreamType extends LocalStream = LocalStream>
   readonly onEnabled = this._events.make<void>();
   readonly onDisabled = this._events.make<void>();
   readonly onStateChanged = this._events.make<void>();
+  readonly onConnectionStateChanged = new Event<{
+    remoteMember?: RoomMember;
+    state: TransportConnectionState;
+  }>();
 
   constructor(public _publication: Publication, private _room: RoomImpl) {
     this.id = _publication.id;
@@ -150,8 +164,7 @@ export class RoomPublicationImpl<StreamType extends LocalStream = LocalStream>
   private _setEvents() {
     this._room.onStreamUnpublished.add((e) => {
       if (e.publication.id === this.id) {
-        this.onCanceled.emit();
-        this._events.dispose();
+        this._dispose();
       }
     });
 
@@ -179,6 +192,21 @@ export class RoomPublicationImpl<StreamType extends LocalStream = LocalStream>
     {
       const publication = this._origin ?? this._publication;
       publication.onMetadataUpdated.pipe(this.onMetadataUpdated);
+    }
+
+    if (this._origin) {
+      this._origin.onConnectionStateChanged.add((e) => {
+        logger.debug('this._origin.onConnectionStateChanged', this.id, e);
+        this.onConnectionStateChanged.emit({ state: e.state });
+      });
+    } else {
+      this._publication.onConnectionStateChanged.add((e) => {
+        logger.debug('this._publication.onConnectionStateChanged', this.id, e);
+        this.onConnectionStateChanged.emit({
+          state: e.state,
+          remoteMember: this._room._getMember(e.remoteMember.id),
+        });
+      });
     }
   }
 
@@ -262,8 +290,9 @@ export class RoomPublicationImpl<StreamType extends LocalStream = LocalStream>
     this._preferredPublication.replaceStream(stream, options);
   };
 
-  /**@internal */
-  _dispose() {
+  private _dispose() {
+    this.onCanceled.emit();
+    this._events.dispose();
     this._disposer.dispose();
   }
 

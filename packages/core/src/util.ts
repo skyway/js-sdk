@@ -98,6 +98,8 @@ export async function createLogPayload({
               localCandidate,
             };
           }
+        }
+        if (p.stream) {
           for (const {
             memberId,
             connectionState,

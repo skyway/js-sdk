@@ -491,7 +491,7 @@ export class LocalPersonImpl extends MemberImpl implements LocalPerson {
     );
 
     const publication = this.channel._addPublication(published);
-    publication.stream = stream;
+    publication._setStream(stream);
 
     if (init.codecCapabilities?.length) {
       publication.setCodecCapabilities(init.codecCapabilities);
@@ -886,7 +886,7 @@ export class LocalPersonImpl extends MemberImpl implements LocalPerson {
     clearInterval(this.ttlInterval);
 
     if (this._signaling) {
-      this._signaling.disconnect();
+      this._signaling.close();
     }
     this._getConnections().forEach((c) => c.close());
 

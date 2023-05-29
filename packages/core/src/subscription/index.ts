@@ -38,6 +38,10 @@ export interface Subscription<
   /** @description [japanese] SubscriptionにStreamが紐つけられた時に発火するイベント */
   onStreamAttached: Event<void>;
   /**
+   * @description [japanese] メディア通信の状態が変化した時に発火するイベント
+   */
+  onConnectionStateChanged: Event<TransportConnectionState>;
+  /**
    * @description [japanese] subscribeしているStreamの実体。
    * ローカルでSubscribeしているSubscriptionでなければundefinedとなる
    */
@@ -98,6 +102,7 @@ export class SubscriptionImpl<
   private _stream?: T;
   readonly onCanceled = new Event<void>();
   readonly onStreamAttached = new Event<void>();
+  readonly onConnectionStateChanged = new Event<TransportConnectionState>();
 
   /**@internal */
   readonly _onChangeEncoding = new Event<void>();
@@ -143,11 +148,14 @@ export class SubscriptionImpl<
     }
   }
 
-  set stream(stream: T | undefined) {
+  /**@internal */
+  _setStream(stream: T) {
     this._stream = stream;
-    if (stream) {
-      this.onStreamAttached.emit();
-    }
+    this.onStreamAttached.emit();
+    stream._onConnectionStateChanged.add((e) => {
+      log.debug('onConnectionStateChanged', this.id, e);
+      this.onConnectionStateChanged.emit(e);
+    });
   }
 
   get stream() {
@@ -168,9 +176,9 @@ export class SubscriptionImpl<
 
   /**@private */
   _canceled() {
-    this.stream = undefined;
     this._state = 'canceled';
     this.onCanceled.emit();
+
     this._disposer.dispose();
   }
 

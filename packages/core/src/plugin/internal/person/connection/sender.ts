@@ -119,7 +119,7 @@ export class Sender extends Peer {
             {
               const e = await this.waitForConnectionState(
                 'connected',
-                5000
+                context.config.rtcConfig.iceDisconnectBufferTimeout
               ).catch((e) => e as SkyWayError);
               if (e && this._connectionState !== 'reconnecting') {
                 await this.restartIce();
@@ -142,7 +142,12 @@ export class Sender extends Peer {
     if (this._connectionState === state) {
       return;
     }
-    this._log.debug('onConnectionStateChanged', state);
+    this._log.debug(
+      'onConnectionStateChanged',
+      this.id,
+      this._connectionState,
+      state
+    );
     this._connectionState = state;
     this.onConnectionStateChanged.emit(state);
   }
@@ -282,7 +287,10 @@ export class Sender extends Peer {
       return;
     }
 
-    e = await this.waitForConnectionState('connected', 5000).catch((e) => e);
+    e = await this.waitForConnectionState(
+      'connected',
+      this._context.config.rtcConfig.iceDisconnectBufferTimeout
+    ).catch((e) => e);
     if (!e) {
       if (checkNeedEnd()) return;
     }
@@ -521,10 +529,7 @@ export class Sender extends Peer {
     });
     this.onConnectionStateChanged
       .add((state) => {
-        stream.onConnectionStateChanged.emit({
-          remoteMember: this.endpoint,
-          state,
-        });
+        stream._setConnectionState(this.endpoint, state);
       })
       .disposer(this._disposer);
   }
@@ -738,10 +743,13 @@ export class Sender extends Peer {
 
   close() {
     this._log.debug('closed');
+
     this.unSetPeerConnectionListener();
-    this._disposer.dispose();
     Object.values(this._unsubscribeStreamEnableChange).forEach((f) => f());
     this.pc.close();
+    this._setConnectionState('disconnected');
+
+    this._disposer.dispose();
   }
 }
 

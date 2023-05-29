@@ -1,4 +1,4 @@
-import { Events, Logger } from '@skyway-sdk/common';
+import { EventDisposer, Events, Logger } from '@skyway-sdk/common';
 import { Event } from '@skyway-sdk/common';
 import { Encoding } from '@skyway-sdk/model';
 
@@ -15,7 +15,10 @@ import { LocalMediaStreamBase, LocalStream } from '../media/stream/local';
 import { LocalAudioStream } from '../media/stream/local/audio';
 import { LocalVideoStream } from '../media/stream/local/video';
 import { Member } from '../member';
-import { RemoteMemberImplInterface } from '../member/remoteMember';
+import {
+  RemoteMember,
+  RemoteMemberImplInterface,
+} from '../member/remoteMember';
 import { TransportConnectionState } from '../plugin/interface';
 import { Subscription } from '../subscription';
 import { createError, createLogPayload, createWarnPayload } from '../util';
@@ -58,6 +61,13 @@ export interface Publication<T extends LocalStream = LocalStream> {
   onDisabled: Event<void>;
   /** @description [japanese] stateが変化した時に発火するイベント */
   onStateChanged: Event<void>;
+  /**
+   * @description [japanese] メディア通信の状態が変化した時に発火するイベント
+   */
+  onConnectionStateChanged: Event<{
+    remoteMember: RemoteMember;
+    state: TransportConnectionState;
+  }>;
 
   //--------------------
 
@@ -129,7 +139,24 @@ export class PublicationImpl<T extends LocalStream = LocalStream>
   setEncodings(_encodings: Encoding[]) {
     this._encodings = _encodings;
   }
-  stream?: T;
+  private _stream?: T;
+  get stream(): T | undefined {
+    return this._stream;
+  }
+  /**@internal */
+  _setStream(stream: LocalStream | undefined) {
+    this._stream = stream as T;
+    if (stream) {
+      stream._onConnectionStateChanged
+        .add((e) => {
+          log.debug('onConnectionStateChanged', this.id, e);
+          this.onConnectionStateChanged.emit(e);
+        })
+        .disposer(this.streamEventDisposer);
+    } else {
+      this.streamEventDisposer.dispose();
+    }
+  }
   /**@private */
   readonly _channel: SkyWayChannelImpl;
   origin?: PublicationImpl;
@@ -152,11 +179,16 @@ export class PublicationImpl<T extends LocalStream = LocalStream>
   readonly onEnabled = this._events.make<void>();
   readonly onDisabled = this._events.make<void>();
   readonly onStateChanged = this._events.make<void>();
+  readonly onConnectionStateChanged = new Event<{
+    remoteMember: RemoteMember;
+    state: TransportConnectionState;
+  }>();
   /**@private */
   readonly _onEncodingsChanged = this._events.make<EncodingParameters[]>();
   /**@private */
   readonly _onReplaceStream = this._events.make<LocalMediaStreamBase>();
   private readonly _onEnabled = this._events.make<void>();
+  private streamEventDisposer = new EventDisposer();
 
   private _context: SkyWayContext;
 
@@ -181,7 +213,9 @@ export class PublicationImpl<T extends LocalStream = LocalStream>
     this.origin = args.origin;
     this.setCodecCapabilities(args.codecCapabilities ?? []);
     this.setEncodings(normalizeEncodings(args.encodings ?? []));
-    this.stream = args.stream;
+    if (args.stream) {
+      this._setStream(args.stream);
+    }
     this._state = args.isEnabled ? 'enabled' : 'disabled';
 
     log.debug('publication spawned', this.toJSON());
@@ -221,9 +255,11 @@ export class PublicationImpl<T extends LocalStream = LocalStream>
   /**@private */
   _unpublished() {
     this._state = 'canceled';
+
     if (this.stream) {
       this.stream._unpublished();
     }
+
     this.onCanceled.emit();
     this.onStateChanged.emit();
 
@@ -249,7 +285,7 @@ export class PublicationImpl<T extends LocalStream = LocalStream>
         failed = true;
         f(e);
       });
-      this.stream = undefined;
+      this._setStream(undefined);
       this.onCanceled
         .asPromise(this._context.config.rtcApi.timeout)
         .then(() => r())
@@ -510,7 +546,7 @@ export class PublicationImpl<T extends LocalStream = LocalStream>
       .catch((e) => e);
 
     stream.setEnabled(this.stream.isEnabled);
-    this.stream = stream as T;
+    this._setStream(stream as T);
 
     this._onReplaceStream.emit(stream);
   }

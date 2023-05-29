@@ -123,7 +123,7 @@ export class SfuTransport {
               }
               const e = await this._waitForMsConnectionState(
                 'connected',
-                this._options.peerConnectionJitterTimeout
+                _context.config.rtcConfig.iceDisconnectBufferTimeout
               ).catch((e) => e as SkyWayError);
               if (
                 e &&
@@ -157,19 +157,21 @@ export class SfuTransport {
   }
 
   close() {
+    log.debug('close', this.id);
     // suppress firefox [RTCPeerConnection is gone] Exception
     if ((this.pc as any)?.peerIdentity) {
       (this.pc as any).peerIdentity.catch(() => {});
     }
     this.msTransport.close();
+    this._setConnectionState('disconnected');
   }
 
   private _setConnectionState(state: TransportConnectionState) {
     if (this._connectionState === state) {
       return;
     }
+    log.debug('onConnectionStateChanged', this._connectionState, state, this);
     this._connectionState = state;
-    log.debug('onConnectionStateChanged', this);
     this.onConnectionStateChanged.emit(state);
   }
 
@@ -266,7 +268,7 @@ export class SfuTransport {
 
     e = await this._waitForMsConnectionState(
       'connected',
-      this._options.peerConnectionJitterTimeout
+      this._context.config.rtcConfig.iceDisconnectBufferTimeout
     ).catch((e) => e);
     if (!e && checkNeedEnd()) {
       return iceParameters;

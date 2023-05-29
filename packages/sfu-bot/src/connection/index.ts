@@ -107,7 +107,7 @@ export class SFUConnection implements SkyWayConnection {
     log.elapsed(ts, '[end] _startSubscribing consume');
 
     subscription.codec = codec;
-    subscription.stream = stream;
+    subscription._setStream(stream);
   }
 
   /**@internal */

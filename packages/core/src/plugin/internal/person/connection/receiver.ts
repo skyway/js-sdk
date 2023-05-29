@@ -133,7 +133,7 @@ export class Receiver extends Peer {
       })
       .disposer(this._disposer);
 
-    this.pc.ontrack = ({ track, transceiver }) => {
+    this.pc.ontrack = async ({ track, transceiver }) => {
       if (!transceiver.mid) {
         throw createError({
           operationName: 'Receiver.pc.ontrack',
@@ -184,7 +184,7 @@ export class Receiver extends Peer {
       });
     };
 
-    this.pc.ondatachannel = ({ channel }) => {
+    this.pc.ondatachannel = async ({ channel }) => {
       const { publicationId, streamId } = DataChannelNegotiationLabel.fromLabel(
         channel.label
       );
@@ -223,7 +223,12 @@ export class Receiver extends Peer {
     if (this._connectionState === state) {
       return;
     }
-    this._log.debug('onConnectionStateChanged', state);
+    this._log.debug(
+      'onConnectionStateChanged',
+      this.id,
+      this._connectionState,
+      state
+    );
     this._connectionState = state;
     this.onConnectionStateChanged.emit(state);
   }
@@ -248,7 +253,7 @@ export class Receiver extends Peer {
     });
     this.onConnectionStateChanged
       .add((state) => {
-        stream.onConnectionStateChanged.emit(state);
+        stream._setConnectionState(state);
       })
       .disposer(this._disposer);
   }
@@ -300,9 +305,12 @@ export class Receiver extends Peer {
 
   close() {
     this._log.debug('closed');
+
     this.unSetPeerConnectionListener();
-    this._disposer.dispose();
     this.pc.close();
+    this._setConnectionState('disconnected');
+
+    this._disposer.dispose();
   }
 
   add(subscription: SubscriptionImpl) {

@@ -117,7 +117,7 @@ export class P2PConnection implements SkyWayConnection {
       }
 
       subscription.codec = stream.codec;
-      subscription.stream = stream;
+      subscription._setStream(stream);
     });
   }
 

@@ -1,4 +1,4 @@
-import { EventDisposer, Logger } from '@skyway-sdk/common';
+import { Event, EventDisposer, Logger } from '@skyway-sdk/common';
 import {
   createError,
   createLogPayload,
@@ -14,6 +14,7 @@ import {
   SkyWayContext,
   statsToArray,
   SubscriptionImpl,
+  TransportConnectionState,
   uuidV4,
   waitForLocalStats,
 } from '@skyway-sdk/core';
@@ -46,6 +47,9 @@ export class Sender {
   private _ackTransport?: SfuTransport;
   private _disposer = new EventDisposer();
   private _unsubscribeStreamEnableChange?: () => void;
+  private _connectionState: TransportConnectionState = 'new';
+  private readonly onConnectionStateChanged =
+    new Event<TransportConnectionState>();
   closed = false;
 
   constructor(
@@ -59,11 +63,24 @@ export class Sender {
     private _context: SkyWayContext
   ) {}
 
+  private _setConnectionState(state: TransportConnectionState) {
+    if (this._connectionState === state) {
+      return;
+    }
+    log.debug('_setConnectionState', {
+      state,
+      forwardingId: this.forwardingId,
+    });
+    this._connectionState = state;
+    this.onConnectionStateChanged.emit(state);
+  }
+
   toJSON() {
     return {
       forwarding: this.forwarding,
       broadcasterTransport: this._broadcasterTransport,
       ackTransport: this._ackTransport,
+      _connectionState: this._connectionState,
     };
   }
 
@@ -89,6 +106,16 @@ export class Sender {
         channel: this.channel,
       });
     }
+    this.onConnectionStateChanged
+      .add((state) => {
+        log.debug(
+          'transport connection state changed',
+          this._broadcasterTransport?.id,
+          state
+        );
+        stream._setConnectionState(this._bot, state);
+      })
+      .disposer(this._disposer);
 
     log.debug('[start] Sender startForwarding', {
       botId: this._bot.id,
@@ -146,6 +173,13 @@ export class Sender {
         payload: { ackTransportOptions, broadcasterTransportOptions },
       });
     }
+
+    this._broadcasterTransport.onConnectionStateChanged
+      .add((state) => {
+        this._setConnectionState(state);
+      })
+      .disposer(this._disposer);
+    this._setConnectionState(this._broadcasterTransport.connectionState);
 
     if (ackTransportOptions) {
       this._ackTransport = this._transportRepository.createTransport(
@@ -559,18 +593,6 @@ export class Sender {
       delete stream._getTransportCallbacks[this._bot.id];
       delete stream._getStatsCallbacks[this._bot.id];
     });
-    transport.onConnectionStateChanged
-      .add((state) => {
-        stream.onConnectionStateChanged.emit({
-          remoteMember: this._bot,
-          state,
-        });
-      })
-      .disposer(this._disposer);
-    stream.onConnectionStateChanged.emit({
-      remoteMember: this._bot,
-      state: transport.connectionState,
-    });
   }
 
   private _handleMessage(consumer: DataConsumer, producer: DataProducer) {
@@ -677,10 +699,12 @@ export class Sender {
 
   close() {
     this.closed = true;
-    this._disposer.dispose();
     if (this._unsubscribeStreamEnableChange) {
       this._unsubscribeStreamEnableChange();
     }
+    this._setConnectionState('disconnected');
+
+    this._disposer.dispose();
   }
 
   get pc() {

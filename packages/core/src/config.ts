@@ -20,6 +20,11 @@ export type SkyWayConfigOptions = {
     timeout?: number;
     turnPolicy?: TurnPolicy;
     turnProtocol?: TurnProtocol;
+    /**
+     * @internal
+     * @description ms
+     * */
+    iceDisconnectBufferTimeout?: number;
   };
   token: { updateReminderSec?: number };
   log: Partial<{ level: LogLevel; format: LogFormat }>;
@@ -71,6 +76,7 @@ export class ContextConfig implements SkyWayConfigOptions {
     turnPolicy: 'enable',
     turnProtocol: 'all',
     encodedInsertableStreams: false,
+    iceDisconnectBufferTimeout: 5000,
   };
   token: Required<SkyWayConfigOptions['token']> = {
     updateReminderSec: 30,

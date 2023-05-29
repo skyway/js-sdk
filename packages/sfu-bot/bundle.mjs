@@ -10,7 +10,7 @@ fs.writeFile(
   `export const PACKAGE_VERSION = '${pkg.version}';\n`
 );
 
-const globalName = 'skyway_sfu_client';
+const globalName = 'skyway_sfu_bot';
 const dist = 'dist';
 
 await $`npm run compile`;

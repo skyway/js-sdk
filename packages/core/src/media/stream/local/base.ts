@@ -9,9 +9,16 @@ import { Stream, WebRTCStats, ContentType } from '../base';
 export abstract class LocalStreamBase implements Stream {
   readonly side = 'local';
   /**
+   * @deprecated
+   * @use Publication.onConnectionStateChanged
    * @description [japanese] メディア通信の状態が変化した時に発火するイベント
    */
   readonly onConnectionStateChanged = new Event<{
+    remoteMember: RemoteMember;
+    state: TransportConnectionState;
+  }>();
+  /**@internal */
+  readonly _onConnectionStateChanged = new Event<{
     remoteMember: RemoteMember;
     state: TransportConnectionState;
   }>();
@@ -28,9 +35,14 @@ export abstract class LocalStreamBase implements Stream {
   _getStatsCallbacks: {
     [remoteMemberId: string]: () => Promise<WebRTCStats>;
   } = {};
+  private _connectionState: {
+    [remoteMemberId: string]: TransportConnectionState;
+  } = {};
 
   /**@internal */
-  constructor(readonly contentType: ContentType) {}
+  constructor(readonly contentType: ContentType) {
+    this._onConnectionStateChanged.pipe(this.onConnectionStateChanged);
+  }
 
   /**@internal */
   _setLabel(label: string) {
@@ -48,6 +60,16 @@ export abstract class LocalStreamBase implements Stream {
   _getTransport(selector: Member | string): Transport | undefined {
     const id = typeof selector === 'string' ? selector : selector.id;
     return this._getTransportCallbacks[id]?.();
+  }
+
+  /**@internal */
+  _setConnectionState(
+    remoteMember: RemoteMember,
+    state: TransportConnectionState
+  ) {
+    if (this._connectionState[remoteMember.id] === state) return;
+    this._connectionState[remoteMember.id] = state;
+    this._onConnectionStateChanged.emit({ remoteMember, state });
   }
 
   /**
@@ -101,14 +123,16 @@ export abstract class LocalStreamBase implements Stream {
 
   /**@internal */
   _getConnectionState(selector: Member | string): TransportConnectionState {
-    return this._getTransport(selector)?.connectionState ?? 'new';
+    const id = typeof selector === 'string' ? selector : selector.id;
+    return this._connectionState[id] ?? 'new';
   }
 
   /**@internal */
   _getConnectionStateAll() {
-    return Object.entries(this._getTransportCallbacks).map(
-      ([memberId, cb]) => ({ memberId, connectionState: cb().connectionState })
-    );
+    return Object.keys(this._getTransportCallbacks).map((memberId) => ({
+      memberId,
+      connectionState: this._getConnectionState(memberId),
+    }));
   }
 
   /**@internal */
