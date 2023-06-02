@@ -74,7 +74,9 @@ export class Event<T extends any> {
       const timeout =
         timeLimit &&
         setTimeout(() => {
-          reject('Event asPromise timeout : ' + timeLimit);
+          reject(
+            new SerializableError('Event asPromise timeout : ' + timeLimit)
+          );
         }, timeLimit);
       this.once((arg) => {
         if (timeout) clearTimeout(timeout);
@@ -95,7 +97,7 @@ export class Event<T extends any> {
       const timeout =
         timeLimit &&
         setTimeout(() => {
-          reject('Event watch timeout : ' + timeLimit);
+          reject(new SerializableError('Event watch timeout : ' + timeLimit));
         }, timeLimit);
 
       const { removeListener } = this.add((arg) => {
@@ -141,5 +143,15 @@ export class EventDisposer {
   dispose() {
     this._disposer.forEach((d) => d());
     this._disposer = [];
+  }
+}
+
+class SerializableError extends Error {
+  toJSON() {
+    return {
+      name: this.name,
+      message: this.message,
+      stack: this.stack,
+    };
   }
 }

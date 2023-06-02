@@ -158,30 +158,31 @@ export class StreamFactory {
   /**
    * @description [japanese]
    * PCブラウザでのみ利用可能なAPI。
-   * ディスプレイのVideoStreamとオプションとしてAudioStreamを作成する。
-   * AudioStreamはWindowsのChromeでしか取得できない。
+   * VideoStreamは常に取得される（AudioStreamのみ取得することはできない）
+   * audioオプションを有効にするとAudioStreamを取得することができる。
+   * audioオプションはWindowsのChromeにしか対応しておらず、
+   * それ以外の環境では有効にしても戻り値のaudioにはundefinedが返される。
    */
-  async createDisplayStreams(options: {
-    audio?:
-      | boolean
-      | (AudioMediaTrackConstraints & Partial<LocalMediaStreamOptions>);
-    /**default enable */
-    video?: DisplayMediaTrackConstraints &
-      VideoMediaTrackConstraints &
-      Partial<LocalMediaStreamOptions>;
-  }) {
+  async createDisplayStreams<T extends DisplayStreamOptions>(
+    options: T = {} as T
+  ): Promise<{
+    video: LocalVideoStream;
+    audio: T extends { audio: infer U }
+      ? U extends false | undefined | null
+        ? undefined
+        : LocalAudioStream | undefined
+      : undefined;
+  }> {
     const videoOption = options.video ?? {};
-    videoOption.stopTrackWhenDisabled =
-      videoOption.stopTrackWhenDisabled ?? true;
+    videoOption.stopTrackWhenDisabled ??= true;
 
     let audioOption = options.audio;
     if (audioOption) {
-      audioOption = {};
-      audioOption.stopTrackWhenDisabled =
-        audioOption.stopTrackWhenDisabled ?? true;
+      audioOption = typeof audioOption === 'boolean' ? {} : audioOption;
+      audioOption.stopTrackWhenDisabled ??= true;
     }
 
-    options = { audio: audioOption, video: videoOption };
+    options = { audio: audioOption, video: videoOption } as T;
 
     const stream = await navigator.mediaDevices.getDisplayMedia(options);
     const [video] = stream.getVideoTracks();
@@ -197,13 +198,14 @@ export class StreamFactory {
     }
 
     const videoStream = new LocalVideoStream(video, {
-      ...options.video,
+      ...videoOption,
       isDisplayMedia: true,
     });
     videoStream._setLabel('displayVideo');
+
     const audioStream = audio
       ? new LocalAudioStream(audio, {
-          ...(typeof options.audio === 'boolean' ? {} : options.audio),
+          ...audioOption,
           isDisplayMedia: true,
         })
       : undefined;
@@ -213,7 +215,7 @@ export class StreamFactory {
 
     return {
       video: videoStream,
-      audio: audioStream,
+      audio: audioStream as any,
     };
   }
 
@@ -320,9 +322,13 @@ export type DisplayMediaTrackConstraints = VideoMediaTrackConstraints & {
   // cursor?: CursorNever | CursorAlways | CursorMotion;
 };
 
-/** @description [japanese] キャプチャーしたディスプレイからカーソルを含まない。 */
-// export type CursorNever = 'never';
-/** @description [japanese] キャプチャーしたディスプレイからカーソルを含む。 */
-// export type CursorAlways = 'always';
-/** @description [japanese] カーソル／ポインタが動かされたとき、画面内のカーソルを含む。カーソルは、ある期間カーソルの更なる動きがないときに削除される。 */
-// export type CursorMotion = 'motion';
+export type DisplayStreamOptions = {
+  audio?:
+    | (AudioMediaTrackConstraints &
+        Partial<Pick<LocalMediaStreamOptions, 'stopTrackWhenDisabled'>>)
+    | boolean;
+  video?:
+    | DisplayMediaTrackConstraints &
+        VideoMediaTrackConstraints &
+        Partial<Pick<LocalMediaStreamOptions, 'stopTrackWhenDisabled'>>;
+};
