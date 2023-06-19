@@ -254,16 +254,6 @@ export class SkyWayContext {
     let plugin = this.plugins.find((p) => p.subtype === memberDto.subtype);
     if (!plugin) {
       plugin = this._unknownPlugin;
-      // 悪意のあるユーザが未知のsubtypeを使用した際に無視するためにthrowしない
-      log.error(
-        createError({
-          operationName: 'SkyWayContext._createRemoteMember',
-          context: this,
-          info: errors.unknownRemoteMemberType,
-          path: log.prefix,
-          payload: { memberDto },
-        })
-      );
     }
     const member = plugin._createRemoteMember(channel, memberDto);
     return member;

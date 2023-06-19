@@ -86,12 +86,6 @@ export const errors = {
     solution:
       '対象のMemberのSubtypeのプラグイン(SfuBotなど)をSkyWayContextに登録してください',
   },
-  unknownRemoteMemberType: {
-    name: 'unknownMemberType',
-    detail: '対象のMemberのSubtypeのプラグインが登録されていません',
-    solution:
-      '対象のMemberのSubtypeのプラグイン(SfuBotなど)をSkyWayContextに登録してください',
-  },
   streamNotExistInSubscription: {
     name: 'streamNotExistInSubscription',
     detail:

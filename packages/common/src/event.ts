@@ -63,6 +63,7 @@ export class Event<T extends any> {
       off.removeListener();
       callback(arg);
     });
+    return off;
   };
 
   /**

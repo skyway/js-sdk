@@ -1,4 +1,4 @@
-@skyway-sdk/common@1.2.4
+@skyway-sdk/common@1.4.1
 
 MIT
 
@@ -29,7 +29,7 @@ SOFTWARE.
 
 ---
 
-@skyway-sdk/core@1.4.0
+@skyway-sdk/core@1.4.1
 
 MIT
 
@@ -68,7 +68,7 @@ MIT
 
 ---
 
-@skyway-sdk/room@1.4.0
+@skyway-sdk/room@1.4.1
 
 MIT
 
@@ -99,7 +99,7 @@ SOFTWARE.
 
 ---
 
-@skyway-sdk/rtc-api-client@1.2.4
+@skyway-sdk/rtc-api-client@1.4.1
 
 MIT
 
@@ -130,7 +130,7 @@ SOFTWARE.
 
 ---
 
-@skyway-sdk/rtc-rpc-api-client@1.2.4
+@skyway-sdk/rtc-rpc-api-client@1.4.1
 
 MIT
 
@@ -161,7 +161,7 @@ SOFTWARE.
 
 ---
 
-@skyway-sdk/sfu-api-client@1.2.3
+@skyway-sdk/sfu-api-client@1.4.1
 
 MIT
 
@@ -192,7 +192,7 @@ SOFTWARE.
 
 ---
 
-@skyway-sdk/sfu-bot@1.4.0
+@skyway-sdk/sfu-bot@1.4.1
 
 MIT
 
@@ -254,7 +254,7 @@ SOFTWARE.
 
 ---
 
-@skyway-sdk/token@1.2.4
+@skyway-sdk/token@1.4.1
 
 MIT
 

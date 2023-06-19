@@ -15,7 +15,7 @@ npm i @skyway-sdk/room
 
 **1. SkyWay Auth Token を取得（生成）する**
 
-[SkyWay Auth Token について](https://beta.skyway.ntt.com/auth-token.html)
+[SkyWay Auth Token について](https://skyway.ntt.com/ja/docs/user-guide/authentication/)
 
 **2. Room を作成する**
 

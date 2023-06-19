@@ -15,7 +15,7 @@ npm i @skyway-sdk/core
 
 **1. SkyWay Auth Token を取得（生成）する**
 
-[SkyWay Auth Token について](https://beta.skyway.ntt.com/auth-token.html)
+[SkyWay Auth Token について](https://skyway.ntt.com/ja/docs/user-guide/authentication/)
 
 **2. Channel を作成する**
 

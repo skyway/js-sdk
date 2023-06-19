@@ -9,6 +9,7 @@ import {
   PublicationDisabledEvent,
   PublicationEnabledEvent,
   PublicationSummary,
+  StreamSubscribedEvent,
   StreamUnsubscribedEvent,
   SubscriptionSummary,
 } from '@skyway-sdk/rtc-rpc-api-client';
@@ -369,10 +370,10 @@ export class ChannelImpl implements model.Channel {
     this.onPublicationEnabled.emit(outgoing);
   }
 
-  private _streamSubscribed(incoming: StreamUnsubscribedEvent['data']) {
+  private _streamSubscribed(incoming: StreamSubscribedEvent['data']) {
     const subscription = this.addSubscription(incoming.subscription);
 
-    const outgoing: event.StreamUnsubscribedEvent = {
+    const outgoing: event.StreamSubscribedEvent = {
       ...incoming,
       subscription,
     };
