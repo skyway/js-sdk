@@ -70,7 +70,7 @@ export type MemberScope = {
    * - write: すべて可能
    * - create: 入室（入室時に member が作成される）
    * - delete: 退室（入室時に member が削除される）
-   * - signal: シグナリング情報のやり取り
+   * - signal: シグナリング情報のやり取り (p2p通信を利用する際に必須)
    * - updateMetadata: metadata の編集
    */
   actions: readonly MemberAction[];

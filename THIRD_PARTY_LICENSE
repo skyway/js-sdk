@@ -29,7 +29,7 @@ SOFTWARE.
 
 ---
 
-@skyway-sdk/core@1.4.1
+@skyway-sdk/core@1.5.0
 
 MIT
 
@@ -68,7 +68,7 @@ MIT
 
 ---
 
-@skyway-sdk/room@1.4.1
+@skyway-sdk/room@1.5.0
 
 MIT
 
@@ -192,7 +192,7 @@ SOFTWARE.
 
 ---
 
-@skyway-sdk/sfu-bot@1.4.1
+@skyway-sdk/sfu-bot@1.5.0
 
 MIT
 
@@ -809,7 +809,7 @@ SOFTWARE.
 
 ---
 
-node-fetch@2.6.11
+node-fetch@2.6.12
 
 MIT
 
@@ -903,7 +903,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-supports-color@9.3.1
+supports-color@9.4.0
 
 MIT
 

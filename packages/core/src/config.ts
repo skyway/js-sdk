@@ -29,7 +29,7 @@ export type SkyWayConfigOptions = {
   token: { updateReminderSec?: number };
   log: Partial<{ level: LogLevel; format: LogFormat }>;
   /**@internal */
-  internal: { disableDPlane?: boolean; disableSignaling?: boolean };
+  internal: { disableDPlane?: boolean };
   member: Partial<MemberKeepAliveConfig>;
 };
 
@@ -46,6 +46,12 @@ export type MemberKeepAliveConfig = {
   keepaliveIntervalSec: number;
   /**@description [japanese] KeepAliveの周期を超えてChannelからMemberが削除されるまでの時間 */
   keepaliveIntervalGapSec: number;
+};
+
+/**@internal */
+export type MemberInternalConfig = {
+  /**@internal */
+  disableSignaling?: boolean;
 };
 
 export type TurnPolicy = 'enable' | 'disable' | 'turnOnly';
@@ -88,7 +94,6 @@ export class ContextConfig implements SkyWayConfigOptions {
   /**@internal */
   internal: Required<SkyWayConfigOptions['internal']> = {
     disableDPlane: false,
-    disableSignaling: false,
   };
   member: Required<SkyWayConfigOptions['member']> = {
     keepaliveIntervalGapSec: 30,

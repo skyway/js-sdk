@@ -37,8 +37,6 @@ export class SfuRoomImpl extends RoomImpl implements SfuRoom {
       await plugin.createBot(channel);
     }
 
-    context.config.internal.disableSignaling = true;
-
     const room = new SfuRoomImpl(channel, plugin);
     return room;
   }
@@ -205,7 +203,10 @@ export class SfuRoomImpl extends RoomImpl implements SfuRoom {
   }
 
   async join(memberInit: RoomMemberInit = {}) {
-    const local = await this.joinChannel(memberInit);
+    const local = await this.joinChannel({
+      ...memberInit,
+      disableSignaling: true,
+    });
 
     const localRoomMember = new LocalSFURoomMemberImpl(
       local as LocalPersonAdapter,

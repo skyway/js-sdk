@@ -8,7 +8,7 @@ import {
 import { Encoding } from '@skyway-sdk/model';
 import { PublicationInit } from '@skyway-sdk/rtc-api-client';
 
-import { SkyWayChannelImpl } from '../../channel';
+import { PersonInit, SkyWayChannelImpl } from '../../channel';
 import { errors } from '../../errors';
 import { SignalingSession } from '../../external/signaling';
 import { Codec, EncodingParameters } from '../../media';
@@ -26,7 +26,6 @@ import { Person } from '../person';
 import { isRemoteMember } from '../remoteMember';
 import { PublishingAgent, SubscribingAgent } from './agent';
 import { SkyWayContext } from '../../context';
-import { MemberKeepAliveConfig } from '../../config';
 import { IceManager } from '../../external/ice';
 import {
   RemoteAudioStream,
@@ -105,6 +104,7 @@ export class LocalPersonImpl extends MemberImpl implements LocalPerson {
   ttlSec?: number;
   readonly keepaliveIntervalSec = this.args.keepaliveIntervalSec;
   readonly keepaliveIntervalGapSec = this.args.keepaliveIntervalGapSec;
+  readonly disableSignaling = this.args.disableSignaling;
   readonly config = this.context.config;
 
   readonly onStreamPublished = this._events.make<{
@@ -167,7 +167,7 @@ export class LocalPersonImpl extends MemberImpl implements LocalPerson {
       metadata?: string;
       iceManager: IceManager;
       context: SkyWayContext;
-    } & Partial<MemberKeepAliveConfig>
+    } & PersonInit
   ) {
     super(args);
 

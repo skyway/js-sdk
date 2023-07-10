@@ -1,13 +1,12 @@
 import { Logger } from '@skyway-sdk/common';
 import model from '@skyway-sdk/model';
 
-import { SkyWayChannelImpl } from '../../channel';
+import { PersonInit, SkyWayChannelImpl } from '../../channel';
 import { MaxIceParamServerTTL } from '../../const';
 import { SkyWayContext } from '../../context';
 import { errors } from '../../errors';
 import { setupSignalingSession } from '../../external/signaling';
 import { LocalPersonImpl } from '.';
-import { MemberKeepAliveConfig } from '../../config';
 import { IceManager } from '../../external/ice';
 import { createError } from '../../util';
 
@@ -21,7 +20,8 @@ export async function createLocalPerson(
   {
     keepaliveIntervalSec,
     keepaliveIntervalGapSec,
-  }: Partial<MemberKeepAliveConfig> = {}
+    disableSignaling,
+  }: PersonInit = {}
 ) {
   log.debug('createLocalPerson', {
     channel,
@@ -33,7 +33,7 @@ export async function createLocalPerson(
   const { iceParamServer } = context.config;
 
   const signalingSession =
-    context.config.internal.disableSignaling === true
+    disableSignaling === true
       ? undefined
       : await setupSignalingSession(context, channel, memberDto);
 

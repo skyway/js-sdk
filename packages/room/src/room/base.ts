@@ -3,6 +3,7 @@ import {
   ChannelState,
   LocalStream,
   MemberMetadataUpdatedEvent,
+  PersonInit,
   Publication,
   SkyWayChannelImpl,
   SubscriptionImpl,
@@ -336,8 +337,4 @@ export abstract class RoomImpl implements Room {
   }
 }
 
-export type RoomMemberInit = {
-  name?: string;
-  metadata?: string;
-  keepaliveIntervalSec?: number;
-};
+export type RoomMemberInit = PersonInit;

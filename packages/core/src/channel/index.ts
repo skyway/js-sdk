@@ -37,7 +37,7 @@ import {
 } from './event';
 import { SkyWayContext } from '../context';
 
-import { MemberKeepAliveConfig } from '../config';
+import { MemberInternalConfig, MemberKeepAliveConfig } from '../config';
 import { createLogPayload, createError } from '../util';
 import {
   LocalPerson,
@@ -486,12 +486,7 @@ export class SkyWayChannelImpl implements Channel {
     this.onPublicationUnsubscribed.emit({ subscription });
   }
 
-  async join(
-    options: {
-      name?: MemberInit['name'];
-      metadata?: MemberInit['metadata'];
-    } & Partial<MemberKeepAliveConfig> = {}
-  ) {
+  async join(options: PersonInit = {}) {
     const timestamp = log.info(
       '[start] join',
       await createLogPayload({
@@ -524,10 +519,8 @@ export class SkyWayChannelImpl implements Channel {
       }
     }
 
-    options.keepaliveIntervalSec =
-      options.keepaliveIntervalSec ?? this.config.member.keepaliveIntervalSec;
-    options.keepaliveIntervalGapSec =
-      options.keepaliveIntervalGapSec ??
+    options.keepaliveIntervalSec ??= this.config.member.keepaliveIntervalSec;
+    options.keepaliveIntervalGapSec ??=
       this.config.member.keepaliveIntervalGapSec;
 
     const init: MemberInit = {
@@ -549,10 +542,7 @@ export class SkyWayChannelImpl implements Channel {
       member,
     });
 
-    const person = await this._createLocalPerson(member, {
-      keepaliveIntervalSec: options.keepaliveIntervalSec,
-      keepaliveIntervalGapSec: options.keepaliveIntervalGapSec,
-    });
+    const person = await this._createLocalPerson(member, options);
     const adapter = new LocalPersonAdapter(person);
     log.elapsed(timestamp, '[end] join', { person });
 
@@ -609,22 +599,17 @@ export class SkyWayChannelImpl implements Channel {
     const member = await this._channelImpl.joinChannel(init);
     const person = await this._createLocalPerson(member, {
       keepaliveIntervalSec: adapter.keepaliveIntervalSec,
-      keepaliveIntervalGapSec: adapter.keepaliveIntervalSec,
+      keepaliveIntervalGapSec: adapter.keepaliveIntervalGapSec,
+      disableSignaling: adapter.disableSignaling,
     });
     adapter.apply(person);
   }
 
   private async _createLocalPerson(
     member: model.Member,
-    {
-      keepaliveIntervalSec,
-      keepaliveIntervalGapSec,
-    }: Partial<MemberKeepAliveConfig>
+    config: PersonInit
   ): Promise<LocalPersonImpl> {
-    const person = await createLocalPerson(this._context, this, member, {
-      keepaliveIntervalSec,
-      keepaliveIntervalGapSec,
-    });
+    const person = await createLocalPerson(this._context, this, member, config);
     this._localPerson = person;
 
     return person;
@@ -859,3 +844,9 @@ export class SkyWayChannel {
 }
 
 export type ChannelState = 'opened' | 'closed';
+
+export type PersonInit = {
+  name?: MemberInit['name'];
+  metadata?: MemberInit['metadata'];
+} & Partial<MemberKeepAliveConfig> &
+  MemberInternalConfig;

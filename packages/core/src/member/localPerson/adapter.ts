@@ -21,6 +21,9 @@ export class LocalPersonAdapter implements LocalPerson {
   get keepaliveIntervalGapSec() {
     return this._impl.keepaliveIntervalGapSec;
   }
+  get disableSignaling() {
+    return this._impl.disableSignaling;
+  }
   get type() {
     return this._impl.type;
   }

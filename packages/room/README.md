@@ -453,12 +453,12 @@ const data = await SkyWayStreamFactory.createDataStream();
 ```ts
 const displayStream = await navigator.mediaDevices.getDisplayMedia();
 const [displayTrack] = displayStream.getVideoTracks();
-const stream = new LocalVideoStream('label', displayTrack);
+const stream = new LocalVideoStream(displayTrack);
 
 const [audioTrack] = (
   await navigator.mediaDevices.getUserMedia({ audio: true })
 ).getTracks();
-const stream = new LocalAudioStream('label', audioTrack);
+const stream = new LocalAudioStream(audioTrack);
 ```
 
 ### AudioStream / VideoStream の再生方法

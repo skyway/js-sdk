@@ -1,4 +1,4 @@
-import { Event } from '@skyway-sdk/common';
+import { Event, EventDisposer, Logger } from '@skyway-sdk/common';
 
 import {
   AudioMediaTrackConstraints,
@@ -9,11 +9,23 @@ import {
 import { ContentType, attachElement, detachElement } from '../base';
 import { LocalStreamBase } from './base';
 
+const logger = new Logger('packages/core/src/media/stream/local/media.ts');
+
 export abstract class LocalMediaStreamBase extends LocalStreamBase {
   /**@description [japanese] PublicationのDisable/EnableなどでStreamのtrackが更新された時に発火するイベント */
   onTrackUpdated = new Event<MediaStreamTrack>();
+  /**
+   * @description [japanese] streamが破棄された時に発火するイベント (例. 画面共有が終了したときなど)
+   * @example [japanese] ハンドリング例
+   *  const publication = await member.publish(audio);
+      audio.onDestroyed.once(async () => {
+        await member.unpublish(publication);
+      });
+   * */
+  onDestroyed = new Event<void>();
   private _element?: HTMLVideoElement | HTMLAudioElement;
   private _track: MediaStreamTrack;
+  private _disposer = new EventDisposer();
   /**@internal */
   protected _oldTrack?: MediaStreamTrack;
   private _trackConstraints: MediaTrackConstraints = {};
@@ -52,6 +64,7 @@ export abstract class LocalMediaStreamBase extends LocalStreamBase {
     super(contentType);
 
     this._track = track;
+    this._listenTrackEvent();
     this._options = options;
 
     // iOS safari 15はgetConstraintsがバグってるのでここで入れておく
@@ -110,6 +123,18 @@ export abstract class LocalMediaStreamBase extends LocalStreamBase {
       this.attach(this._element);
     }
     this.onTrackUpdated.emit(track);
+    this._listenTrackEvent();
+  }
+
+  private _listenTrackEvent() {
+    const onended = () => {
+      logger.info('onDestroyed', this.toJSON());
+      this.onDestroyed.emit();
+    };
+    this._track.addEventListener('ended', onended);
+    this._disposer.push(() =>
+      this._track.removeEventListener('ended', onended)
+    );
   }
 
   /**
@@ -117,6 +142,7 @@ export abstract class LocalMediaStreamBase extends LocalStreamBase {
    * カメラやマイクなどのデバイスを解放するためにはそのデバイスに関連するすべてのStreamを解放する必要があります
    */
   release() {
+    this._disposer.dispose();
     this._track.stop();
   }
 }
