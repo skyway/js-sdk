@@ -1,4 +1,5 @@
 import { errors as coreErrors } from '@skyway-sdk/core';
+import { errors as sfuErrors } from '@skyway-sdk/sfu-bot';
 
 export const roomErrors = {
   invalidParameter: { name: 'invalidParameter', detail: '', solution: '' },
@@ -37,4 +38,4 @@ export const roomErrors = {
   },
 } as const;
 
-export const errors = { ...coreErrors, ...roomErrors } as const;
+export const errors = { ...coreErrors, ...sfuErrors, ...roomErrors } as const;

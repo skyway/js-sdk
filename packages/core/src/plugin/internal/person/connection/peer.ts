@@ -4,10 +4,9 @@ import { SkyWayContext } from '../../../../context';
 import { errors } from '../../../../errors';
 import { IceManager } from '../../../../external/ice';
 import { SignalingSession } from '../../../../external/signaling';
-
-import { createError, createWarnPayload } from '../../../../util';
 import { LocalPersonImpl } from '../../../../member/localPerson';
 import { RemoteMember } from '../../../../member/remoteMember';
+import { createError, createWarnPayload } from '../../../../util';
 import { statsToJson } from '../util';
 import { P2PMessage } from '.';
 

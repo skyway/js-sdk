@@ -8,6 +8,7 @@ import {
 } from '@skyway-sdk/common';
 import * as sdpTransform from 'sdp-transform';
 import { v4 } from 'uuid';
+
 import { SkyWayContext } from '../../../../context';
 import { errors } from '../../../../errors';
 import { IceManager } from '../../../../external/ice';
@@ -15,7 +16,18 @@ import { SignalingSession } from '../../../../external/signaling';
 import { Codec } from '../../../../media';
 import { RemoteStream } from '../../../../media/stream';
 import { createRemoteStream } from '../../../../media/stream/remote/factory';
+import { LocalPersonImpl } from '../../../../member/localPerson';
+import { RemoteMember } from '../../../../member/remoteMember';
 import { SubscriptionImpl } from '../../../../subscription';
+import {
+  createError,
+  createWarnPayload,
+  fmtpConfigParser,
+  statsToArray,
+} from '../../../../util';
+import { TransportConnectionState } from '../../../interface';
+import { convertConnectionState } from '../util';
+import { P2PMessage } from '.';
 import { DataChannelNegotiationLabel } from './datachannel';
 import { IceCandidateMessage, Peer } from './peer';
 import {
@@ -23,18 +35,6 @@ import {
   SenderRestartIceMessage,
   SenderUnproduceMessage,
 } from './sender';
-import { P2PMessage } from '.';
-
-import { LocalPersonImpl } from '../../../../member/localPerson';
-import { RemoteMember } from '../../../../member/remoteMember';
-import {
-  statsToArray,
-  fmtpConfigParser,
-  createError,
-  createWarnPayload,
-} from '../../../../util';
-import { TransportConnectionState } from '../../../interface';
-import { convertConnectionState } from '../util';
 
 const log = new Logger(
   'packages/core/src/plugin/internal/person/connection/receiver.ts'

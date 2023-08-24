@@ -1,8 +1,8 @@
 import { Logger } from '@skyway-sdk/common';
 
 import { errors } from '../../../errors';
-import { createError } from '../../../util';
 import type { Codec } from '../../../media';
+import { createError } from '../../../util';
 import { RemoteStream } from '.';
 import { RemoteAudioStream } from './audio';
 import { RemoteDataStream } from './data';

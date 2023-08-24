@@ -1,4 +1,5 @@
 import { Event } from '@skyway-sdk/common';
+
 import { Member } from '../../member';
 import { LocalPersonImpl } from '../../member/localPerson';
 import { PublicationImpl } from '../../publication';

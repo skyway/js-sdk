@@ -20,8 +20,6 @@ import {
 } from '@skyway-sdk/core';
 import { SfuRestApiClient } from '@skyway-sdk/sfu-api-client';
 import isEqual from 'lodash/isEqual';
-import { DataConsumer } from 'mediasoup-client/lib/DataConsumer';
-import { DataProducer } from 'mediasoup-client/lib/DataProducer';
 import { Producer, ProducerOptions } from 'mediasoup-client/lib/Producer';
 import {
   RtpCodecCapability,
@@ -44,7 +42,6 @@ export class Sender {
   private _producer?: Producer;
   /**@private */
   _broadcasterTransport?: SfuTransport;
-  private _ackTransport?: SfuTransport;
   private _disposer = new EventDisposer();
   private _unsubscribeStreamEnableChange?: () => void;
   private _connectionState: TransportConnectionState = 'new';
@@ -79,7 +76,6 @@ export class Sender {
     return {
       forwarding: this.forwarding,
       broadcasterTransport: this._broadcasterTransport,
-      ackTransport: this._ackTransport,
       _connectionState: this._connectionState,
     };
   }
@@ -130,10 +126,7 @@ export class Sender {
       // optional
       broadcasterTransportOptions,
       rtpCapabilities,
-      ackTransportId,
-      ackTransportOptions,
-      ackProducerId,
-      ackConsumerOptions,
+      identifierKey,
     } = await this._api.startForwarding({
       botId: this._bot.id,
       publicationId: this.publication.id,
@@ -146,7 +139,6 @@ export class Sender {
     if (broadcasterTransportOptions) {
       log.debug('sender create new transport', {
         broadcasterTransportOptions,
-        ackTransportOptions,
       });
       await this._transportRepository.loadDevice(rtpCapabilities!);
 
@@ -170,7 +162,7 @@ export class Sender {
         info: { ...errors.internal, detail: '_broadcasterTransport not found' },
         path: log.prefix,
         channel: this.channel,
-        payload: { ackTransportOptions, broadcasterTransportOptions },
+        payload: { broadcasterTransportOptions },
       });
     }
 
@@ -180,55 +172,6 @@ export class Sender {
       })
       .disposer(this._disposer);
     this._setConnectionState(this._broadcasterTransport.connectionState);
-
-    if (ackTransportOptions) {
-      this._ackTransport = this._transportRepository.createTransport(
-        this._localPerson.id,
-        this._bot,
-        ackTransportOptions,
-        'recv',
-        this._iceManager
-      );
-      const ackConsumer = await this._ackTransport.msTransport.consumeData(
-        ackConsumerOptions!
-      );
-      ackConsumer.addListener('open', async () => {
-        const payload = await createLogPayload({
-          operationName: 'acmConsumer.opened',
-          channel: this.channel,
-        });
-        log.debug(payload, { ackTransportId });
-      });
-
-      const transactionId = uuidV4();
-      this._broadcasterTransport.onProduceData
-        .watch(
-          (e) => e.producerOptions.appData?.transactionId === transactionId
-        )
-        .then(({ callback }) => {
-          callback({ id: ackProducerId! });
-        });
-      const ackProducer =
-        await this._broadcasterTransport.msTransport.produceData({
-          appData: { transactionId },
-        });
-      this._handleMessage(ackConsumer, ackProducer);
-    }
-
-    this._ackTransport = this._transportRepository.getTransport(
-      this._localPerson.id,
-      ackTransportId
-    );
-    if (!this._ackTransport) {
-      throw createError({
-        operationName: 'Sender.startForwarding',
-        context: this._context,
-        info: { ...errors.internal, detail: '_ackTransport not found' },
-        path: log.prefix,
-        channel: this.channel,
-        payload: { ackTransportOptions, broadcasterTransportOptions },
-      });
-    }
 
     const producer = await this._produce(stream, this._broadcasterTransport);
     this._setupTransportAccessForStream(
@@ -265,11 +208,14 @@ export class Sender {
       ).publication as PublicationImpl<LocalStream>;
     }
 
-    const forwarding = new Forwarding(
+    const forwarding = new Forwarding({
       configure,
-      this.publication,
-      relayingPublication
-    );
+      originPublication: this.publication,
+      relayingPublication,
+      api: this._api,
+      context: this._context,
+      identifierKey,
+    });
     this.forwarding = forwarding;
 
     const botSubscribing = this.channel.subscriptions.find(
@@ -592,86 +538,6 @@ export class Sender {
     this._disposer.push(() => {
       delete stream._getTransportCallbacks[this._bot.id];
       delete stream._getStatsCallbacks[this._bot.id];
-    });
-  }
-
-  private _handleMessage(consumer: DataConsumer, producer: DataProducer) {
-    consumer.on('message', async (message) => {
-      try {
-        const { type, payload, id } = JSON.parse(message);
-        switch (type) {
-          case 'request':
-            {
-              const { subscriberId, publicationId } = payload;
-              log.debug('ackConsume', { subscriberId, publicationId });
-
-              const exist = this.channel.subscriptions.find(
-                (subscription) =>
-                  subscription.publication.id === publicationId &&
-                  subscription.subscriber.id === subscriberId
-              );
-              if (!exist) {
-                await this.channel.onPublicationSubscribed
-                  .watch(
-                    ({ subscription }) =>
-                      subscription.publication.id === publicationId &&
-                      subscription.subscriber.id === subscriberId,
-                    this._bot.options.ackTimeout
-                  )
-                  .catch((e) => {
-                    throw createError({
-                      operationName: 'Sender._handleMessage',
-                      context: this._context,
-                      info: {
-                        ...errors.timeout,
-                        detail: 'ackConsume publication.onSubscribed',
-                      },
-                      path: log.prefix,
-                      channel: this.channel,
-                      error: e,
-                      payload: {
-                        subscriberId,
-                        subscriptions: this.channel.subscriptions,
-                      },
-                    });
-                  });
-              }
-
-              for (let i = 0; i < 10; i++) {
-                try {
-                  producer.send(JSON.stringify({ type: 'response', id }));
-                } catch (error: any) {
-                  log.error(
-                    createError({
-                      operationName: 'Sender._handleMessage',
-                      context: this._context,
-                      info: {
-                        ...errors.internal,
-                        detail: 'An error occurred in producer.send',
-                      },
-                      path: log.prefix,
-                      channel: this.channel,
-                      error,
-                      payload: {
-                        subscriberId,
-                        subscriptions: this.channel.subscriptions,
-                      },
-                    })
-                  );
-                }
-                await new Promise((r) => setTimeout(r, 1000));
-                if (this.closed) {
-                  break;
-                }
-              }
-
-              log.debug('ackConsume accepted', { subscriberId, publicationId });
-            }
-            break;
-        }
-      } catch (error) {
-        log.error('_handleMessage', error);
-      }
     });
   }
 

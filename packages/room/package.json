@@ -1,6 +1,6 @@
 {
   "name": "@skyway-sdk/room",
-  "version": "1.5.0",
+  "version": "1.5.2",
   "description": "The official Next Generation JavaScript SDK for SkyWay",
   "homepage": "https://skyway.ntt.com/",
   "repository": {
@@ -25,10 +25,11 @@
     "doc": "npm run doc:html && npm run doc:md",
     "doc:html": "rm -rf docs/html && typedoc --excludePrivate --disableSources --excludeInternal --tsconfig ./tsconfig.build.json --out docs/html --plugin none ./src/index.ts ",
     "doc:md": "rm -rf docs/md && typedoc --excludePrivate --disableSources --excludeInternal --tsconfig ./tsconfig.build.json --out docs/md ./src/index.ts ",
+    "test": "npm run e2e",
     "e2e": "npm-run-all -p jest test-large test-extra",
     "e2e:firefox": "karma start ./karma.large.js --single-run --browsers FirefoxHeadlessAutoAllowGUM && karma start ./karma.extra.js --single-run --browsers FirefoxHeadlessAutoAllowGUM",
     "e2e:safari": "karma start ./karma.large.js --single-run --browsers safari && karma start ./karma.extra.js --single-run --browsers safari",
-    "format": "eslint ./src --fix && eslint ./e2e --fix",
+    "format": "eslint ./src --fix && eslint ./tests --fix",
     "graph": "dependency-cruiser --include-only '^src' --output-type dot src | dot -T svg > docs/dependencygraph.svg",
     "jest": "jest",
     "lint": "eslint ./src --fix && eslint ./e2e --fix",
@@ -45,8 +46,8 @@
     "watch:tsc": "tsc -p tsconfig.build.json -w"
   },
   "dependencies": {
-    "@skyway-sdk/core": "^1.5.0",
-    "@skyway-sdk/sfu-bot": "^1.5.0",
+    "@skyway-sdk/core": "^1.5.1",
+    "@skyway-sdk/sfu-bot": "^1.5.1",
     "uuid": "^9.0.0"
   },
   "devDependencies": {

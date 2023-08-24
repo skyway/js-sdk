@@ -1,18 +1,18 @@
 import { Event, Logger, PromiseQueue } from '@skyway-sdk/common';
 import { v4 } from 'uuid';
+
 import { SkyWayContext } from '../../../../context';
 import { errors } from '../../../../errors';
 import { IceManager } from '../../../../external/ice';
 import { SignalingSession } from '../../../../external/signaling';
+import { LocalPersonImpl } from '../../../../member/localPerson';
+import { RemoteMember } from '../../../../member/remoteMember';
 import { Publication, PublicationImpl } from '../../../../publication';
 import { Subscription, SubscriptionImpl } from '../../../../subscription';
+import { createError } from '../../../../util';
 import { SkyWayConnection } from '../../../interface/connection';
 import { Receiver } from './receiver';
 import { Sender } from './sender';
-
-import { LocalPersonImpl } from '../../../../member/localPerson';
-import { RemoteMember } from '../../../../member/remoteMember';
-import { createError } from '../../../../util';
 
 const log = new Logger(
   'packages/core/src/plugin/internal/person/connection/index.ts'

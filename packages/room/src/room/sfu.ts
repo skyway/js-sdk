@@ -14,8 +14,8 @@ import {
   LocalSFURoomMemberImpl,
 } from '../member/local/sfu';
 import { RemoteRoomMemberImpl } from '../member/remote/base';
-import { Room, RoomImpl, RoomMemberInit } from './base';
 import { RoomPublicationImpl } from '../publication';
+import { Room, RoomImpl, RoomMemberInit } from './base';
 
 const log = new Logger('packages/room/src/room/sfu.ts');
 

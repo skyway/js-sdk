@@ -1,11 +1,10 @@
 import { Event, Logger } from '@skyway-sdk/common';
 
-import { SkyWayConnection } from '../../interface';
-
-import { PublicationImpl } from '../../../publication';
-import { SubscriptionImpl } from '../../../subscription';
 import { LocalPersonImpl } from '../../../member/localPerson';
 import { RemoteMemberImplInterface } from '../../../member/remoteMember';
+import { PublicationImpl } from '../../../publication';
+import { SubscriptionImpl } from '../../../subscription';
+import { SkyWayConnection } from '../../interface';
 
 const log = new Logger(
   'packages/core/src/plugin/internal/unknown/connection.ts'

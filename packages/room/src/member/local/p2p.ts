@@ -8,8 +8,8 @@ import {
   SubscriptionImpl,
 } from '@skyway-sdk/core';
 
-import { RoomPublication } from '../../publication';
 import { errors } from '../../errors';
+import { RoomPublication } from '../../publication';
 import { P2PRoomImpl } from '../../room/p2p';
 import { RoomSubscription } from '../../subscription';
 import { createError } from '../../util';

@@ -1,4 +1,7 @@
+import { errors as apiErrors } from '@skyway-sdk/sfu-api-client';
+
 export const errors = {
+  ...apiErrors,
   invalidParameter: { name: 'invalidParameter', detail: '', solution: '' },
   timeout: { name: 'timeout', detail: '', solution: '' },
   internal: { name: 'internal', detail: '', solution: '' },
@@ -25,8 +28,8 @@ export const errors = {
   streamNotExistInPublication: {
     name: 'streamNotExistInPublication',
     detail:
-      'PublicationにStreamがありません。RemoteMemberのPublicationをForwarding出来ません',
-    solution: 'PublicationがLocalでPublishされたものか確かめてください',
+      'PublicationにStreamがありません。RemoteMemberのPublicationのStreamにはアクセスできません',
+    solution: '参照しているPublicationが目的のものか確かめてください。',
   },
   invalidPreferredEncoding: {
     name: 'invalidPreferredEncoding',
@@ -61,5 +64,10 @@ export const errors = {
     name: 'netWorkError',
     detail: '通信環境に問題があります',
     solution: 'ネットワーク接続状況を確認してください',
+  },
+  confirmSubscriptionFailed: {
+    name: 'confirmSubscriptionFailed',
+    detail: 'Forwardingのconsume許可を出すのに失敗しました',
+    solution: 'ありません',
   },
 } as const;

@@ -1,8 +1,8 @@
 import { Event } from '@skyway-sdk/common';
 import model from '@skyway-sdk/model';
 
-import { SkyWayContext } from '../../context';
 import { SkyWayChannel } from '../../channel';
+import { SkyWayContext } from '../../context';
 import { LocalPersonImpl } from '../../member/localPerson';
 import { RemoteMemberImplInterface } from '../../member/remoteMember';
 

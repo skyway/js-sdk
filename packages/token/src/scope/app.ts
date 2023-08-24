@@ -41,6 +41,7 @@ export type ChannelScope = {
   members: MemberScope[];
   /**sfuBot リソースに関するオブジェクトを配列で指定 */
   sfuBots?: SfuScope[];
+  [key: string]: unknown;
 };
 /**@internal */
 export const ChannelActions = [

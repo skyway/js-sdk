@@ -5,10 +5,10 @@ import { PersonInit, SkyWayChannelImpl } from '../../channel';
 import { MaxIceParamServerTTL } from '../../const';
 import { SkyWayContext } from '../../context';
 import { errors } from '../../errors';
-import { setupSignalingSession } from '../../external/signaling';
-import { LocalPersonImpl } from '.';
 import { IceManager } from '../../external/ice';
+import { setupSignalingSession } from '../../external/signaling';
 import { createError } from '../../util';
+import { LocalPersonImpl } from '.';
 
 const log = new Logger('packages/core/src/member/person/local/factory.ts');
 

@@ -23,8 +23,8 @@ import { Config } from '../config';
 import { errors } from '../errors';
 import * as event from '../model/event';
 import { createError } from '../util';
+import { MemberInit, PublicationInit, RtcApi, SubscriptionInit } from './api';
 import { EventObserver } from './eventObserver';
-import { RtcApi, MemberInit, PublicationInit, SubscriptionInit } from './api';
 
 const log = new Logger('packages/rtc-api-client/src/domain/channel.ts');
 

@@ -5,8 +5,7 @@ import {
   DisplayMediaTrackConstraints,
   VideoMediaTrackConstraints,
 } from '../../factory';
-
-import { ContentType, attachElement, detachElement } from '../base';
+import { attachElement, ContentType, detachElement } from '../base';
 import { LocalStreamBase } from './base';
 
 const logger = new Logger('packages/core/src/media/stream/local/media.ts');

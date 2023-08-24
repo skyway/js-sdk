@@ -151,10 +151,7 @@ export class SfuRestApiClient {
         broadcasterTransportId: string;
         rtpCapabilities?: RtpCapabilities;
         broadcasterTransportOptions?: TransportOptions;
-        ackTransportId: string;
-        ackTransportOptions?: TransportOptions;
-        ackConsumerOptions?: DataConsumerOptions;
-        ackProducerId?: string;
+        identifierKey: string;
       }>(`/bots/${botId}/forwardings`, body, {
         headers: { authorization: `Bearer ${this._token}` },
         retry: async (err) => {
@@ -199,7 +196,7 @@ export class SfuRestApiClient {
 
     const res = await this.http
       .put<{ producerId: string }>(
-        `/bots/${botId}/forwardings/${forwardingId}/transport/producer`,
+        `/bots/${botId}/forwardings/${forwardingId}/transports/producers`,
         { transportId, producerOptions },
         {
           headers: { authorization: `Bearer ${this._token}` },
@@ -268,13 +265,13 @@ export class SfuRestApiClient {
         transportId: string;
         transportOptions: TransportOptions | undefined;
       }>(
-        `/bots/${botId}/forwardings/${forwardingId}/transport/consumers`,
+        `/bots/${botId}/forwardings/${forwardingId}/transports/consumers`,
         requestPayload,
         {
           retry: async (err) => {
             if (
               [
-                400,
+                400, 403,
                 //  404,
                 429,
               ].includes(err.status)
@@ -291,6 +288,13 @@ export class SfuRestApiClient {
           throw createError({
             operationName: 'SfuRestApiClient.createConsumer',
             info: errors.maxSubscriberExceededError,
+            path: log.prefix,
+            payload: e,
+          });
+        } else if (e.status === 403) {
+          throw createError({
+            operationName: 'SfuRestApiClient.createConsumer',
+            info: errors.notAllowedConsumeError,
             path: log.prefix,
             payload: e,
           });
@@ -326,7 +330,7 @@ export class SfuRestApiClient {
     const body = { transportId, dtlsParameters };
 
     const res = await this.http
-      .put<{ transportId: string }>(`/transport/connection`, body, {
+      .put<{ transportId: string }>(`/transports/connections`, body, {
         headers: { authorization: `Bearer ${this._token}` },
         retry: async () => {
           return await backOff.wait();
@@ -363,7 +367,7 @@ export class SfuRestApiClient {
   }) {
     const res = await this.http
       .put<{ transportId: string }>(
-        `transport/consumers/${consumerId}/layer`,
+        `transports/consumers/${consumerId}/layers`,
         { transportId, spatialLayer, publicationId },
         {
           headers: { authorization: `Bearer ${this._token}` },
@@ -404,7 +408,7 @@ export class SfuRestApiClient {
   async iceRestart({ transportId }: { transportId: string }) {
     const res = await this.http
       .put<{ iceParameters: IceParameters }>(
-        `/transport/connection/ice`,
+        `/transports/connections/ice`,
         { transportId },
         { headers: this._headers }
       )
@@ -430,7 +434,7 @@ export class SfuRestApiClient {
       .get<{
         rtpCapabilities: RtpCapabilities;
       }>(
-        `/bots/${botId}/forwardings/${forwardingId}/transport/rtp_capabilities?originPublicationId=${originPublicationId}`,
+        `/bots/${botId}/forwardings/${forwardingId}/transports/rtp-capabilities?originPublicationId=${originPublicationId}`,
         {
           headers: { authorization: `Bearer ${this._token}` },
           retry: async () => {
@@ -458,6 +462,42 @@ export class SfuRestApiClient {
     }
 
     return res.rtpCapabilities;
+  }
+
+  async confirmSubscription({
+    forwardingId,
+    subscriptionId,
+    identifierKey,
+  }: {
+    forwardingId: string;
+    subscriptionId: string;
+    identifierKey: string;
+  }) {
+    const requestPayload: {
+      forwardingId: string;
+      subscriptionId: string;
+      identifierKey: string;
+    } = {
+      forwardingId,
+      subscriptionId,
+      identifierKey,
+    };
+
+    const res = await this.http
+      .post<{
+        message: string;
+        operationId: string;
+      }>('/confirm-subscription', requestPayload, {
+        headers: { authorization: `Bearer ${this._token}` },
+      })
+      .catch((e: HttpResponse) => {
+        throw this._commonErrorHandler(
+          e,
+          'SfuRestApiClient.confirmSubscription'
+        );
+      });
+    log.debug('response of confirmSubscription', res);
+    return res;
   }
 }
 

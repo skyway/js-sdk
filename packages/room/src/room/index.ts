@@ -13,9 +13,9 @@ import {
 import { v4 as uuidV4 } from 'uuid';
 
 import { errors } from '../errors';
+import { PACKAGE_VERSION } from '../version';
 import { P2PRoom, P2PRoomImpl } from './p2p';
 import { SfuRoom, SfuRoomImpl } from './sfu';
-import { PACKAGE_VERSION } from '../version';
 
 const log = new Logger('packages/room/src/room/index.ts');
 

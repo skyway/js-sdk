@@ -14,29 +14,28 @@ import { SkyWayContext } from '../../../../context';
 import { errors } from '../../../../errors';
 import { IceManager } from '../../../../external/ice';
 import { SignalingSession } from '../../../../external/signaling';
-import { PublicationImpl } from '../../../../publication';
-import { isSafari } from '../util';
-import { setEncodingParams } from '../util';
-import { DataChannelNegotiationLabel } from './datachannel';
-import { IceCandidateMessage, Peer } from './peer';
-import { ReceiverAnswerMessage } from './receiver';
-import { TransportConnectionState } from '../../../interface';
-
-import { P2PMessage } from '.';
 import { Codec } from '../../../../media';
 import {
-  LocalStream,
   LocalAudioStream,
+  LocalStream,
   LocalVideoStream,
 } from '../../../../media/stream';
 import { LocalPersonImpl } from '../../../../member/localPerson';
 import { RemoteMember } from '../../../../member/remoteMember';
+import { PublicationImpl } from '../../../../publication';
 import {
-  statsToArray,
-  getParameters,
   createError,
   createWarnPayload,
+  getParameters,
+  statsToArray,
 } from '../../../../util';
+import { TransportConnectionState } from '../../../interface';
+import { isSafari } from '../util';
+import { setEncodingParams } from '../util';
+import { P2PMessage } from '.';
+import { DataChannelNegotiationLabel } from './datachannel';
+import { IceCandidateMessage, Peer } from './peer';
+import { ReceiverAnswerMessage } from './receiver';
 
 const log = new Logger(
   'packages/core/src/plugin/internal/person/connection/sender.ts'

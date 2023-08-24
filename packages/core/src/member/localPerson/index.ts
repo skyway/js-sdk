@@ -9,10 +9,18 @@ import { Encoding } from '@skyway-sdk/model';
 import { PublicationInit } from '@skyway-sdk/rtc-api-client';
 
 import { PersonInit, SkyWayChannelImpl } from '../../channel';
+import { SkyWayContext } from '../../context';
 import { errors } from '../../errors';
+import { IceManager } from '../../external/ice';
 import { SignalingSession } from '../../external/signaling';
 import { Codec, EncodingParameters } from '../../media';
 import { LocalStream } from '../../media/stream';
+import {
+  RemoteAudioStream,
+  RemoteDataStream,
+  RemoteVideoStream,
+} from '../../media/stream';
+import { MemberImpl } from '../../member';
 import { SkyWayConnection } from '../../plugin/interface';
 import { UnknownMemberImpl } from '../../plugin/internal/unknown/member';
 import {
@@ -21,18 +29,10 @@ import {
   PublicationImpl,
 } from '../../publication';
 import { Subscription, SubscriptionImpl } from '../../subscription';
-import { MemberImpl } from '../../member';
+import { createError, createLogPayload } from '../../util';
 import { Person } from '../person';
 import { isRemoteMember } from '../remoteMember';
 import { PublishingAgent, SubscribingAgent } from './agent';
-import { SkyWayContext } from '../../context';
-import { IceManager } from '../../external/ice';
-import {
-  RemoteAudioStream,
-  RemoteDataStream,
-  RemoteVideoStream,
-} from '../../media/stream';
-import { createError, createLogPayload } from '../../util';
 
 export * from './adapter';
 export * from './factory';

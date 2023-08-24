@@ -11,15 +11,14 @@ import {
 import { v4 } from 'uuid';
 
 import { errors } from '../errors';
+import { RoomMember, RoomMemberImpl } from '../member';
 import { LocalRoomMember, LocalRoomMemberImpl } from '../member/local/base';
+import { RemoteRoomMember, RemoteRoomMemberImpl } from '../member/remote/base';
+import { RoomPublication, RoomPublicationImpl } from '../publication';
+import { RoomSubscription, RoomSubscriptionImpl } from '../subscription';
 import { createError } from '../util';
 import { RoomType } from '.';
 import * as event from './event';
-
-import { RoomMember, RoomMemberImpl } from '../member';
-import { RoomPublication, RoomPublicationImpl } from '../publication';
-import { RoomSubscription, RoomSubscriptionImpl } from '../subscription';
-import { RemoteRoomMember, RemoteRoomMemberImpl } from '../member/remote/base';
 
 const log = new Logger('packages/room/src/room/base.ts');
 

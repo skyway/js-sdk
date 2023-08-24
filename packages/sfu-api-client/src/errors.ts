@@ -28,4 +28,9 @@ export const errors = {
     solution: 'tokenに必要な権限を付与してください',
   },
   backendError: { name: 'backendError:', detail: '', solution: '' },
+  notAllowedConsumeError: {
+    name: 'notAllowedConsumeError',
+    detail: 'ForwardingからのConsume許可がありません',
+    solution: 'Forwardingしているmemberによる許可操作が必要です',
+  },
 } as const;

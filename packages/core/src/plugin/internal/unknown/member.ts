@@ -1,10 +1,10 @@
-import { SkyWayContext } from '../../../context';
 import { SkyWayChannelImpl } from '../../../channel';
+import { SkyWayContext } from '../../../context';
 import { MemberImpl } from '../../../member';
+import { LocalPersonImpl } from '../../../member/localPerson';
 import { RemoteMemberImplInterface } from '../../../member/remoteMember';
 import { UnknownConnection } from './connection';
 import { UnknownPlugin } from './plugin';
-import { LocalPersonImpl } from '../../../member/localPerson';
 
 export class UnknownMemberImpl
   extends MemberImpl

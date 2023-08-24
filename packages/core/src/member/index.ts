@@ -10,9 +10,9 @@ import {
   RemoteDataStream,
   RemoteVideoStream,
 } from '../media/stream';
-import { createLogPayload, createError } from '../util';
 import { Publication } from '../publication';
 import { Subscription } from '../subscription';
+import { createError, createLogPayload } from '../util';
 
 const log = new Logger('packages/core/src/member/index.ts');
 

@@ -1,4 +1,4 @@
-@skyway-sdk/common@1.4.1
+@skyway-sdk/common@1.4.2
 
 MIT
 
@@ -29,7 +29,7 @@ SOFTWARE.
 
 ---
 
-@skyway-sdk/core@1.5.0
+@skyway-sdk/core@1.5.1
 
 MIT
 
@@ -68,7 +68,7 @@ MIT
 
 ---
 
-@skyway-sdk/room@1.5.0
+@skyway-sdk/room@1.5.2
 
 MIT
 
@@ -99,7 +99,7 @@ SOFTWARE.
 
 ---
 
-@skyway-sdk/rtc-api-client@1.4.1
+@skyway-sdk/rtc-api-client@1.4.2
 
 MIT
 
@@ -130,7 +130,7 @@ SOFTWARE.
 
 ---
 
-@skyway-sdk/rtc-rpc-api-client@1.4.1
+@skyway-sdk/rtc-rpc-api-client@1.4.2
 
 MIT
 
@@ -161,7 +161,7 @@ SOFTWARE.
 
 ---
 
-@skyway-sdk/sfu-api-client@1.4.1
+@skyway-sdk/sfu-api-client@1.4.2
 
 MIT
 
@@ -192,7 +192,7 @@ SOFTWARE.
 
 ---
 
-@skyway-sdk/sfu-bot@1.5.0
+@skyway-sdk/sfu-bot@1.5.1
 
 MIT
 
@@ -254,7 +254,7 @@ SOFTWARE.
 
 ---
 
-@skyway-sdk/token@1.4.1
+@skyway-sdk/token@1.4.2
 
 MIT
 
@@ -488,7 +488,7 @@ https://github.com/TehShrike/deepmerge
 
 ---
 
-event-target-shim@5.0.1
+event-target-shim@6.0.2
 
 MIT
 
@@ -552,7 +552,7 @@ USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-fake-mediastreamtrack@1.1.6
+fake-mediastreamtrack@1.2.0
 
 ISC
 
@@ -786,7 +786,7 @@ https://github.com/zeit/ms
 
 The MIT License (MIT)
 
-Copyright (c) 2022 Vercel, Inc.
+Copyright (c) 2016 Zeit, Inc.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -809,7 +809,7 @@ SOFTWARE.
 
 ---
 
-node-fetch@2.6.12
+node-fetch@2.7.0
 
 MIT
 
@@ -953,25 +953,6 @@ SOFTWARE.
 
 ---
 
-uuid@8.3.2
-
-MIT
-
-https://github.com/uuidjs/uuid
-
-The MIT License (MIT)
-
-Copyright (c) 2010-2020 Robert Kieffer and other contributors
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-
----
-
 uuid@9.0.0
 
 MIT
@@ -1013,13 +994,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 ---
 
-whatwg-fetch@3.6.2
+whatwg-fetch@3.6.17
 
 MIT
 
 https://github.com/github/fetch
 
-Copyright (c) 2014-2016 GitHub, Inc.
+Copyright (c) 2014-2023 GitHub, Inc.
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
