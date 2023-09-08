@@ -6,6 +6,7 @@ import {
 } from '@skyway-sdk/common';
 import Bowser from 'bowser';
 import sdpTransform, { MediaAttributes } from 'sdp-transform';
+import { UAParser } from 'ua-parser-js';
 
 import { Channel, SkyWayChannelImpl } from './channel';
 import { SkyWayContext } from './context';
@@ -214,16 +215,25 @@ export function createError({
 }
 
 /**@internal */
-export const waitForLocalStats = async (
-  stream: LocalStream,
-  remoteMember: string,
-  end: (stats: WebRTCStats) => boolean,
+export const waitForLocalStats = async ({
+  stream,
+  remoteMember,
+  end,
+  interval,
+  timeout,
+}: {
+  stream: LocalStream;
+  remoteMember: string;
+  end: (stats: WebRTCStats) => boolean;
   /**ms */
-  interval = 100,
+  interval?: number;
   /**ms */
-  timeout = 10_000
-) =>
+  timeout?: number;
+}) =>
   new Promise<WebRTCStats>(async (r, f) => {
+    interval ??= 100;
+    timeout ??= 10_000;
+
     for (let elapsed = 0; ; elapsed += interval) {
       if (elapsed >= timeout) {
         f(
@@ -239,7 +249,7 @@ export const waitForLocalStats = async (
         break;
       }
 
-      const stats = await stream.getStats(remoteMember);
+      const stats = await stream._getStats(remoteMember);
       if (end(stats)) {
         r(stats);
         break;
@@ -379,12 +389,17 @@ export const getRuntimeInfo = ({
 export function detectDevice(): BuiltinHandlerName | undefined {
   // React-Native.
   // NOTE: react-native-webrtc >= 1.75.0 is required.
+  // NOTE: react-native-webrtc with Unified Plan requires version >= 106.0.0.
   if (typeof navigator === 'object' && navigator.product === 'ReactNative') {
     if (typeof RTCPeerConnection === 'undefined') {
       return undefined;
     }
 
-    return 'ReactNative';
+    if (typeof RTCRtpTransceiver !== 'undefined') {
+      return 'ReactNativeUnifiedPlan';
+    } else {
+      return 'ReactNative';
+    }
   }
   // Browser.
   else if (
@@ -392,36 +407,63 @@ export function detectDevice(): BuiltinHandlerName | undefined {
     typeof navigator.userAgent === 'string'
   ) {
     const ua = navigator.userAgent;
-    const browser = Bowser.getParser(ua);
-    const engine = browser.getEngine();
+
+    const uaParser = new UAParser(ua);
+
+    const browser = uaParser.getBrowser();
+    const browserName = browser.name?.toLowerCase() ?? '';
+    const browserVersion = parseInt(browser.major ?? '0');
+    const engine = uaParser.getEngine();
+    const engineName = engine.name?.toLowerCase() ?? '';
+    const os = uaParser.getOS();
+    const osName = os.name?.toLowerCase() ?? '';
+    const osVersion = parseFloat(os.version ?? '0');
+
+    const isIOS = osName === 'ios';
+
+    const isChrome = [
+      'chrome',
+      'chromium',
+      'mobile chrome',
+      'chrome webview',
+      'chrome headless',
+    ].includes(browserName);
+
+    const isFirefox = ['firefox', 'mobile firefox', 'mobile focus'].includes(
+      browserName
+    );
+
+    const isSafari = ['safari', 'mobile safari'].includes(browserName);
+
+    const isEdge = ['edge'].includes(browserName);
 
     // Chrome, Chromium, and Edge.
-    if (
-      browser.satisfies({
-        chrome: '>=74',
-        chromium: '>=74',
-        'microsoft edge': '>=88',
-      })
+    if ((isChrome || isEdge) && !isIOS && browserVersion >= 111) {
+      return 'Chrome111';
+    } else if (
+      (isChrome && !isIOS && browserVersion >= 74) ||
+      (isEdge && !isIOS && browserVersion >= 88)
     ) {
       return 'Chrome74';
-    } else if (browser.satisfies({ chrome: '>=70', chromium: '>=70' })) {
+    } else if (isChrome && !isIOS && browserVersion >= 70) {
       return 'Chrome70';
-    } else if (browser.satisfies({ chrome: '>=67', chromium: '>=67' })) {
+    } else if (isChrome && !isIOS && browserVersion >= 67) {
       return 'Chrome67';
-    } else if (browser.satisfies({ chrome: '>=55', chromium: '>=55' })) {
+    } else if (isChrome && !isIOS && browserVersion >= 55) {
       return 'Chrome55';
     }
     // Firefox.
-    else if (browser.satisfies({ firefox: '>=60' })) {
+    else if (isFirefox && !isIOS && browserVersion >= 60) {
       return 'Firefox60';
     }
-    // Firefox on iOS.
-    else if (browser.satisfies({ ios: { OS: '>=14.3', firefox: '>=30.0' } })) {
+    // Firefox on iOS (so Safari).
+    else if (isFirefox && isIOS && osVersion >= 14.3) {
       return 'Safari12';
     }
     // Safari with Unified-Plan support enabled.
     else if (
-      browser.satisfies({ safari: '>=12.0' }) &&
+      isSafari &&
+      browserVersion >= 12 &&
       typeof RTCRtpTransceiver !== 'undefined' &&
       // eslint-disable-next-line no-prototype-builtins
       RTCRtpTransceiver.prototype.hasOwnProperty('currentDirection')
@@ -429,24 +471,34 @@ export function detectDevice(): BuiltinHandlerName | undefined {
       return 'Safari12';
     }
     // Safari with Plab-B support.
-    else if (browser.satisfies({ safari: '>=11' })) {
+    else if (isSafari && browserVersion >= 11) {
       return 'Safari11';
     }
     // Old Edge with ORTC support.
-    else if (
-      browser.satisfies({ 'microsoft edge': '>=11' }) &&
-      browser.satisfies({ 'microsoft edge': '<=18' })
-    ) {
+    else if (isEdge && !isIOS && browserVersion >= 11 && browserVersion <= 18) {
       return 'Edge11';
     }
+    // Best effort for WebKit based browsers in iOS.
+    else if (
+      engineName === 'webkit' &&
+      isIOS &&
+      osVersion >= 14.3 &&
+      typeof RTCRtpTransceiver !== 'undefined' &&
+      // eslint-disable-next-line no-prototype-builtins
+      RTCRtpTransceiver.prototype.hasOwnProperty('currentDirection')
+    ) {
+      return 'Safari12';
+    }
     // Best effort for Chromium based browsers.
-    else if (engine.name && engine.name.toLowerCase() === 'blink') {
+    else if (engineName === 'blink') {
       const match = ua.match(/(?:(?:Chrome|Chromium))[ /](\w+)/i);
 
       if (match) {
         const version = Number(match[1]);
 
-        if (version >= 74) {
+        if (version >= 111) {
+          return 'Chrome111';
+        } else if (version >= 74) {
           return 'Chrome74';
         } else if (version >= 70) {
           return 'Chrome70';
@@ -456,7 +508,7 @@ export function detectDevice(): BuiltinHandlerName | undefined {
           return 'Chrome55';
         }
       } else {
-        return 'Chrome74';
+        return 'Chrome111';
       }
     }
     // Unsupported browser.
@@ -472,6 +524,7 @@ export function detectDevice(): BuiltinHandlerName | undefined {
 
 /**@internal */
 export type BuiltinHandlerName =
+  | 'Chrome111'
   | 'Chrome74'
   | 'Chrome70'
   | 'Chrome67'
@@ -480,4 +533,5 @@ export type BuiltinHandlerName =
   | 'Safari12'
   | 'Safari11'
   | 'Edge11'
+  | 'ReactNativeUnifiedPlan'
   | 'ReactNative';

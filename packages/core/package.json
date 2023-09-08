@@ -1,6 +1,6 @@
 {
   "name": "@skyway-sdk/core",
-  "version": "1.5.1",
+  "version": "1.5.2",
   "description": "The official Next Generation JavaScript SDK for SkyWay",
   "homepage": "https://skyway.ntt.com/",
   "repository": {
@@ -28,8 +28,8 @@
     "e2e": "npm run test-large",
     "e2e:firefox": "karma start ./karma.all.js --single-run --browsers FirefoxHeadlessAutoAllowGUM",
     "format": "eslint ./src --fix && eslint ./tests --fix",
-    "lint": "eslint ./src --fix && eslint ./tests --fix",
     "graph": "dependency-cruiser --include-only '^src' --output-type dot src | dot -T svg > docs/dependencygraph.svg",
+    "lint": "eslint ./src --fix && eslint ./tests --fix",
     "pre:test": "cd ../../ && npm run build && cd packages/core",
     "publish:npm": "npx can-npm-publish --verbose && npm run build && npm publish --access public",
     "test-all": "npm-run-all -p test-large test-middle test-small",
@@ -52,10 +52,12 @@
     "bowser": "^2.11.0",
     "deepmerge": "^4.2.2",
     "sdp-transform": "^2.14.1",
+    "ua-parser-js": "^1.0.35",
     "uuid": "^9.0.0"
   },
   "devDependencies": {
     "@types/sdp-transform": "^2.4.5",
+    "@types/ua-parser-js": "^0.7.36",
     "@types/uuid": "^9.0.1"
   }
 }

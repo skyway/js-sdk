@@ -224,11 +224,41 @@ export class Sender {
     const [codec] = producer.rtpParameters.codecs;
     botSubscribing.codec = codec;
 
-    waitForLocalStats(
+    if (isSafari()) {
+      waitForLocalStats({
+        stream,
+        remoteMember: this._bot.id,
+        end: (stats) => {
+          const outbound = stats.find(
+            (s) =>
+              s.id.includes('RTCOutboundRTP') || s.type.includes('outbound-rtp')
+          );
+          if (outbound?.keyFramesEncoded > 0) return true;
+          return false;
+        },
+        interval: 10,
+      })
+        .then(async () => {
+          const encodings = this.publication.encodings;
+
+          if (encodings?.length > 0) {
+            await setEncodingParams(producer.rtpSender!, encodings).catch(
+              (e) => {
+                log.error('_onEncodingsChanged failed', e, this);
+              }
+            );
+          }
+        })
+        .catch((err) => {
+          log.error('setEncodingParams waitForLocalStats failed', err, this);
+        });
+    }
+
+    waitForLocalStats({
       stream,
-      this._bot.id,
-      (stats) => !!stats.find((s) => s.type.includes('local-candidate'))
-    )
+      remoteMember: this._bot.id,
+      end: (stats) => !!stats.find((s) => s.type.includes('local-candidate')),
+    })
       .then(async () => {
         const payload = await createLogPayload({
           operationName: 'startForwarding/waitForLocalStats',
@@ -421,15 +451,6 @@ export class Sender {
       });
     log.debug('[end] msTransport.produce', this);
     this._producer = producer;
-
-    if (isSafari()) {
-      if (encodings.length > 0) {
-        // answerをsRDした後に設定する
-        await setEncodingParams(producer.rtpSender!, encodings).catch((e) => {
-          log.error('_onEncodingsChanged failed', e, this);
-        });
-      }
-    }
 
     return producer;
   }

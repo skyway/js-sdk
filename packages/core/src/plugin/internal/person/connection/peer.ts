@@ -203,14 +203,24 @@ export abstract class Peer {
   };
 
   /**@throws {@link SkyWayError} */
-  protected waitForStats = async (
-    track: MediaStreamTrack,
-    cb: (stats: any[]) => boolean,
+  protected waitForStats = async ({
+    track,
+    cb,
+    interval,
+    timeout,
+    logging,
+  }: {
+    track: MediaStreamTrack;
+    cb: (stats: { id: string; type: string; [key: string]: any }[]) => boolean;
     /**ms */
-    interval = 100,
+    interval?: number;
     /**ms */
-    timeout = 10_000
-  ) => {
+    timeout?: number;
+    logging?: boolean;
+  }) => {
+    interval ??= 100;
+    timeout ??= 10_000;
+
     for (let elapsed = 0; ; elapsed += interval) {
       if (elapsed >= timeout) {
         throw createError({
@@ -227,6 +237,9 @@ export abstract class Peer {
 
       const report = await this.pc.getStats(track);
       const stats = statsToJson(report);
+      if (logging) {
+        log.debug('Peer.waitForStats', stats);
+      }
       if (cb(stats)) {
         break;
       }

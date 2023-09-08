@@ -704,17 +704,21 @@ export class Sender extends Peer {
     const transceiver = this.transceivers[publication.id];
 
     const stream = publication.stream as LocalVideoStream;
-    this.waitForStats(
-      stream.track,
-      (stats) => {
-        const outbound = stats.find((s) => s.id.includes('RTCOutboundRTP'));
+    this.waitForStats({
+      track: stream.track,
+      cb: (stats) => {
+        const outbound = stats.find(
+          (s) =>
+            s.id.includes('RTCOutboundRTP') || s.type.includes('outbound-rtp')
+        );
         if (outbound?.keyFramesEncoded > 0) return true;
         return false;
       },
-      10,
-      this._context.config.rtcConfig.timeout
-    )
+      interval: 10,
+      timeout: this._context.config.rtcConfig.timeout,
+    })
       .then(() => {
+        log.debug('safari wait for stats resolved, setEncodingParams');
         setEncodingParams(transceiver.sender, [publication.encodings[0]]).catch(
           (e) => {
             this._log.error('setEncodingParams failed', e);
