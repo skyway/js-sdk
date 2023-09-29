@@ -110,9 +110,11 @@ export class SfuTransport {
         createLogPayload({
           operationName: 'onMediasoupConnectionStateChanged',
           channel: this._bot.channel,
-        }).then((debug) => {
-          log.debug(debug, { state, transportId: this.id, bot: _bot });
-        });
+        })
+          .then((debug) => {
+            log.debug(debug, { state, transportId: this.id, bot: _bot });
+          })
+          .catch(() => {});
 
         switch (state) {
           case 'disconnected':

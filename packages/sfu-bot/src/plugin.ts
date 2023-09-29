@@ -152,6 +152,17 @@ export class SfuBotPlugin extends SkyWayPlugin {
           (e) => e.member.id === botId,
           this._context!.config.rtcApi.timeout
         )
+        .then(async () => {
+          log.elapsed(
+            timestamp,
+            '[end] deleteBot',
+            await createLogPayload({
+              operationName: 'SfuBotPlugin.deleteBot',
+              channel,
+            })
+          );
+          r();
+        })
         .catch((error) => {
           if (!failed)
             f(
@@ -164,17 +175,6 @@ export class SfuBotPlugin extends SkyWayPlugin {
                 context: this._context,
               })
             );
-        })
-        .then(async () => {
-          log.elapsed(
-            timestamp,
-            '[end] deleteBot',
-            await createLogPayload({
-              operationName: 'SfuBotPlugin.deleteBot',
-              channel,
-            })
-          );
-          r();
         });
     });
 }

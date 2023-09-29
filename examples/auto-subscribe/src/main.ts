@@ -50,7 +50,7 @@ const token = new SkyWayAuthToken({
   },
 }).encode(secret);
 
-(async () => {
+void (async () => {
   const localVideo = document.getElementById(
     'js-local-stream'
   ) as HTMLVideoElement;
@@ -174,7 +174,7 @@ const token = new SkyWayAuthToken({
         disposeVideoElement(element as HTMLVideoElement);
       });
       messages.textContent += '== You left ===\n';
-      room.dispose();
+      void room.dispose();
       room = undefined;
     });
 

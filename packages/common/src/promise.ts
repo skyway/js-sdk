@@ -16,7 +16,9 @@ export class PromiseQueue {
     new Promise<T>((r, f) => {
       this.queue.push({ promise, done: r, failed: f });
       if (!this.running) {
-        this.run();
+        this.run().catch((e) => {
+          log.error('push', e);
+        });
       }
     });
 

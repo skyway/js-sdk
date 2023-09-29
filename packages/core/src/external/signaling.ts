@@ -1,4 +1,4 @@
-import { BackOff, Event, Logger, SkyWayError } from '@skyway-sdk/common';
+import { BackOff, Event, Logger } from '@skyway-sdk/common';
 import { Member } from '@skyway-sdk/model';
 import { ConnectionState, SignalingClient } from '@skyway-sdk/signaling-client';
 import { uuidV4 } from '@skyway-sdk/token';
@@ -152,7 +152,7 @@ export class SignalingSession {
         }),
         e
       );
-      this._updateSkyWayAuthToken(token);
+      await this._updateSkyWayAuthToken(token);
       return;
     }
 

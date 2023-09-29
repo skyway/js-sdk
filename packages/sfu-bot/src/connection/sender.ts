@@ -435,6 +435,9 @@ export class Sender {
         } catch (error) {
           producer.errback(error);
         }
+      })
+      .catch((e) => {
+        log.error('onProduce failed', e, this);
       });
     log.debug('[start] msTransport.produce', this);
     const producer = await transport.msTransport

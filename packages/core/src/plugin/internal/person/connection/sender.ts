@@ -111,27 +111,31 @@ export class Sender extends Peer {
 
     this.onPeerConnectionStateChanged
       .add(async (state) => {
-        log.debug('onPeerConnectionStateChanged', { state });
-        switch (state) {
-          case 'disconnected':
-          case 'failed':
-            {
-              const e = await this.waitForConnectionState(
-                'connected',
-                context.config.rtcConfig.iceDisconnectBufferTimeout
-              ).catch((e) => e as SkyWayError);
-              if (e && this._connectionState !== 'reconnecting') {
-                await this.restartIce();
+        try {
+          log.debug('onPeerConnectionStateChanged', { state });
+          switch (state) {
+            case 'disconnected':
+            case 'failed':
+              {
+                const e = await this.waitForConnectionState(
+                  'connected',
+                  context.config.rtcConfig.iceDisconnectBufferTimeout
+                ).catch((e) => e as SkyWayError);
+                if (e && this._connectionState !== 'reconnecting') {
+                  await this.restartIce();
+                }
               }
-            }
-            break;
-          case 'connecting':
-          case 'connected':
-            this._setConnectionState(state);
-            break;
-          case 'closed':
-            this._setConnectionState('disconnected');
-            break;
+              break;
+            case 'connecting':
+            case 'connected':
+              this._setConnectionState(state);
+              break;
+            case 'closed':
+              this._setConnectionState('disconnected');
+              break;
+          }
+        } catch (error) {
+          log.error('onPeerConnectionStateChanged', error, this.id);
         }
       })
       .disposer(this._disposer);
@@ -151,6 +155,7 @@ export class Sender extends Peer {
     this.onConnectionStateChanged.emit(state);
   }
 
+  /**@throws */
   readonly restartIce = async () => {
     if (this._backoffIceRestarted.exceeded) {
       this._log.error(

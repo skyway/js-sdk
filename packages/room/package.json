@@ -1,6 +1,6 @@
 {
   "name": "@skyway-sdk/room",
-  "version": "1.5.3",
+  "version": "1.5.4",
   "description": "The official Next Generation JavaScript SDK for SkyWay",
   "homepage": "https://skyway.ntt.com/",
   "repository": {
@@ -32,7 +32,7 @@
     "format": "eslint ./src --fix && eslint ./tests --fix",
     "graph": "dependency-cruiser --include-only '^src' --output-type dot src | dot -T svg > docs/dependencygraph.svg",
     "jest": "jest",
-    "lint": "eslint ./src --fix && eslint ./e2e --fix",
+    "lint": "eslint ./src --fix && eslint ./tests --fix",
     "publish:npm": "npx can-npm-publish --verbose && npm run build && npm publish --access public",
     "test-extra": "karma start ./karma.extra.js --single-run --browsers chrome_headless_with_fake_device",
     "test-extra:dev": "karma start ./karma.extra.js --browsers chrome_with_fake_device",
@@ -46,8 +46,8 @@
     "watch:tsc": "tsc -p tsconfig.build.json -w"
   },
   "dependencies": {
-    "@skyway-sdk/core": "^1.5.2",
-    "@skyway-sdk/sfu-bot": "^1.5.2",
+    "@skyway-sdk/core": "^1.5.3",
+    "@skyway-sdk/sfu-bot": "^1.5.3",
     "uuid": "^9.0.0"
   },
   "devDependencies": {

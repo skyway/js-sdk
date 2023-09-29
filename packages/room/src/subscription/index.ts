@@ -130,7 +130,9 @@ export class RoomSubscriptionImpl<
   }
 
   async cancel() {
-    this._subscription.cancel();
+    this._subscription.cancel().catch((error) => {
+      log.error('subscription.cancel', error, this.toJSON());
+    });
     await this._room.onPublicationUnsubscribed
       .watch(
         (e) => e.subscription.id === this.id,

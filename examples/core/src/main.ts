@@ -52,7 +52,7 @@ const token = new SkyWayAuthToken({
   },
 }).encode(secret);
 
-(async () => {
+void (async () => {
   const localVideo = document.getElementById('local-video') as HTMLVideoElement;
   const buttonArea = document.getElementById('button-area');
   const remoteMediaArea = document.getElementById('remote-media-area');

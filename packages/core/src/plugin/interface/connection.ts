@@ -13,7 +13,7 @@ export interface SkyWayConnection {
   readonly onDisconnect: Event<void>;
   readonly onClose: Event<void>;
   closed: boolean;
-  close(): void;
+  close(props?: { reason?: string }): void;
   /**@throws {SkyWayError} */
   startPublishing?(publication: PublicationImpl): Promise<void>;
   stopPublishing?(publication: PublicationImpl): Promise<void>;

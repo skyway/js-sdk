@@ -105,7 +105,7 @@ export class RemotePersonImpl extends MemberImpl implements RemotePerson {
     this.onLeft.once(() => {
       log.debug('RemotePerson left: ', this.toJSON());
       Object.values(this._connections).forEach((connection) => {
-        connection.close();
+        connection.close({ reason: 'remote person left' });
       });
       this._connections = {};
     });

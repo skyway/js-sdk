@@ -125,13 +125,14 @@ export class SFUConnection implements SkyWayConnection {
   }
 
   /**@internal */
-  close() {
+  close({ reason }: { reason?: string } = {}) {
     if (this.closed) {
       return;
     }
     log.debug('close sfu connection', {
       remote: this.remoteMember,
       local: this.localPerson,
+      reason,
     });
 
     this.closed = true;

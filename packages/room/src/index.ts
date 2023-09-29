@@ -28,6 +28,7 @@ export {
   Event,
   Events,
   getBitrateFromPeerConnection,
+  getRtcRtpCapabilities,
   LocalAudioStream,
   LocalDataStream,
   LocalMediaStreamBase,

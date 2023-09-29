@@ -103,7 +103,9 @@ export class LocalSFURoomMemberImpl
       });
     }
 
-    this._local.unpublish(origin.id);
+    this._local.unpublish(origin.id).catch((error) => {
+      log.error('unpublish error', error, { target }, this.toJSON());
+    });
     await this.room.onStreamUnpublished
       .watch(
         (e) => e.publication.id === publicationId,
@@ -153,7 +155,9 @@ export class LocalSFURoomMemberImpl
    */
   async unsubscribe(target: string | RoomSubscription) {
     const subscriptionId = typeof target === 'string' ? target : target.id;
-    this._local.unsubscribe(subscriptionId);
+    this._local.unsubscribe(subscriptionId).catch((error) => {
+      log.error('unsubscribe error', error, { target }, this.toJSON());
+    });
     await this.room.onPublicationUnsubscribed
       .watch(
         (e) => e.subscription.id === subscriptionId,

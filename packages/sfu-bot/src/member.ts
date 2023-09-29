@@ -75,7 +75,7 @@ export class SfuBotMember
     this.onLeft.once(() => {
       log.debug('SfuBotMember left: ', { id: this.id });
       Object.values(this._connections).forEach((c) => {
-        c.close();
+        c.close({ reason: 'sfu bot left' });
       });
       this._connections = {};
     });
@@ -329,6 +329,17 @@ export class SfuBotMember
           (e) => e.forwarding.id === forwardingId,
           this._context.config.rtcApi.timeout
         )
+        .then(async () => {
+          log.elapsed(
+            timestamp,
+            '[end] stopForwarding',
+            await createLogPayload({
+              operationName: 'SfuBotMember.stopForwarding',
+              channel: this.channel,
+            })
+          );
+          r();
+        })
         .catch((error) => {
           if (!failed)
             f(
@@ -342,17 +353,6 @@ export class SfuBotMember
                 error,
               })
             );
-        })
-        .then(async () => {
-          log.elapsed(
-            timestamp,
-            '[end] stopForwarding',
-            await createLogPayload({
-              operationName: 'SfuBotMember.stopForwarding',
-              channel: this.channel,
-            })
-          );
-          r();
         });
     });
 

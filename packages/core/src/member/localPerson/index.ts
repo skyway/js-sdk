@@ -460,6 +460,12 @@ export class LocalPersonImpl extends MemberImpl implements LocalPerson {
     }
     stream.published = true;
 
+    if (options.codecCapabilities) {
+      options.codecCapabilities = options.codecCapabilities.filter(
+        (c) => c != undefined
+      );
+    }
+
     const init: PublicationInit = {
       metadata: options.metadata,
       publisher: this.id,
@@ -571,7 +577,9 @@ export class LocalPersonImpl extends MemberImpl implements LocalPerson {
       .map((s) => s.subscriber)
       .forEach((s) => {
         if (isRemoteMember(s)) {
-          this._publishingAgent.stopPublishing(publication, s);
+          this._publishingAgent.stopPublishing(publication, s).catch((e) => {
+            log.error('[failed] stopPublishing', e, { publication });
+          });
         }
       });
 
@@ -668,6 +676,7 @@ export class LocalPersonImpl extends MemberImpl implements LocalPerson {
                   subscription.publication.id === publicationId,
                 this.context.config.rtcApi.timeout
               )
+              .then(r)
               .catch(async (e) => {
                 if (subscribing.processing) {
                   f(
@@ -686,8 +695,7 @@ export class LocalPersonImpl extends MemberImpl implements LocalPerson {
                     })
                   );
                 }
-              })
-              .then(r);
+              });
           }),
           new Promise((r, f) => {
             this.channel.onMemberLeft
@@ -888,7 +896,9 @@ export class LocalPersonImpl extends MemberImpl implements LocalPerson {
     if (this._signaling) {
       this._signaling.close();
     }
-    this._getConnections().forEach((c) => c.close());
+    this._getConnections().forEach((c) =>
+      c.close({ reason: 'localPerson disposed' })
+    );
 
     this._onDisposed.emit();
     this._events.dispose();

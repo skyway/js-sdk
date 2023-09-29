@@ -81,9 +81,14 @@ export class P2PConnection implements SkyWayConnection {
   async stopPublishing(publication: Publication) {
     await this._pubsubQueue.push(async () => {
       this._log.debug('<stopPublishing> start', { publication });
-      this.sender.remove(publication.id).then(() => {
-        this._log.debug('<stopPublishing> removed', { publication });
-      });
+      this.sender
+        .remove(publication.id)
+        .then(() => {
+          this._log.debug('<stopPublishing> removed', { publication });
+        })
+        .catch((e) => {
+          this._log.error('<stopPublishing> remove failed', e, { publication });
+        });
       this._closeIfNeeded();
       this._log.debug('<stopPublishing> end', { publication });
     });
@@ -132,7 +137,7 @@ export class P2PConnection implements SkyWayConnection {
 
   private _closeIfNeeded(): void {
     if (this.sender.hasMedia || this.receiver.hasMedia) return;
-    this.close();
+    this.close({ reason: 'no media' });
   }
 
   async getStats(content: Subscription | Publication) {
@@ -163,13 +168,19 @@ export class P2PConnection implements SkyWayConnection {
   }
 
   /**@internal */
-  close() {
+  close({ reason }: { reason?: string } = {}) {
     if (this.closed) {
       return;
     }
     this.closed = true;
 
-    this._log.debug('closed', { endpointId: this.remoteMember.id });
+    this._log.debug('closed', {
+      endpointId: this.remoteMember.id,
+      reason,
+      sender: this.sender.id,
+      receiver: this.receiver.id,
+      id: this.id,
+    });
 
     this.sender.close();
     this.receiver.close();

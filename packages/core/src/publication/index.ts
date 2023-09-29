@@ -317,6 +317,18 @@ export class PublicationImpl<T extends LocalStream = LocalStream>
           (e) => e.metadata === metadata,
           this._context.config.rtcApi.timeout
         )
+        .then(async () => {
+          r();
+          log.elapsed(
+            timestamp,
+            '[end] updateMetadata',
+            await createLogPayload({
+              operationName: 'Publication.updateMetadata',
+              channel: this._channel,
+            }),
+            this
+          );
+        })
         .catch((error) => {
           if (!failed) {
             throw createError({
@@ -331,18 +343,6 @@ export class PublicationImpl<T extends LocalStream = LocalStream>
               error,
             });
           }
-        })
-        .then(async () => {
-          r();
-          log.elapsed(
-            timestamp,
-            '[end] updateMetadata',
-            await createLogPayload({
-              operationName: 'Publication.updateMetadata',
-              channel: this._channel,
-            }),
-            this
-          );
         });
     });
 
@@ -418,9 +418,11 @@ export class PublicationImpl<T extends LocalStream = LocalStream>
     createLogPayload({
       operationName: 'Publication._disableStream',
       channel: this._channel,
-    }).then((p) =>
-      log.info('publication _disableStream', p, { publication: this })
-    );
+    })
+      .then((p) =>
+        log.info('publication _disableStream', p, { publication: this })
+      )
+      .catch(() => {});
   }
 
   enable = () =>
@@ -490,9 +492,11 @@ export class PublicationImpl<T extends LocalStream = LocalStream>
     createLogPayload({
       operationName: 'Publication._enableStream',
       channel: this._channel,
-    }).then((p) =>
-      log.info('publication _enableStream', p, { publication: this })
-    );
+    })
+      .then((p) =>
+        log.info('publication _enableStream', p, { publication: this })
+      )
+      .catch(() => {});
 
     if (this.stream.contentType === 'data') {
       this.stream.setIsEnabled(true);
@@ -545,7 +549,9 @@ export class PublicationImpl<T extends LocalStream = LocalStream>
       .then((res) => log.debug(res, { old: this.stream, new: stream }))
       .catch((e) => e);
 
-    stream.setEnabled(this.stream.isEnabled);
+    stream.setEnabled(this.stream.isEnabled).catch((e) => {
+      log.error('replaceStream stream.setEnabled', e, this.toJSON());
+    });
     this._setStream(stream as T);
 
     this._onReplaceStream.emit(stream);

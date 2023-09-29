@@ -55,7 +55,9 @@ export class LocalP2PRoomMemberImpl
 
   async unpublish(target: string | RoomPublication) {
     const publicationId = typeof target === 'string' ? target : target.id;
-    this._local.unpublish(publicationId);
+    this._local.unpublish(publicationId).catch((error) => {
+      log.error('unpublish', error, { target }, this.toJSON());
+    });
     const { publication } = await this.room.onStreamUnpublished
       .watch(
         (e) => e.publication.id === publicationId,
@@ -95,7 +97,9 @@ export class LocalP2PRoomMemberImpl
 
   async unsubscribe(target: string | RoomSubscription) {
     const subscriptionId = typeof target === 'string' ? target : target.id;
-    this._local.unsubscribe(subscriptionId);
+    this._local.unsubscribe(subscriptionId).catch((error) => {
+      log.error('unsubscribe', error, { target }, this.toJSON());
+    });
     await this.room.onPublicationUnsubscribed
       .watch(
         (e) => e.subscription.id === subscriptionId,
