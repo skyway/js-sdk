@@ -1,6 +1,6 @@
 {
   "name": "@skyway-sdk/token",
-  "version": "1.4.3",
+  "version": "1.4.4",
   "description": "The official Next Generation JavaScript SDK for SkyWay",
   "homepage": "https://skyway.ntt.com/",
   "repository": {
@@ -34,7 +34,7 @@
     "watch:tsc": "tsc -p tsconfig.build.json -w"
   },
   "dependencies": {
-    "@skyway-sdk/common": "^1.4.3",
+    "@skyway-sdk/common": "^1.4.4",
     "jsrsasign": "^10.6.0",
     "jwt-decode": "3.1.2",
     "uuid": "^9.0.0"

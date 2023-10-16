@@ -9,6 +9,7 @@ export * from './media/factory';
 export * from './media/stream';
 export * from './media/stream/local';
 export * from './media/stream/local/audio';
+export * from './media/stream/local/customVideo';
 export * from './media/stream/local/data';
 export * from './media/stream/local/video';
 export * from './media/stream/remote';

@@ -5,6 +5,7 @@ import {
   ContentType,
   EncodingParameters,
   LocalAudioStream,
+  LocalCustomVideoStream,
   LocalStream,
   LocalVideoStream,
   Publication,
@@ -100,7 +101,7 @@ export interface RoomPublication<T extends LocalStream = LocalStream> {
    * RemoteのPublication(streamがnull)では利用不可。
    */
   replaceStream: (
-    stream: LocalAudioStream | LocalVideoStream,
+    stream: LocalAudioStream | LocalVideoStream | LocalCustomVideoStream,
     options?: ReplaceStreamOptions
   ) => void;
   /**
@@ -284,7 +285,7 @@ export class RoomPublicationImpl<StreamType extends LocalStream = LocalStream>
     });
 
   readonly replaceStream = (
-    stream: LocalAudioStream | LocalVideoStream,
+    stream: LocalAudioStream | LocalVideoStream | LocalCustomVideoStream,
     options: ReplaceStreamOptions = {}
   ) => {
     this._preferredPublication.replaceStream(stream, options);

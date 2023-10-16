@@ -13,6 +13,7 @@ import { Codec, EncodingParameters } from '../media';
 import { ContentType, WebRTCStats } from '../media/stream';
 import { LocalMediaStreamBase, LocalStream } from '../media/stream/local';
 import { LocalAudioStream } from '../media/stream/local/audio';
+import { LocalCustomVideoStream } from '../media/stream/local/customVideo';
 import { LocalVideoStream } from '../media/stream/local/video';
 import { Member } from '../member';
 import {
@@ -94,7 +95,7 @@ export interface Publication<T extends LocalStream = LocalStream> {
    * RemoteのPublication(streamがnull)では利用不可。
    */
   replaceStream: (
-    stream: LocalAudioStream | LocalVideoStream,
+    stream: LocalAudioStream | LocalVideoStream | LocalCustomVideoStream,
     options?: ReplaceStreamOptions
   ) => void;
   /**
@@ -515,7 +516,7 @@ export class PublicationImpl<T extends LocalStream = LocalStream>
   }
 
   replaceStream(
-    stream: LocalAudioStream | LocalVideoStream,
+    stream: LocalAudioStream | LocalVideoStream | LocalCustomVideoStream,
     options: ReplaceStreamOptions = {}
   ) {
     log.info('replaceStream', { stream, options }, this);

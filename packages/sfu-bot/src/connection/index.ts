@@ -2,6 +2,7 @@ import { Event, Logger, PromiseQueue } from '@skyway-sdk/common';
 import {
   createError,
   LocalAudioStream,
+  LocalCustomVideoStream,
   LocalPersonImpl,
   LocalVideoStream,
   Publication,
@@ -50,7 +51,11 @@ export class SFUConnection implements SkyWayConnection {
   ) {}
 
   /**@internal */
-  addSender(publication: PublicationImpl<LocalVideoStream | LocalAudioStream>) {
+  addSender(
+    publication: PublicationImpl<
+      LocalAudioStream | LocalVideoStream | LocalCustomVideoStream
+    >
+  ) {
     const sender = new Sender(
       publication,
       this.channel,

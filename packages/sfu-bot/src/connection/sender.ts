@@ -5,6 +5,7 @@ import {
   IceManager,
   isSafari,
   LocalAudioStream,
+  LocalCustomVideoStream,
   LocalPersonImpl,
   LocalStream,
   LocalVideoStream,
@@ -50,7 +51,9 @@ export class Sender {
   closed = false;
 
   constructor(
-    readonly publication: PublicationImpl<LocalVideoStream | LocalAudioStream>,
+    readonly publication: PublicationImpl<
+      LocalAudioStream | LocalVideoStream | LocalCustomVideoStream
+    >,
     readonly channel: SkyWayChannelImpl,
     private readonly _api: SfuRestApiClient,
     private _transportRepository: TransportRepository,
@@ -274,7 +277,7 @@ export class Sender {
   }
 
   private _listenStreamEnableChange(
-    stream: LocalAudioStream | LocalVideoStream
+    stream: LocalAudioStream | LocalVideoStream | LocalCustomVideoStream
   ) {
     if (this._unsubscribeStreamEnableChange) {
       this._unsubscribeStreamEnableChange();
@@ -295,7 +298,7 @@ export class Sender {
   }
 
   private async _produce(
-    stream: LocalAudioStream | LocalVideoStream,
+    stream: LocalAudioStream | LocalVideoStream | LocalCustomVideoStream,
     transport: SfuTransport
   ) {
     this.publication._onReplaceStream

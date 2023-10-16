@@ -17,6 +17,7 @@ import { SignalingSession } from '../../../../external/signaling';
 import { Codec } from '../../../../media';
 import {
   LocalAudioStream,
+  LocalCustomVideoStream,
   LocalStream,
   LocalVideoStream,
 } from '../../../../media/stream';
@@ -350,7 +351,7 @@ export class Sender extends Peer {
   }
 
   private _listenStreamEnableChange(
-    stream: LocalAudioStream | LocalVideoStream,
+    stream: LocalAudioStream | LocalVideoStream | LocalCustomVideoStream,
     publicationId: string
   ) {
     if (this._unsubscribeStreamEnableChange[publicationId]) {

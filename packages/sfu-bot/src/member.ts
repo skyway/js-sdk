@@ -4,6 +4,7 @@ import {
   createLogPayload,
   errors as coreErrors,
   LocalAudioStream,
+  LocalCustomVideoStream,
   LocalPersonImpl,
   LocalVideoStream,
   MemberImpl,
@@ -123,7 +124,9 @@ export class SfuBotMember
    * const forwarding = await bot.startForwarding(publication, { maxSubscribers: 99 });
    */
   async startForwarding(
-    publication: Publication<LocalVideoStream | LocalAudioStream>,
+    publication: Publication<
+      LocalVideoStream | LocalAudioStream | LocalCustomVideoStream
+    >,
     configure: Partial<ForwardingConfigure> = {}
   ) {
     const timestamp = log.info(
@@ -136,7 +139,9 @@ export class SfuBotMember
 
     const res = await this._startForwardQueue.push(() =>
       this._startForwarding(
-        publication as PublicationImpl<LocalVideoStream | LocalAudioStream>,
+        publication as PublicationImpl<
+          LocalAudioStream | LocalVideoStream | LocalCustomVideoStream
+        >,
         configure
       )
     );
@@ -154,7 +159,9 @@ export class SfuBotMember
   }
 
   private async _startForwarding(
-    relayed: PublicationImpl<LocalVideoStream | LocalAudioStream>,
+    relayed: PublicationImpl<
+      LocalAudioStream | LocalVideoStream | LocalCustomVideoStream
+    >,
     configure: Partial<ForwardingConfigure>
   ): Promise<Forwarding> {
     if (configure.maxSubscribers == undefined) {

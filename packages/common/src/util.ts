@@ -14,6 +14,7 @@ export class BackOff {
     Object.assign(this, props);
   }
 
+  /**if need wait return true */
   async wait() {
     if (this.exceeded) {
       return false;

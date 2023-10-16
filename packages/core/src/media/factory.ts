@@ -4,6 +4,10 @@ import { errors } from '../errors';
 import { createError, createWarnPayload } from '../util';
 import { LocalMediaStreamOptions } from './stream';
 import { LocalAudioStream } from './stream/local/audio';
+import {
+  LocalCustomVideoStream,
+  ProcessedStream,
+} from './stream/local/customVideo';
 import { DataStreamOptions, LocalDataStream } from './stream/local/data';
 import { LocalVideoStream } from './stream/local/video';
 
@@ -258,6 +262,30 @@ export class StreamFactory {
       video: videoStream,
     };
   }
+
+  /**
+   * @description [japanese] CustomVideoStreamを作成する
+   */
+  async createCustomVideoStream(
+    processor: VideoStreamProcessor,
+    options: {
+      stopTrackWhenDisabled?: boolean;
+      constraints?: MediaTrackConstraints;
+    } = {}
+  ): Promise<LocalCustomVideoStream> {
+    options.stopTrackWhenDisabled = options.stopTrackWhenDisabled ?? true;
+    const stream = new LocalCustomVideoStream(options);
+
+    const processedStream = await processor.createProcessedStream({
+      constraints: options.constraints ?? {},
+      stopTrackWhenDisabled: options.stopTrackWhenDisabled,
+      onUpdateTrack: (track) => {
+        return stream.updateTrack(track);
+      },
+    });
+    await stream.setStream(processedStream);
+    return stream;
+  }
 }
 
 export const SkyWayStreamFactory = new StreamFactory();
@@ -332,3 +360,11 @@ export type DisplayStreamOptions = {
         VideoMediaTrackConstraints &
         Partial<Pick<LocalMediaStreamOptions, 'stopTrackWhenDisabled'>>;
 };
+
+interface VideoStreamProcessor {
+  createProcessedStream(options?: {
+    stopTrackWhenDisabled?: boolean;
+    onUpdateTrack?: (track: MediaStreamTrack) => Promise<void>;
+    constraints?: MediaTrackConstraints;
+  }): Promise<ProcessedStream>;
+}

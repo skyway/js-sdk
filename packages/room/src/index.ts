@@ -30,6 +30,7 @@ export {
   getBitrateFromPeerConnection,
   getRtcRtpCapabilities,
   LocalAudioStream,
+  LocalCustomVideoStream,
   LocalDataStream,
   LocalMediaStreamBase,
   LocalMediaStreamOptions,

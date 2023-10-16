@@ -1,6 +1,6 @@
 {
   "name": "@skyway-sdk/core",
-  "version": "1.5.3",
+  "version": "1.6.0",
   "description": "The official Next Generation JavaScript SDK for SkyWay",
   "homepage": "https://skyway.ntt.com/",
   "repository": {
@@ -47,7 +47,7 @@
     "watch:tsc": "tsc -p tsconfig.build.json -w"
   },
   "dependencies": {
-    "@skyway-sdk/rtc-api-client": "^1.4.3",
+    "@skyway-sdk/rtc-api-client": "^1.4.4",
     "@skyway-sdk/signaling-client": "^1.0.2",
     "bowser": "^2.11.0",
     "deepmerge": "^4.2.2",
