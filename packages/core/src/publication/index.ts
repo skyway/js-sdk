@@ -187,7 +187,10 @@ export class PublicationImpl<T extends LocalStream = LocalStream>
   /**@private */
   readonly _onEncodingsChanged = this._events.make<EncodingParameters[]>();
   /**@private */
-  readonly _onReplaceStream = this._events.make<LocalMediaStreamBase>();
+  readonly _onReplaceStream = this._events.make<{
+    newStream: LocalMediaStreamBase;
+    oldStream: LocalMediaStreamBase;
+  }>();
   private readonly _onEnabled = this._events.make<void>();
   private streamEventDisposer = new EventDisposer();
 
@@ -553,9 +556,10 @@ export class PublicationImpl<T extends LocalStream = LocalStream>
     stream.setEnabled(this.stream.isEnabled).catch((e) => {
       log.error('replaceStream stream.setEnabled', e, this.toJSON());
     });
+    const oldStream = this._stream as LocalMediaStreamBase;
     this._setStream(stream as T);
 
-    this._onReplaceStream.emit(stream);
+    this._onReplaceStream.emit({ newStream: stream, oldStream });
   }
 
   getStats(selector: string | Member): Promise<WebRTCStats> {

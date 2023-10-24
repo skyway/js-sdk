@@ -45,6 +45,7 @@ export class Sender {
   _broadcasterTransport?: SfuTransport;
   private _disposer = new EventDisposer();
   private _unsubscribeStreamEnableChange?: () => void;
+  private _cleanupStreamCallbacks?: () => void;
   private _connectionState: TransportConnectionState = 'new';
   private readonly onConnectionStateChanged =
     new Event<TransportConnectionState>();
@@ -177,7 +178,7 @@ export class Sender {
     this._setConnectionState(this._broadcasterTransport.connectionState);
 
     const producer = await this._produce(stream, this._broadcasterTransport);
-    this._setupTransportAccessForStream(
+    this._cleanupStreamCallbacks = this._setupTransportAccessForStream(
       stream,
       this._broadcasterTransport,
       producer
@@ -302,9 +303,29 @@ export class Sender {
     transport: SfuTransport
   ) {
     this.publication._onReplaceStream
-      .add(async (stream) => {
-        this._listenStreamEnableChange(stream as LocalAudioStream);
-        await this._replaceTrack(stream.track);
+      .add(async ({ newStream }) => {
+        if (!this._broadcasterTransport) {
+          throw createError({
+            operationName: 'Sender._produce',
+            context: this._context,
+            info: {
+              ...errors.internal,
+              detail: '_broadcasterTransport not found',
+            },
+            path: log.prefix,
+            channel: this.channel,
+          });
+        }
+        this._listenStreamEnableChange(newStream as LocalAudioStream);
+        if (this._cleanupStreamCallbacks) {
+          this._cleanupStreamCallbacks();
+        }
+        this._cleanupStreamCallbacks = this._setupTransportAccessForStream(
+          newStream as LocalStream,
+          this._broadcasterTransport,
+          producer
+        );
+        await this._replaceTrack(newStream.track);
       })
       .disposer(this._disposer);
     this._listenStreamEnableChange(stream);
@@ -562,10 +583,17 @@ export class Sender {
       return arr;
     };
 
-    this._disposer.push(() => {
+    // replaceStream時に古いstreamに紐づくcallbackを削除するため、戻り値としてcallback削除用の関数を返し、replaceStream時に呼び出す
+    const cleanupCallbacks = () => {
       delete stream._getTransportCallbacks[this._bot.id];
       delete stream._getStatsCallbacks[this._bot.id];
+    };
+
+    this._disposer.push(() => {
+      cleanupCallbacks();
     });
+
+    return cleanupCallbacks;
   }
 
   unproduce() {

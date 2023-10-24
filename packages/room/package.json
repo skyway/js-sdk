@@ -1,6 +1,6 @@
 {
   "name": "@skyway-sdk/room",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "description": "The official Next Generation JavaScript SDK for SkyWay",
   "homepage": "https://skyway.ntt.com/",
   "repository": {
@@ -46,11 +46,16 @@
     "watch:tsc": "tsc -p tsconfig.build.json -w"
   },
   "dependencies": {
-    "@skyway-sdk/core": "^1.6.0",
-    "@skyway-sdk/sfu-bot": "^1.6.0",
+    "@skyway-sdk/core": "^1.6.1",
+    "@skyway-sdk/sfu-bot": "^1.6.1",
     "uuid": "^9.0.0"
   },
   "devDependencies": {
     "@types/uuid": "^9.0.1"
-  }
+  },
+  "keywords": [
+    "webrtc",
+    "skyway",
+    "conferencing"
+  ]
 }

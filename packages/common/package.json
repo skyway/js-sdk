@@ -1,6 +1,6 @@
 {
   "name": "@skyway-sdk/common",
-  "version": "1.4.4",
+  "version": "1.4.5",
   "description": "The official Next Generation JavaScript SDK for SkyWay",
   "homepage": "https://skyway.ntt.com/",
   "repository": {
@@ -33,5 +33,10 @@
   "dependencies": {
     "axios": "^0.23.0"
   },
-  "devDependencies": {}
+  "devDependencies": {},
+  "keywords": [
+    "webrtc",
+    "skyway",
+    "conferencing"
+  ]
 }

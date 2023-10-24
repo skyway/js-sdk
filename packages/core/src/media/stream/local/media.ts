@@ -32,7 +32,10 @@ export abstract class LocalMediaStreamBase extends LocalStreamBase {
   protected get trackConstraints() {
     return this._trackConstraints;
   }
-
+  /**@internal */
+  _replacingTrack = false;
+  /**@internal */
+  _onReplacingTrackDone = new Event<void>();
   abstract isEnabled: boolean;
   /**@internal */
   _onEnableChanged = new Event<MediaStreamTrack | null>();

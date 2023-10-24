@@ -1,6 +1,6 @@
 {
   "name": "@skyway-sdk/model",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "The official Next Generation JavaScript SDK for SkyWay",
   "homepage": "https://skyway.ntt.com/",
   "repository": {
@@ -32,5 +32,10 @@
     "watch:esbuild": "esbuild src/index.ts --bundle --watch --format=esm --target=es6 --outfile=dist/index.mjs",
     "watch:tsc": "tsc -p tsconfig.build.json -w"
   },
-  "devDependencies": {}
+  "devDependencies": {},
+  "keywords": [
+    "webrtc",
+    "skyway",
+    "conferencing"
+  ]
 }

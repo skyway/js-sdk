@@ -68,6 +68,10 @@ export class Sender extends Peer {
     [publicationId: string]: () => void;
   } = {};
 
+  private _cleanupStreamCallbacks: {
+    [streamId: string]: () => void;
+  } = {};
+
   constructor(
     context: SkyWayContext,
     iceManager: IceManager,
@@ -403,7 +407,8 @@ export class Sender extends Peer {
       });
     }
 
-    this._setupTransportAccessForStream(stream);
+    this._cleanupStreamCallbacks[stream.id] =
+      this._setupTransportAccessForStream(stream);
 
     if (stream.contentType === 'data') {
       const dc = this.pc.createDataChannel(
@@ -421,12 +426,20 @@ export class Sender extends Peer {
       this.datachannels[publication.id] = dc;
     } else {
       publication._onReplaceStream
-        .add(async (stream) => {
+        .add(async ({ newStream, oldStream }) => {
+          newStream._replacingTrack = true;
           this._listenStreamEnableChange(
-            stream as LocalAudioStream,
+            newStream as LocalAudioStream,
             publication.id
           );
-          await this._replaceTrack(publication.id, stream.track);
+          if (this._cleanupStreamCallbacks[oldStream.id]) {
+            this._cleanupStreamCallbacks[oldStream.id]();
+          }
+          this._cleanupStreamCallbacks[newStream.id] =
+            this._setupTransportAccessForStream(newStream as LocalStream);
+          await this._replaceTrack(publication.id, newStream.track);
+          newStream._replacingTrack = false;
+          newStream._onReplacingTrackDone.emit();
         })
         .disposer(this._disposer);
       this._listenStreamEnableChange(stream, publication.id);
@@ -524,19 +537,32 @@ export class Sender extends Peer {
         const arr = statsToArray(stats);
         return arr;
       }
+
+      if (stream._replacingTrack) {
+        await stream._onReplacingTrackDone.asPromise(200);
+      }
+
       const stats = await this.pc.getStats(stream.track);
       const arr = statsToArray(stats);
       return arr;
     };
-    this._disposer.push(() => {
+
+    // replaceStream時に古いstreamに紐づくcallbackを削除するため、戻り値としてcallback削除用の関数を返し、replaceStream時に呼び出す
+    const cleanupCallbacks = () => {
       delete stream._getTransportCallbacks[this.endpoint.id];
       delete stream._getStatsCallbacks[this.endpoint.id];
+    };
+
+    this._disposer.push(() => {
+      cleanupCallbacks();
     });
     this.onConnectionStateChanged
       .add((state) => {
         stream._setConnectionState(this.endpoint, state);
       })
       .disposer(this._disposer);
+
+    return cleanupCallbacks;
   }
 
   /**@throws {SkyWayError} */
