@@ -8,7 +8,7 @@
   "scripts": {
     "bootstrap": "lerna bootstrap",
     "build": "npm run bootstrap && lerna run build && npm run bootstrap",
-    "build:example": "lerna run build:example && npm run format",
+    "build:example": "npm run build && lerna run build:example",
     "clean": "lerna clean -y && rm -rf ./packages/*/dist && rm -rf ./packages/*/node_modules && rm -rf ./packages/*/bundler && rm -rf node_modules",
     "type": "lerna run type",
     "compile": "npm run bootstrap && lerna run compile && lerna run type",

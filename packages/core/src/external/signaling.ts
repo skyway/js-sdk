@@ -1,4 +1,4 @@
-import { BackOff, Event, Logger } from '@skyway-sdk/common';
+import { BackOff, Event, EventDisposer, Logger } from '@skyway-sdk/common';
 import { Member } from '@skyway-sdk/model';
 import { ConnectionState, SignalingClient } from '@skyway-sdk/signaling-client';
 import { uuidV4 } from '@skyway-sdk/token';
@@ -68,12 +68,15 @@ export class SignalingSession {
     interval: 100,
     jitter: 100,
   });
+  private _disposer = new EventDisposer();
 
   constructor(public _client: SignalingClient, private context: SkyWayContext) {
     this._listen();
-    context._onTokenUpdated.add(async (token) => {
-      await this._updateSkyWayAuthToken(token);
-    });
+    context._onTokenUpdated
+      .add(async (token) => {
+        await this._updateSkyWayAuthToken(token);
+      })
+      .disposer(this._disposer);
   }
 
   updateClient(client: SignalingClient) {
@@ -183,6 +186,7 @@ export class SignalingSession {
 
   close() {
     this.closed = true;
+    this._disposer.dispose();
     this._client.disconnect();
   }
 

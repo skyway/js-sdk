@@ -15,12 +15,12 @@ export async function createLicenses() {
 
   for (const [name, detail] of Object.entries(deps)) {
     const { path } = detail;
-    let licenseFile = (
-      await readFile(path + '/LICENSE').catch(() => '')
-    ).toString();
-    licenseFile =
-      licenseFile ||
-      (await readFile(path + '/LICENSE.md').catch(() => '')).toString();
+
+    let licenseFile =
+      (await readFile(path + '/LICENSE').catch(() => '')).toString() ||
+      (await readFile(path + '/license').catch(() => '')).toString() ||
+      (await readFile(path + '/LICENSE.md').catch(() => '')).toString() ||
+      (await readFile(path + '/license.md').catch(() => '')).toString();
 
     const [, , , user, repo] = (detail.repository ?? '').split('/');
     licenseFile = licenseFile || (await downloadLicenses(user, repo));
