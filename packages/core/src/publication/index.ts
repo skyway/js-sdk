@@ -9,10 +9,12 @@ import {
 } from '../channel/event';
 import { SkyWayContext } from '../context';
 import { errors } from '../errors';
+import { AnalyticsSession } from '../external/analytics';
 import { Codec, EncodingParameters } from '../media';
 import { ContentType, WebRTCStats } from '../media/stream';
 import { LocalMediaStreamBase, LocalStream } from '../media/stream/local';
 import { LocalAudioStream } from '../media/stream/local/audio';
+import { LocalDataStream } from '../media/stream/local/data';
 import { LocalCustomVideoStream } from '../media/stream/local/customVideo';
 import { LocalVideoStream } from '../media/stream/local/video';
 import { Member } from '../member';
@@ -171,6 +173,18 @@ export class PublicationImpl<T extends LocalStream = LocalStream>
     return this._state;
   }
 
+  get deviceName(): string | undefined {
+    if (this.stream instanceof LocalDataStream) {
+      return undefined;
+    } else {
+      const withDeviceStream = this.stream as
+        | LocalVideoStream
+        | LocalCustomVideoStream
+        | LocalAudioStream;
+      return withDeviceStream.track.label;
+    }
+  }
+
   private readonly _events = new Events();
   readonly onCanceled = this._events.make<void>();
   readonly onSubscribed = this._events.make<StreamSubscribedEvent>();
@@ -193,6 +207,8 @@ export class PublicationImpl<T extends LocalStream = LocalStream>
   }>();
   private readonly _onEnabled = this._events.make<void>();
   private streamEventDisposer = new EventDisposer();
+  /**@private */
+  readonly _analytics?: AnalyticsSession;
 
   private _context: SkyWayContext;
 
@@ -221,6 +237,7 @@ export class PublicationImpl<T extends LocalStream = LocalStream>
       this._setStream(args.stream);
     }
     this._state = args.isEnabled ? 'enabled' : 'disabled';
+    this._analytics = this._channel.localPerson?._analytics;
 
     log.debug('publication spawned', this.toJSON());
   }
@@ -352,8 +369,17 @@ export class PublicationImpl<T extends LocalStream = LocalStream>
 
   updateEncodings(encodings: EncodingParameters[]) {
     log.info('updateEncodings', { encodings }, this);
-    this.setEncodings(normalizeEncodings(encodings));
+    this.setEncodings(normalizeEncodings(sortEncodingParameters(encodings)));
     this._onEncodingsChanged.emit(encodings);
+
+    if (this._analytics && !this._analytics.isClosed()) {
+      // 再送時に他の処理をブロックしないためにawaitしない
+      void this._analytics.client.sendPublicationUpdateEncodingsReport({
+        publicationId: this.id,
+        encodings: this.encodings,
+        updatedAt: Date.now(),
+      });
+    }
   }
 
   disable = () =>
@@ -560,6 +586,16 @@ export class PublicationImpl<T extends LocalStream = LocalStream>
     this._setStream(stream as T);
 
     this._onReplaceStream.emit({ newStream: stream, oldStream });
+
+    if (this._analytics && !this._analytics.isClosed()) {
+      // 再送時に他の処理をブロックしないためにawaitしない
+      void this._analytics.client.sendMediaDeviceReport({
+        publicationId: this.id,
+        mediaDeviceName: this.deviceName as string,
+        mediaDeviceTrigger: 'replaceStream',
+        updatedAt: Date.now(),
+      });
+    }
   }
 
   getStats(selector: string | Member): Promise<WebRTCStats> {
@@ -637,6 +673,25 @@ export const normalizeEncodings = (
     ...e,
     id: e.id ?? i.toString(),
   }));
+
+export const sortEncodingParameters = (
+  encodings: EncodingParameters[]
+): EncodingParameters[] => {
+  const [encode] = encodings;
+  if (encode.maxBitrate) {
+    // 小から大
+    return encodings.sort((a, b) => a.maxBitrate! - b.maxBitrate!);
+  } else if (encode.scaleResolutionDownBy) {
+    //大から小
+    return encodings.sort(
+      (a, b) => b.scaleResolutionDownBy! - a.scaleResolutionDownBy!
+    );
+  } else if (encode.maxFramerate) {
+    // 小から大
+    return encodings.sort((a, b) => a.maxFramerate! - b.maxFramerate!);
+  }
+  return encodings;
+};
 
 export type ReplaceStreamOptions = {
   /**@description [japanese] 入れ替え前のstreamを開放する。デフォルトで有効 */

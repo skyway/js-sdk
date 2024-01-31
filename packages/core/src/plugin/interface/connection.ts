@@ -15,7 +15,7 @@ export interface SkyWayConnection {
   closed: boolean;
   close(props?: { reason?: string }): void;
   /**@throws {SkyWayError} */
-  startPublishing?(publication: PublicationImpl): Promise<void>;
+  startPublishing?(publication: PublicationImpl, subscriptionId: string): Promise<void>;
   stopPublishing?(publication: PublicationImpl): Promise<void>;
   startSubscribing?(subscription: SubscriptionImpl): Promise<void>;
   stopSubscribing?(subscription: SubscriptionImpl): Promise<void>;

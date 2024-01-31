@@ -158,6 +158,7 @@ export class RemotePersonImpl extends MemberImpl implements RemotePerson {
     const connection = new P2PConnection(
       localPerson.iceManager,
       localPerson._signaling,
+      localPerson._analytics,
       this._context,
       channel.id,
       localPerson,

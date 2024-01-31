@@ -1,6 +1,6 @@
 {
   "name": "@skyway-sdk/sfu-bot",
-  "version": "1.6.2",
+  "version": "1.7.0",
   "description": "The official Next Generation JavaScript SDK for SkyWay",
   "homepage": "https://skyway.ntt.com/",
   "repository": {
@@ -23,8 +23,8 @@
     "compile:esbuild": "esbuild src/index.ts --bundle --format=esm --target=es6 --outfile=dist/index.mjs",
     "compile:tsc": "rm -rf dist && tsc -p tsconfig.build.json",
     "doc": "npm run doc:html && npm run doc:md",
-    "doc:html": "rm -rf docs/html && typedoc --excludePrivate --disableSources --excludeInternal --tsconfig ./tsconfig.build.json --out docs/html --plugin none ./src/index.ts ",
-    "doc:md": "rm -rf docs/md && typedoc --excludePrivate --disableSources --excludeInternal --tsconfig ./tsconfig.build.json --out docs/md ./src/index.ts ",
+    "doc:html": "rm -rf docs/html && typedoc --excludePrivate --disableSources --excludeInternal --tsconfig ./tsconfig.build.json --out docs/html ./src/index.ts ",
+    "doc:md": "rm -rf docs/md && typedoc --excludePrivate --disableSources --excludeInternal --tsconfig ./tsconfig.build.json --out docs/md --plugin typedoc-plugin-markdown ./src/index.ts ",
     "e2e": "npm run test",
     "e2e:dev": "npm run test:dev",
     "format": "eslint ./src --fix",
@@ -41,7 +41,7 @@
     "watch:tsc": "tsc -p tsconfig.build.json -w"
   },
   "dependencies": {
-    "@skyway-sdk/core": "^1.6.2",
+    "@skyway-sdk/core": "^1.7.0",
     "@skyway-sdk/sfu-api-client": "^1.4.6",
     "lodash": "4.17.21",
     "mediasoup-client": "3.6.82"

@@ -3,6 +3,8 @@ import { SfuScope } from './sfu';
 export type AppScope = {
   /**アプリケーションIDを指定 */
   id: string;
+  /**AnalyticsDashboardへのデータ送信をするかどうかの設定 */
+  analytics?: boolean;
   /**アプリケーション自体に関する権限。現在は'read'固定 */
   actions?: readonly AppAction[];
   /**channelリソースに関するオブジェクトを配列で指定*/

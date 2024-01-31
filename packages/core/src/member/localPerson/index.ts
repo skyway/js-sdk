@@ -11,6 +11,7 @@ import { PublicationInit } from '@skyway-sdk/rtc-api-client';
 import { PersonInit, SkyWayChannelImpl } from '../../channel';
 import { SkyWayContext } from '../../context';
 import { errors } from '../../errors';
+import { AnalyticsSession } from '../../external/analytics';
 import { IceManager } from '../../external/ice';
 import { SignalingSession } from '../../external/signaling';
 import { Codec, EncodingParameters } from '../../media';
@@ -27,6 +28,7 @@ import {
   normalizeEncodings,
   Publication,
   PublicationImpl,
+  sortEncodingParameters,
 } from '../../publication';
 import { Subscription, SubscriptionImpl } from '../../subscription';
 import { createError, createLogPayload } from '../../util';
@@ -105,6 +107,7 @@ export class LocalPersonImpl extends MemberImpl implements LocalPerson {
   readonly keepaliveIntervalSec = this.args.keepaliveIntervalSec;
   readonly keepaliveIntervalGapSec = this.args.keepaliveIntervalGapSec;
   readonly disableSignaling = this.args.disableSignaling;
+  readonly disableAnalytics = this.args.disableAnalytics;
   readonly config = this.context.config;
 
   readonly onStreamPublished = this._events.make<{
@@ -149,6 +152,8 @@ export class LocalPersonImpl extends MemberImpl implements LocalPerson {
   /**@private */
   readonly _signaling?: SignalingSession;
   /**@private */
+  readonly _analytics?: AnalyticsSession;
+  /**@private */
   _disposed = false;
 
   static async Create(...args: ConstructorParameters<typeof LocalPersonImpl>) {
@@ -162,6 +167,7 @@ export class LocalPersonImpl extends MemberImpl implements LocalPerson {
     private args: {
       channel: SkyWayChannelImpl;
       signaling?: SignalingSession;
+      analytics?: AnalyticsSession;
       name?: string;
       id: string;
       metadata?: string;
@@ -174,6 +180,7 @@ export class LocalPersonImpl extends MemberImpl implements LocalPerson {
     this._publishingAgent = new PublishingAgent(this);
     this._subscribingAgent = new SubscribingAgent(this);
     this._signaling = args.signaling;
+    this._analytics = args.analytics;
 
     this._listenChannelEvent();
     this._listenBeforeUnload();
@@ -349,7 +356,7 @@ export class LocalPersonImpl extends MemberImpl implements LocalPerson {
       );
 
       await this._publishingAgent
-        .startPublishing(subscription.publication, subscription.subscriber)
+        .startPublishing(subscription)
         .catch((e) => {
           log.error('[failed] startPublishing', e, { subscription });
           throw e;
@@ -480,7 +487,9 @@ export class LocalPersonImpl extends MemberImpl implements LocalPerson {
       init.codecCapabilities = [{ mimeType: 'video/vp8' }];
     }
     if (options.encodings && options.encodings.length > 0) {
-      init.encodings = sortEncodings(normalizeEncodings(options.encodings));
+      init.encodings = normalizeEncodings(
+        sortEncodingParameters(options.encodings)
+      );
     }
 
     const published = await this._requestQueue.push(() =>
@@ -517,6 +526,24 @@ export class LocalPersonImpl extends MemberImpl implements LocalPerson {
       }),
       { publication }
     );
+
+    // dataの場合はMediaDeviceがないので送信処理をしない
+    if (['video', 'audio'].includes(publication.contentType) && this._analytics && !this._analytics.isClosed()) {
+      // 再送時に他の処理をブロックしないためにawaitしない
+      void this._analytics.client.sendMediaDeviceReport({
+        publicationId: publication.id,
+        mediaDeviceName: publication.deviceName as string,
+        mediaDeviceTrigger: 'publish',
+        updatedAt: Date.now(),
+      });
+
+      const encodings = init.encodings ?? [];
+      void this._analytics.client.sendPublicationUpdateEncodingsReport({
+        publicationId: publication.id,
+        encodings: encodings,
+        updatedAt: Date.now(),
+      });
+    }
 
     return publication as Publication<T>;
   }
@@ -896,6 +923,11 @@ export class LocalPersonImpl extends MemberImpl implements LocalPerson {
     if (this._signaling) {
       this._signaling.close();
     }
+
+    if (this._analytics) {
+      this._analytics.close();
+    }
+
     this._getConnections().forEach((c) =>
       c.close({ reason: 'localPerson disposed' })
     );
@@ -918,8 +950,8 @@ export type PublicationOptions = {
    * @description [japanese]
    * メディアのエンコードの設定を行うことができる。
    * サイマルキャストに対応している通信モデル（SFU）を利用している場合、encodingsの配列に複数のEncodingを設定するとサイマルキャストが有効になる。
-   * そうでない場合、先頭の設定のみが適用される。
-   * 設定を複数入れる場合ビットレートの低いものが先頭になるように並べる必要がある。
+   * この時、encodingの配列はビットレートの低い順にソートされて設定される。
+   * P2Pを利用している場合、最もビットレートの低い設定のみが適用される。
    */
   encodings?: EncodingParameters[];
 };
@@ -927,20 +959,3 @@ export type PublicationOptions = {
 export type SubscriptionOptions = {
   preferredEncodingId?: string;
 };
-
-function sortEncodings(encodings: Encoding[]) {
-  const [encode] = encodings;
-  if (encode.maxBitrate) {
-    // 小から大
-    return encodings.sort((a, b) => a.maxBitrate! - b.maxBitrate!);
-  } else if (encode.scaleResolutionDownBy) {
-    //大から小
-    return encodings.sort(
-      (a, b) => b.scaleResolutionDownBy! - a.scaleResolutionDownBy!
-    );
-  } else if (encode.maxFramerate) {
-    // 小から大
-    return encodings.sort((a, b) => a.maxFramerate! - b.maxFramerate!);
-  }
-  return encodings;
-}

@@ -1,6 +1,6 @@
 {
   "name": "@skyway-sdk/room",
-  "version": "1.6.2",
+  "version": "1.7.0",
   "description": "The official Next Generation JavaScript SDK for SkyWay",
   "homepage": "https://skyway.ntt.com/",
   "repository": {
@@ -23,8 +23,8 @@
     "compile:esbuild": "esbuild src/index.ts --bundle --format=esm --target=es6 --outfile=dist/index.mjs",
     "compile:tsc": "rm -rf dist && tsc -p tsconfig.build.json",
     "doc": "npm run doc:html && npm run doc:md",
-    "doc:html": "rm -rf docs/html && typedoc --excludePrivate --disableSources --excludeInternal --tsconfig ./tsconfig.build.json --out docs/html --plugin none ./src/index.ts ",
-    "doc:md": "rm -rf docs/md && typedoc --excludePrivate --disableSources --excludeInternal --tsconfig ./tsconfig.build.json --out docs/md ./src/index.ts ",
+    "doc:html": "rm -rf docs/html && typedoc --excludePrivate --disableSources --excludeInternal --tsconfig ./tsconfig.build.json --out docs/html ./src/index.ts ",
+    "doc:md": "rm -rf docs/md && typedoc --excludePrivate --disableSources --excludeInternal --tsconfig ./tsconfig.build.json --out docs/md --plugin typedoc-plugin-markdown ./src/index.ts ",
     "test": "npm run e2e",
     "e2e": "npm-run-all -p jest test-large test-extra",
     "e2e:firefox": "karma start ./karma.large.js --single-run --browsers FirefoxHeadlessAutoAllowGUM && karma start ./karma.extra.js --single-run --browsers FirefoxHeadlessAutoAllowGUM",
@@ -46,8 +46,8 @@
     "watch:tsc": "tsc -p tsconfig.build.json -w"
   },
   "dependencies": {
-    "@skyway-sdk/core": "^1.6.2",
-    "@skyway-sdk/sfu-bot": "^1.6.2",
+    "@skyway-sdk/core": "^1.7.0",
+    "@skyway-sdk/sfu-bot": "^1.7.0",
     "uuid": "^9.0.0"
   },
   "devDependencies": {

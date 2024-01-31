@@ -1,5 +1,6 @@
 import { BackOff, Event, SkyWayError } from '@skyway-sdk/common';
 import {
+  AnalyticsSession,
   createError,
   createLogPayload,
   IceManager,
@@ -69,7 +70,8 @@ export class SfuTransport {
     private _bot: SfuBotMember,
     private _iceManager: IceManager,
     private _sfuApi: SfuRestApiClient,
-    private _context: SkyWayContext
+    private _context: SkyWayContext,
+    private _analyticsSession?: AnalyticsSession
   ) {
     const sfuPlugin = _context.plugins.find(
       (p) => p.subtype === SfuBotPlugin.subtype
@@ -87,9 +89,22 @@ export class SfuTransport {
         errback!
       )
     );
-    msTransport.on('connectionstatechange', (e) =>
-      this.onMediasoupConnectionStateChanged.emit(e)
-    );
+    msTransport.on('connectionstatechange', (e) => {
+      this.onMediasoupConnectionStateChanged.emit(e);
+
+      if (this._analyticsSession && !this._analyticsSession.isClosed()) {
+        // 再送時に他の処理をブロックしないためにawaitしない
+        void this._analyticsSession.client.sendRtcPeerConnectionEventReport({
+          rtcPeerConnectionId: this.id,
+          type: 'connectionStateChange',
+          data: {
+            connectionState: e,
+          },
+          createdAt: Date.now(),
+        });
+      }
+    });
+
     msTransport.on('produce', (producerOptions, callback, errback) => {
       this.onProduce.emit({
         producerOptions,
@@ -175,6 +190,16 @@ export class SfuTransport {
     log.debug('onConnectionStateChanged', this._connectionState, state, this);
     this._connectionState = state;
     this.onConnectionStateChanged.emit(state);
+    if (this._analyticsSession && !this._analyticsSession.isClosed()) {
+      void this._analyticsSession.client.sendRtcPeerConnectionEventReport({
+        rtcPeerConnectionId: this.id,
+        type: 'skywayConnectionStateChange',
+        data: {
+          skywayConnectionState: state,
+        },
+        createdAt: Date.now(),
+      });
+    }
   }
 
   readonly restartIce = async () => {
@@ -231,6 +256,16 @@ export class SfuTransport {
             payload: { count: this._backoffIceRestart.count, transport: this },
           })
         );
+
+        if (this._analyticsSession && !this._analyticsSession.isClosed()) {
+          // 再送時に他の処理をブロックしないためにawaitしない
+          void this._analyticsSession.client.sendRtcPeerConnectionEventReport({
+            rtcPeerConnectionId: this.id,
+            type: 'restartIce',
+            data: undefined,
+            createdAt: Date.now(),
+          });
+        }
         return true;
       }
     };

@@ -24,6 +24,9 @@ export class LocalPersonAdapter implements LocalPerson {
   get disableSignaling() {
     return this._impl.disableSignaling;
   }
+  get disableAnalytics() {
+    return this._impl.disableAnalytics;
+  }
   get type() {
     return this._impl.type;
   }

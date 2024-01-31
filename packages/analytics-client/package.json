@@ -1,6 +1,6 @@
 {
-  "name": "@skyway-sdk/rtc-rpc-api-client",
-  "version": "1.5.0",
+  "name": "@skyway-sdk/analytics-client",
+  "version": "0.1.0-beta",
   "description": "The official Next Generation JavaScript SDK for SkyWay",
   "homepage": "https://skyway.ntt.com/",
   "repository": {
@@ -22,30 +22,35 @@
     "compile": "npm run compile:tsc && npm run compile:esbuild",
     "compile:esbuild": "esbuild src/index.ts --bundle --format=esm --target=es6 --outfile=dist/index.mjs",
     "compile:tsc": "rm -rf dist && tsc -p tsconfig.build.json",
-    "e2e": "jest ./e2e --forceExit --coverage",
-    "format": "eslint ./src --fix",
-    "lint": "eslint ./src --fix",
-    "gen": "openapi-typescript ../../skyway-rest-api-description/descriptions/rtc-api.v3-dev.skyway.io.json --output ./src/schema.ts",
+    "fix": "npm run format && npm run lint",
+    "format": "prettier --write src __tests__",
     "graph": "dependency-cruiser --include-only '^src' --output-type dot src | dot -T svg > docs/dependencygraph.svg",
+    "lint": "eslint --fix src __tests__",
     "publish:npm": "npx can-npm-publish --verbose && npm run build && npm publish --access public",
-    "type": "tsc --noEmit -p ./tsconfig.json",
+    "test": "jest --silent --forceExit",
+    "test:console": "jest --forceExit",
+    "type": "tsc --noEmit -p ./tsconfig.build.json",
     "watch": "npm-run-all --parallel watch:tsc watch:esbuild",
     "watch:esbuild": "esbuild src/index.ts --bundle --watch --format=esm --target=es6 --outfile=dist/index.mjs",
     "watch:tsc": "tsc -p tsconfig.build.json -w"
   },
   "dependencies": {
-    "@skyway-sdk/common": "^1.4.6",
-    "@skyway-sdk/model": "^1.0.1",
     "isomorphic-ws": "^4.0.1",
-    "uuid": "^9.0.0"
+    "uuid": "^9.0.0",
+    "ws": "^7.5.2"
   },
   "devDependencies": {
-    "@skyway-sdk/token": "^1.5.0",
-    "@types/uuid": "^9.0.1"
+    "@skyway-sdk/model": "^1.0.0",
+    "@types/jest": "^27.0.0",
+    "@types/node": "^16.3.0",
+    "@types/uuid": "^9.0.1",
+    "@types/ws": "^7.4.6",
+    "jest": "^27.0.6"
   },
   "keywords": [
     "webrtc",
     "skyway",
-    "conferencing"
+    "conferencing",
+    "getstats"
   ]
 }

@@ -1,5 +1,6 @@
 import { Event, Logger } from '@skyway-sdk/common';
 import {
+  AnalyticsSession,
   createError,
   getRuntimeInfo,
   IceManager,
@@ -75,7 +76,8 @@ export class TransportRepository {
     bot: SfuBotMember,
     transportOptions: TransportOptions,
     direction: 'send' | 'recv',
-    iceManager: IceManager
+    iceManager: IceManager,
+    analyticsSession?: AnalyticsSession
   ) {
     const createTransport =
       direction === 'send'
@@ -91,12 +93,14 @@ export class TransportRepository {
           : undefined,
       additionalSettings: this._context.config.rtcConfig,
     });
+
     const transport = new SfuTransport(
       msTransport,
       bot,
       iceManager,
       this._api,
-      this._context
+      this._context,
+      analyticsSession
     );
     this._transports[personId + msTransport.id] = transport;
 

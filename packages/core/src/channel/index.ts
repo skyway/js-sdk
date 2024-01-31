@@ -600,6 +600,7 @@ export class SkyWayChannelImpl implements Channel {
       keepaliveIntervalSec: adapter.keepaliveIntervalSec,
       keepaliveIntervalGapSec: adapter.keepaliveIntervalGapSec,
       disableSignaling: adapter.disableSignaling,
+      disableAnalytics: adapter.disableAnalytics,
     });
     adapter.apply(person);
   }

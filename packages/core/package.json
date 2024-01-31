@@ -1,6 +1,6 @@
 {
   "name": "@skyway-sdk/core",
-  "version": "1.6.2",
+  "version": "1.7.0",
   "description": "The official Next Generation JavaScript SDK for SkyWay",
   "homepage": "https://skyway.ntt.com/",
   "repository": {
@@ -23,8 +23,8 @@
     "compile:esbuild": "esbuild src/index.ts --bundle --format=esm --target=es6 --outfile=dist/index.mjs",
     "compile:tsc": "rm -rf dist && tsc -p tsconfig.build.json",
     "doc": "npm run doc:html && npm run doc:md",
-    "doc:html": "rm -rf docs/html && typedoc --excludePrivate --disableSources --excludeInternal --tsconfig ./tsconfig.build.json --out docs/html --plugin none ./src/index.ts ",
-    "doc:md": "rm -rf docs/md && typedoc --excludePrivate --disableSources --excludeInternal --tsconfig ./tsconfig.build.json --out docs/md ./src/index.ts ",
+    "doc:html": "rm -rf docs/html && typedoc --excludePrivate --disableSources --excludeInternal --tsconfig ./tsconfig.build.json --out docs/html ./src/index.ts ",
+    "doc:md": "rm -rf docs/md && typedoc --excludePrivate --disableSources --excludeInternal --tsconfig ./tsconfig.build.json --out docs/md --plugin typedoc-plugin-markdown ./src/index.ts ",
     "e2e": "npm run test-large",
     "e2e:firefox": "karma start ./karma.all.js --single-run --browsers FirefoxHeadlessAutoAllowGUM",
     "format": "eslint ./src --fix && eslint ./tests --fix",
@@ -47,7 +47,8 @@
     "watch:tsc": "tsc -p tsconfig.build.json -w"
   },
   "dependencies": {
-    "@skyway-sdk/rtc-api-client": "^1.4.6",
+    "@skyway-sdk/analytics-client": "^0.1.0-beta",
+    "@skyway-sdk/rtc-api-client": "^1.5.0",
     "@skyway-sdk/signaling-client": "^1.0.3",
     "bowser": "^2.11.0",
     "deepmerge": "^4.2.2",

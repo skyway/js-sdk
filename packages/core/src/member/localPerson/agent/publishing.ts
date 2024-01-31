@@ -1,4 +1,5 @@
 import { Logger } from '@skyway-sdk/common';
+import { SubscriptionImpl } from '../../../subscription';
 
 import { errors } from '../../../errors';
 import { RemoteMemberImplInterface } from '../../../member/remoteMember';
@@ -14,13 +15,14 @@ export class PublishingAgent {
 
   /**@throws {SkyWayError} */
   async startPublishing(
-    publication: PublicationImpl,
-    endpoint: RemoteMemberImplInterface
+    subscription: SubscriptionImpl,
   ): Promise<void> {
     if (this.context.config.internal.disableDPlane) {
       await new Promise((r) => setTimeout(r, 500));
       return;
     }
+    const publication: PublicationImpl = subscription.publication;
+    const endpoint: RemoteMemberImplInterface = subscription.subscriber;
 
     // タイミング的にstreamのセットが完了していない可能性がある
     if (!publication.stream) {
@@ -48,7 +50,7 @@ export class PublishingAgent {
     const connection = endpoint._getOrCreateConnection(this._localPerson);
 
     if (connection.startPublishing) {
-      await connection.startPublishing(publication);
+      await connection.startPublishing(publication, subscription.id);
     }
   }
 

@@ -26,6 +26,8 @@ export class Receiver {
   transport?: SfuTransport;
 
   private _disposer = new EventDisposer();
+  private sendSubscriptionStatsReportTimer: NodeJS.Timer | null = null;
+  private _waitingSendSubscriptionStatsReports: string[] = [];
 
   constructor(
     readonly subscription: SubscriptionImpl,
@@ -35,7 +37,24 @@ export class Receiver {
     private _bot: SfuBotMember,
     private _iceManager: IceManager,
     private _context: SkyWayContext
-  ) {}
+  ) {
+    const analyticsSession = this._localPerson._analytics;
+    if (analyticsSession) {
+      analyticsSession.onConnectionStateChanged.add((state) => {
+        if (
+          state === 'connected' &&
+          this._waitingSendSubscriptionStatsReports.length > 0
+        ) {
+          for (const consumerId of this._waitingSendSubscriptionStatsReports) {
+            if (this.consumer && this.consumer.id === consumerId) {
+              this.startSendSubscriptionStatsReportTimer();
+            }
+          }
+          this._waitingSendSubscriptionStatsReports = [];
+        }
+      });
+    }
+  }
 
   toJSON() {
     return {
@@ -93,7 +112,8 @@ export class Receiver {
         this._bot,
         transportOptions as any,
         'recv',
-        this._iceManager
+        this._iceManager,
+        this._localPerson._analytics
       );
     }
 
@@ -128,6 +148,20 @@ export class Receiver {
       this.transport = this._transportRepository.getTransport(
         this._localPerson.id,
         transportId
+      );
+    }
+
+    if (
+      this._localPerson._analytics &&
+      !this._localPerson._analytics.isClosed()
+    ) {
+      // 再送時に他の処理をブロックしないためにawaitしない
+      void this._localPerson._analytics.client.sendBindingRtcPeerConnectionToSubscription(
+        {
+          subscriptionId: this.subscription.id,
+          role: 'receiver',
+          rtcPeerConnectionId: this.transport.id,
+        }
       );
     }
 
@@ -166,6 +200,16 @@ export class Receiver {
       parameters: selectedCodec.parameters,
     };
     this._setupTransportAccessForStream(stream, consumer);
+
+    const analyticsSession = this._localPerson._analytics;
+    if (analyticsSession && !analyticsSession.isClosed()) {
+      if (analyticsSession.client.isConnectionEstablished()) {
+        this.startSendSubscriptionStatsReportTimer();
+      } else {
+        // AnalyticsServerに初回接続できなかった場合はキューに入れる
+        this._waitingSendSubscriptionStatsReports.push(consumer.id);
+      }
+    }
 
     return { stream, codec };
   }
@@ -210,6 +254,10 @@ export class Receiver {
 
     this.consumer.close();
     this.consumer = undefined;
+
+    if (this.sendSubscriptionStatsReportTimer) {
+      clearInterval(this.sendSubscriptionStatsReportTimer);
+    }
   }
 
   close() {
@@ -218,5 +266,32 @@ export class Receiver {
 
   get pc() {
     return this.transport?.pc;
+  }
+
+  private startSendSubscriptionStatsReportTimer() {
+    const analyticsSession = this._localPerson._analytics;
+    if (analyticsSession) {
+      const intervalSec = analyticsSession.client.getIntervalSec();
+      this.sendSubscriptionStatsReportTimer = setInterval(async () => {
+        // AnalyticsSessionがcloseされていたらタイマーを止める
+        if (!analyticsSession || analyticsSession.isClosed()) {
+          if (this.sendSubscriptionStatsReportTimer) {
+            clearInterval(this.sendSubscriptionStatsReportTimer);
+          }
+          return;
+        }
+        if (this.consumer) {
+          const stats = await this.consumer.getStats();
+          if (stats) {
+            // 再送時に他の処理をブロックしないためにawaitしない
+            void analyticsSession.client.sendSubscriptionStatsReport(stats, {
+              subscriptionId: this.subscription.id,
+              role: 'receiver',
+              createdAt: Date.now(),
+            });
+          }
+        }
+      }, intervalSec * 1000);
+    }
   }
 }

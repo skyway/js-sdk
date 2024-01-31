@@ -11,6 +11,8 @@ export type SkyWayConfigOptions = {
   iceParamServer: { domain?: string; version?: number; secure?: boolean };
   /**@internal */
   signalingService: { domain?: string; secure?: boolean };
+  /**@internal */
+  analyticsService: { domain?: string; secure?: boolean };
   rtcConfig: {
     encodedInsertableStreams?: boolean;
     /**
@@ -52,6 +54,7 @@ export type MemberKeepAliveConfig = {
 export type MemberInternalConfig = {
   /**@internal */
   disableSignaling?: boolean;
+  disableAnalytics?: boolean;
 };
 
 export type TurnPolicy = 'enable' | 'disable' | 'turnOnly';
@@ -75,6 +78,11 @@ export class ContextConfig implements SkyWayConfigOptions {
   /**@internal */
   signalingService: Required<SkyWayConfigOptions['signalingService']> = {
     domain: 'signaling.skyway.ntt.com',
+    secure: true,
+  };
+  /**@internal */
+  analyticsService: Required<SkyWayConfigOptions['analyticsService']> = {
+    domain: 'analytics-logging.skyway.ntt.com',
     secure: true,
   };
   rtcConfig: Required<SkyWayConfigOptions['rtcConfig']> = {

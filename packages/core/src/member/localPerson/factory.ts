@@ -1,10 +1,12 @@
 import { Logger } from '@skyway-sdk/common';
 import model from '@skyway-sdk/model';
+import { SkyWayAuthToken } from '@skyway-sdk/token';
 
 import { PersonInit, SkyWayChannelImpl } from '../../channel';
 import { MaxIceParamServerTTL } from '../../const';
 import { SkyWayContext } from '../../context';
 import { errors } from '../../errors';
+import { setupAnalyticsSession } from '../../external/analytics';
 import { IceManager } from '../../external/ice';
 import { setupSignalingSession } from '../../external/signaling';
 import { createError } from '../../util';
@@ -21,6 +23,7 @@ export async function createLocalPerson(
     keepaliveIntervalSec,
     keepaliveIntervalGapSec,
     disableSignaling,
+    disableAnalytics,
   }: PersonInit = {}
 ) {
   log.debug('createLocalPerson', {
@@ -36,6 +39,14 @@ export async function createLocalPerson(
     disableSignaling === true
       ? undefined
       : await setupSignalingSession(context, channel, memberDto);
+
+  const decodedToken = SkyWayAuthToken.Decode(context.authTokenString);
+  const existAnalyticsScope = decodedToken.scope.app.analytics ?? false;
+
+  const analyticsSession =
+    disableAnalytics === true || !existAnalyticsScope
+      ? undefined
+      : await setupAnalyticsSession(context, channel, memberDto);
 
   const iceManager = new IceManager({
     ...iceParamServer,
@@ -60,6 +71,7 @@ export async function createLocalPerson(
     iceManager,
     channel,
     signaling: signalingSession,
+    analytics: analyticsSession,
     metadata: memberDto.metadata,
     name: memberDto.name,
     id: memberDto.id,

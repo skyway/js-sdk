@@ -1,7 +1,9 @@
 import { Event, Logger } from '@skyway-sdk/common';
+import { uuidV4 } from '@skyway-sdk/token';
 
 import { SkyWayContext } from '../../../../context';
 import { errors } from '../../../../errors';
+import { AnalyticsSession } from '../../../../external/analytics';
 import { IceManager } from '../../../../external/ice';
 import { SignalingSession } from '../../../../external/signaling';
 import { LocalPersonImpl } from '../../../../member/localPerson';
@@ -29,11 +31,13 @@ export abstract class Peer {
   readonly onDisconnect = new Event<void>();
   connected = false;
   disconnected = false;
+  rtcPeerConnectionId = uuidV4();
 
   constructor(
     protected readonly _context: SkyWayContext,
     protected readonly _iceManager: IceManager,
     protected readonly signaling: SignalingSession,
+    protected readonly analytics: AnalyticsSession | undefined,
     protected readonly localPerson: LocalPersonImpl,
     protected readonly endpoint: RemoteMember,
     readonly role: PeerRole
@@ -53,14 +57,22 @@ export abstract class Peer {
 
   private setPeerConnectionListener(): void {
     this.pc.onicecandidate = this._onICECandidate;
+    this.pc.onicecandidateerror = this._onICECandidateError;
+    this.pc.onicegatheringstatechange = this._onIceGatheringStateChange;
     this.pc.onconnectionstatechange = this._onConnectionStateChange;
-    this.pc.onsignalingstatechange = () =>
+    this.pc.oniceconnectionstatechange = this._onIceConnectionStateChange;
+    this.pc.onsignalingstatechange = () => {
+      void this._onSignalingStateChange();
       this.onSignalingStateChanged.emit(this.pc.signalingState);
+    };
   }
 
   protected unSetPeerConnectionListener() {
     this.pc.onicecandidate = null;
+    this.pc.onicecandidateerror = null;
+    this.pc.onicegatheringstatechange = null;
     this.pc.onconnectionstatechange = null;
+    this.pc.oniceconnectionstatechange = null;
     this.pc.onsignalingstatechange = null;
   }
 
@@ -88,6 +100,21 @@ export abstract class Peer {
       localPerson: this.localPerson,
     });
 
+    if (
+      this.localPerson._analytics &&
+      !this.localPerson._analytics.isClosed()
+    ) {
+      // 再送時に他の処理をブロックしないためにawaitしない
+      void this.localPerson._analytics.client.sendRtcPeerConnectionEventReport({
+        rtcPeerConnectionId: this.rtcPeerConnectionId,
+        type: 'iceCandidate',
+        data: {
+          candidate: JSON.stringify(ev.candidate),
+        },
+        createdAt: Date.now(),
+      });
+    }
+
     try {
       await this.signaling.send(this.endpoint, message);
       log.debug(`[end] send candidate`, {
@@ -108,9 +135,57 @@ export abstract class Peer {
     }
   };
 
+  private _onICECandidateError = async (ev: globalThis.Event) => {
+    if (
+      this.localPerson._analytics &&
+      !this.localPerson._analytics.isClosed()
+    ) {
+      // 再送時に他の処理をブロックしないためにawaitしない
+      void this.localPerson._analytics.client.sendRtcPeerConnectionEventReport({
+        rtcPeerConnectionId: this.rtcPeerConnectionId,
+        type: 'iceCandidateError',
+        data: {
+          event: JSON.stringify(ev),
+        },
+        createdAt: Date.now(),
+      });
+    }
+  };
+
+  private _onIceGatheringStateChange = async (ev: globalThis.Event) => {
+    if (
+      this.localPerson._analytics &&
+      !this.localPerson._analytics.isClosed()
+    ) {
+      const state = this.pc.iceGatheringState;
+      // 再送時に他の処理をブロックしないためにawaitしない
+      void this.localPerson._analytics.client.sendRtcPeerConnectionEventReport({
+        rtcPeerConnectionId: this.rtcPeerConnectionId,
+        type: 'iceGatheringStateChange',
+        data: {
+          event: state,
+        },
+        createdAt: Date.now(),
+      });
+    }
+  };
+
   private _onConnectionStateChange = async () => {
     const state = this.pc.connectionState;
-    log.debug('_onConnectionStateChange', this.localPerson.id, state);
+    if (
+      this.localPerson._analytics &&
+      !this.localPerson._analytics.isClosed()
+    ) {
+      // 再送時に他の処理をブロックしないためにawaitしない
+      void this.localPerson._analytics.client.sendRtcPeerConnectionEventReport({
+        rtcPeerConnectionId: this.rtcPeerConnectionId,
+        type: 'connectionStateChange',
+        data: {
+          connectionState: state,
+        },
+        createdAt: Date.now(),
+      });
+    }
 
     switch (state) {
       case 'connected':
@@ -119,6 +194,42 @@ export abstract class Peer {
         break;
     }
     this.onPeerConnectionStateChanged.emit(this.pc.connectionState);
+  };
+
+  private _onIceConnectionStateChange = async () => {
+    if (
+      this.localPerson._analytics &&
+      !this.localPerson._analytics.isClosed()
+    ) {
+      const state = this.pc.iceConnectionState;
+      // 再送時に他の処理をブロックしないためにawaitしない
+      void this.localPerson._analytics.client.sendRtcPeerConnectionEventReport({
+        rtcPeerConnectionId: this.rtcPeerConnectionId,
+        type: 'iceConnectionStateChange',
+        data: {
+          iceConnectionState: state,
+        },
+        createdAt: Date.now(),
+      });
+    }
+  };
+
+  private _onSignalingStateChange = async () => {
+    if (
+      this.localPerson._analytics &&
+      !this.localPerson._analytics.isClosed()
+    ) {
+      const state = this.pc.signalingState;
+      // 再送時に他の処理をブロックしないためにawaitしない
+      void this.localPerson._analytics.client.sendRtcPeerConnectionEventReport({
+        rtcPeerConnectionId: this.rtcPeerConnectionId,
+        type: 'signalingStateChange',
+        data: {
+          signalingState: state,
+        },
+        createdAt: Date.now(),
+      });
+    }
   };
 
   async handleCandidate(candidate: RTCIceCandidate) {

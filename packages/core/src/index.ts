@@ -3,6 +3,7 @@ export * from './channel/event';
 export * from './config';
 export * from './context';
 export * from './errors';
+export * from './external/analytics';
 export * from './external/ice';
 export * from './media';
 export * from './media/factory';

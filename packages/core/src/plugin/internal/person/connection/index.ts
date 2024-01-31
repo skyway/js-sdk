@@ -3,6 +3,7 @@ import { v4 } from 'uuid';
 
 import { SkyWayContext } from '../../../../context';
 import { errors } from '../../../../errors';
+import { AnalyticsSession } from '../../../../external/analytics';
 import { IceManager } from '../../../../external/ice';
 import { SignalingSession } from '../../../../external/signaling';
 import { LocalPersonImpl } from '../../../../member/localPerson';
@@ -31,11 +32,16 @@ export class P2PConnection implements SkyWayConnection {
     localPersonId: this.localPerson.id,
   });
   private _pubsubQueue = new PromiseQueue();
+  private sendSubscriptionStatsReportTimer: NodeJS.Timer | null = null;
+  private _waitingSendSubscriptionStatsReportsFromPublish: Map<string, string> =
+    new Map();
+  private _waitingSendSubscriptionStatsReportsFromSubscribe: string[] = [];
 
   readonly sender = new Sender(
     this._context,
     this._iceManager,
     this._signaling,
+    this._analytics,
     this.localPerson,
     this.remoteMember
   );
@@ -43,6 +49,7 @@ export class P2PConnection implements SkyWayConnection {
     this._context,
     this._iceManager,
     this._signaling,
+    this._analytics,
     this.localPerson,
     this.remoteMember
   );
@@ -51,6 +58,7 @@ export class P2PConnection implements SkyWayConnection {
   constructor(
     private readonly _iceManager: IceManager,
     private readonly _signaling: SignalingSession,
+    private readonly _analytics: AnalyticsSession | undefined,
     private readonly _context: SkyWayContext,
     readonly channelId: string,
     readonly localPerson: LocalPersonImpl,
@@ -64,17 +72,69 @@ export class P2PConnection implements SkyWayConnection {
       this.disconnected = true;
       this.onDisconnect.emit();
     });
+
+    if (this._analytics) {
+      this._analytics.onConnectionStateChanged.add((state) => {
+        // AnalyticsServerに初回接続できなかった場合のsendSubscriptionStatsReportタイマー再セット処理
+        if (state !== 'connected') return;
+        if (this._waitingSendSubscriptionStatsReportsFromPublish.size > 0) {
+          for (const [subscriptionId, publicationId] of this
+            ._waitingSendSubscriptionStatsReportsFromPublish) {
+            const publication = this.sender.publications[publicationId];
+            if (publication) {
+              this.startSendSubscriptionStatsReportTimer(
+                publication,
+                subscriptionId
+              );
+            }
+          }
+          this._waitingSendSubscriptionStatsReportsFromPublish.clear();
+        }
+        if (this._waitingSendSubscriptionStatsReportsFromSubscribe.length > 0) {
+          for (const subscriptionId of this
+            ._waitingSendSubscriptionStatsReportsFromSubscribe) {
+            const subscription = this.receiver.subscriptions[subscriptionId];
+            if (subscription) {
+              this.startSendSubscriptionStatsReportTimer(
+                subscription,
+                subscriptionId
+              );
+            }
+          }
+          this._waitingSendSubscriptionStatsReportsFromSubscribe = [];
+        }
+      });
+    }
   }
 
   /**
    * @internal
    * @throws {SkyWayError}
    */
-  async startPublishing(publication: PublicationImpl) {
+  async startPublishing(publication: PublicationImpl, subscriptionId: string) {
     await this._pubsubQueue.push(async () => {
       this._log.debug('startPublishing', { publication });
       await this.sender.add(publication);
     });
+
+    if (this._analytics && !this._analytics.isClosed()) {
+      // 再送時に他の処理をブロックしないためにawaitしない
+      void this._analytics.client.sendBindingRtcPeerConnectionToSubscription({
+        subscriptionId: subscriptionId,
+        role: 'sender',
+        rtcPeerConnectionId: this.sender.rtcPeerConnectionId,
+      });
+
+      if (this._analytics.client.isConnectionEstablished()) {
+        this.startSendSubscriptionStatsReportTimer(publication, subscriptionId);
+      } else {
+        // AnalyticsServerに初回接続できなかった場合はキューに入れる
+        this._waitingSendSubscriptionStatsReportsFromPublish.set(
+          subscriptionId,
+          publication.id
+        );
+      }
+    }
   }
 
   /**@internal */
@@ -92,6 +152,10 @@ export class P2PConnection implements SkyWayConnection {
       this._closeIfNeeded();
       this._log.debug('<stopPublishing> end', { publication });
     });
+
+    if (this.sendSubscriptionStatsReportTimer) {
+      clearInterval(this.sendSubscriptionStatsReportTimer);
+    }
   }
 
   /**@internal */
@@ -123,6 +187,27 @@ export class P2PConnection implements SkyWayConnection {
 
       subscription.codec = stream.codec;
       subscription._setStream(stream);
+
+      if (this._analytics && !this._analytics.isClosed()) {
+        // 再送時に他の処理をブロックしないためにawaitしない
+        void this._analytics.client.sendBindingRtcPeerConnectionToSubscription({
+          subscriptionId: subscription.id,
+          role: 'receiver',
+          rtcPeerConnectionId: this.receiver.rtcPeerConnectionId,
+        });
+
+        if (this._analytics.client.isConnectionEstablished()) {
+          this.startSendSubscriptionStatsReportTimer(
+            subscription,
+            subscription.id
+          );
+        } else {
+          // AnalyticsServerに初回接続できなかった場合はキューに入れる
+          this._waitingSendSubscriptionStatsReportsFromSubscribe.push(
+            subscription.id
+          );
+        }
+      }
     });
   }
 
@@ -133,6 +218,10 @@ export class P2PConnection implements SkyWayConnection {
       this.receiver.remove(subscription.id);
       this._closeIfNeeded();
     });
+
+    if (this.sendSubscriptionStatsReportTimer) {
+      clearInterval(this.sendSubscriptionStatsReportTimer);
+    }
   }
 
   private _closeIfNeeded(): void {
@@ -186,6 +275,48 @@ export class P2PConnection implements SkyWayConnection {
     this.receiver.close();
 
     this.onClose.emit();
+  }
+
+  private startSendSubscriptionStatsReportTimer(
+    stream: Publication | Subscription,
+    subscriptionId: string
+  ) {
+    if (this._analytics) {
+      const role = stream instanceof PublicationImpl ? 'sender' : 'receiver';
+      const intervalSec = this._analytics.client.getIntervalSec();
+      this.sendSubscriptionStatsReportTimer = setInterval(async () => {
+        if (!this._analytics) {
+          throw createError({
+            operationName: 'P2PConnection.sendSubscriptionStatsReportTimer',
+            info: {
+              ...errors.missingProperty,
+              detail: 'AnalyticsSession not exist',
+            },
+            path: log.prefix,
+            context: this._context,
+            channel: this.localPerson.channel,
+          });
+        }
+
+        // AnalyticsSessionがcloseされていたらタイマーを止める
+        if (this._analytics.isClosed()) {
+          if (this.sendSubscriptionStatsReportTimer) {
+            clearInterval(this.sendSubscriptionStatsReportTimer);
+          }
+          return;
+        }
+
+        const stats = await this.getStats(stream);
+        if (stats) {
+          // 再送時に他の処理をブロックしないためにawaitしない
+          void this._analytics.client.sendSubscriptionStatsReport(stats, {
+            subscriptionId: subscriptionId,
+            role: role,
+            createdAt: Date.now(),
+          });
+        }
+      }, intervalSec * 1000);
+    }
   }
 }
 
