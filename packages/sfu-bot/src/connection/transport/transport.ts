@@ -29,7 +29,7 @@ const log = new Logger(
 
 export class SfuTransport {
   private _backoffIceRestart = new BackOff({
-    times: 10,
+    times: 8,
     interval: 100,
     jitter: 100,
   });

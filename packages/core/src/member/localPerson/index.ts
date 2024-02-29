@@ -355,12 +355,10 @@ export class LocalPersonImpl extends MemberImpl implements LocalPerson {
         { subscription }
       );
 
-      await this._publishingAgent
-        .startPublishing(subscription)
-        .catch((e) => {
-          log.error('[failed] startPublishing', e, { subscription });
-          throw e;
-        });
+      await this._publishingAgent.startPublishing(subscription).catch((e) => {
+        log.error('[failed] startPublishing', e, { subscription });
+        throw e;
+      });
       log.elapsed(
         timestamp,
         '[end] startPublishing',
@@ -528,7 +526,11 @@ export class LocalPersonImpl extends MemberImpl implements LocalPerson {
     );
 
     // dataの場合はMediaDeviceがないので送信処理をしない
-    if (['video', 'audio'].includes(publication.contentType) && this._analytics && !this._analytics.isClosed()) {
+    if (
+      ['video', 'audio'].includes(publication.contentType) &&
+      this._analytics &&
+      !this._analytics.isClosed()
+    ) {
       // 再送時に他の処理をブロックしないためにawaitしない
       void this._analytics.client.sendMediaDeviceReport({
         publicationId: publication.id,

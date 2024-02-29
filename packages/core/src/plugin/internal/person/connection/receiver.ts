@@ -268,14 +268,16 @@ export class Receiver extends Peer {
           this.localPerson._analytics &&
           !this.localPerson._analytics.isClosed()
         ) {
-          void this.localPerson._analytics.client.sendRtcPeerConnectionEventReport({
-            rtcPeerConnectionId: this.rtcPeerConnectionId,
-            type: 'skywayConnectionStateChange',
-            data: {
-              skywayConnectionState: state,
-            },
-            createdAt: Date.now(),
-          });
+          void this.localPerson._analytics.client.sendRtcPeerConnectionEventReport(
+            {
+              rtcPeerConnectionId: this.rtcPeerConnectionId,
+              type: 'skywayConnectionStateChange',
+              data: {
+                skywayConnectionState: state,
+              },
+              createdAt: Date.now(),
+            }
+          );
         }
       })
       .disposer(this._disposer);

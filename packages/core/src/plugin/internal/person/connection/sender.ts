@@ -56,7 +56,7 @@ export class Sender extends Peer {
   private _disposer = new EventDisposer();
   private _ms = new MediaStream();
   private _backoffIceRestarted = new BackOff({
-    times: 10,
+    times: 8,
     interval: 100,
     jitter: 100,
   });
@@ -228,12 +228,14 @@ export class Sender extends Peer {
           !this.localPerson._analytics.isClosed()
         ) {
           // 再送時に他の処理をブロックしないためにawaitしない
-          void this.localPerson._analytics.client.sendRtcPeerConnectionEventReport({
-            rtcPeerConnectionId: this.id,
-            type: 'restartIce',
-            data: undefined,
-            createdAt: Date.now(),
-          });
+          void this.localPerson._analytics.client.sendRtcPeerConnectionEventReport(
+            {
+              rtcPeerConnectionId: this.id,
+              type: 'restartIce',
+              data: undefined,
+              createdAt: Date.now(),
+            }
+          );
         }
         return true;
       }
@@ -618,14 +620,16 @@ export class Sender extends Peer {
           this.localPerson._analytics &&
           !this.localPerson._analytics.isClosed()
         ) {
-          void this.localPerson._analytics.client.sendRtcPeerConnectionEventReport({
-            rtcPeerConnectionId: this.rtcPeerConnectionId,
-            type: 'skywayConnectionStateChange',
-            data: {
-              skywayConnectionState: state,
-            },
-            createdAt: Date.now(),
-          });
+          void this.localPerson._analytics.client.sendRtcPeerConnectionEventReport(
+            {
+              rtcPeerConnectionId: this.rtcPeerConnectionId,
+              type: 'skywayConnectionStateChange',
+              data: {
+                skywayConnectionState: state,
+              },
+              createdAt: Date.now(),
+            }
+          );
         }
       })
       .disposer(this._disposer);

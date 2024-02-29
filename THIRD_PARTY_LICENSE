@@ -1,4 +1,4 @@
-@skyway-sdk/analytics-client@0.1.0-beta
+@skyway-sdk/analytics-client@0.1.0-beta2
 
 MIT
 
@@ -60,7 +60,7 @@ SOFTWARE.
 
 ---
 
-@skyway-sdk/core@1.7.0
+@skyway-sdk/core@1.7.1
 
 MIT
 
@@ -122,7 +122,7 @@ SOFTWARE.
 
 ---
 
-@skyway-sdk/room@1.7.0
+@skyway-sdk/room@1.7.1
 
 MIT
 
@@ -153,7 +153,7 @@ SOFTWARE.
 
 ---
 
-@skyway-sdk/rtc-api-client@1.5.0
+@skyway-sdk/rtc-api-client@1.5.1
 
 MIT
 
@@ -184,7 +184,7 @@ SOFTWARE.
 
 ---
 
-@skyway-sdk/rtc-rpc-api-client@1.5.0
+@skyway-sdk/rtc-rpc-api-client@1.5.1
 
 MIT
 
@@ -246,7 +246,7 @@ SOFTWARE.
 
 ---
 
-@skyway-sdk/sfu-bot@1.7.0
+@skyway-sdk/sfu-bot@1.7.1
 
 MIT
 
@@ -308,7 +308,7 @@ SOFTWARE.
 
 ---
 
-@skyway-sdk/token@1.5.0
+@skyway-sdk/token@1.5.1
 
 MIT
 
@@ -834,7 +834,7 @@ SOFTWARE.
 
 ---
 
-jsrsasign@10.9.0
+jsrsasign@11.1.0
 
 MIT
 

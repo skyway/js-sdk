@@ -14,8 +14,8 @@ import { Codec, EncodingParameters } from '../media';
 import { ContentType, WebRTCStats } from '../media/stream';
 import { LocalMediaStreamBase, LocalStream } from '../media/stream/local';
 import { LocalAudioStream } from '../media/stream/local/audio';
-import { LocalDataStream } from '../media/stream/local/data';
 import { LocalCustomVideoStream } from '../media/stream/local/customVideo';
+import { LocalDataStream } from '../media/stream/local/data';
 import { LocalVideoStream } from '../media/stream/local/video';
 import { Member } from '../member';
 import {

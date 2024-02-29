@@ -1,6 +1,6 @@
 {
   "name": "@skyway-sdk/analytics-client",
-  "version": "0.1.0-beta",
+  "version": "0.1.0-beta2",
   "description": "The official Next Generation JavaScript SDK for SkyWay",
   "homepage": "https://skyway.ntt.com/",
   "repository": {

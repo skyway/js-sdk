@@ -71,7 +71,7 @@ export class RPC {
             path: log.prefix,
           })
         );
-      }, 10_000);
+      }, 5_000);
       this._ws.onerror = (e: any) => {
         f(
           createError({
