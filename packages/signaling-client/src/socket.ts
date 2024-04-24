@@ -63,7 +63,7 @@ export class Socket {
 
   readonly onConnectionFailed = new Event<void>();
 
-  private _reconnectTimer: NodeJS.Timer | undefined;
+  private _reconnectTimer: ReturnType<typeof setTimeout> | undefined;
 
   constructor({ channelId, channelName, memberId, memberName, sessionEndpoint, token, logger }: SocketParams) {
     this._sessionEndpoint = sessionEndpoint;

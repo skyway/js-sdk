@@ -50,7 +50,9 @@ export class Sender {
   private readonly onConnectionStateChanged =
     new Event<TransportConnectionState>();
   closed = false;
-  private sendSubscriptionStatsReportTimer: NodeJS.Timer | null = null;
+  private sendSubscriptionStatsReportTimer: ReturnType<
+    typeof setInterval
+  > | null = null;
   private _waitingSendSubscriptionStatsReports: string[] = [];
 
   constructor(

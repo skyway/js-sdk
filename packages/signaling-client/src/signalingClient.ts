@@ -55,9 +55,9 @@ export class SignalingClient {
 
   private readonly _memberName?: string;
 
-  private _connectivityCheckInterval: NodeJS.Timer | undefined;
+  private _connectivityCheckInterval: ReturnType<typeof setInterval> | undefined;
 
-  private _connectivityCheckTimers: Map<string, NodeJS.Timer> = new Map();
+  private _connectivityCheckTimers: Map<string, ReturnType<typeof setTimeout>> = new Map();
 
   private _responseCallbacks: Map<string, (data: Record<string, unknown>) => void> = new Map();
 

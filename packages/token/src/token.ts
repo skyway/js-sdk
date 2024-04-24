@@ -10,4 +10,5 @@ export type AuthToken = {
   scope: {
     app: AppScope;
   };
+  version?: number;
 };

@@ -17,6 +17,7 @@ export class SkyWayAuthToken implements AuthToken {
   readonly scope!: {
     readonly app: AppScope;
   };
+  version?: number;
   tokenString?: string;
 
   constructor(props: AuthToken) {
@@ -44,6 +45,7 @@ export class SkyWayAuthToken implements AuthToken {
       iat: this.iat,
       exp: this.exp,
       scope: this.scope,
+      version: this.version,
     };
     this.tokenString = jsrsasign.KJUR.jws.JWS.sign(
       'HS256',
@@ -62,6 +64,7 @@ export class SkyWayAuthToken implements AuthToken {
       exp: this.exp,
       scope: this.scope,
       encoded: this.tokenString,
+      version: this.version,
     };
   }
 }

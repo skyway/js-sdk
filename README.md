@@ -73,7 +73,7 @@ const { SkyWayContext, SkyWayStreamFactory, SkyWayRoom } = skyway_room;
 
 ## 初期設定時
 
-- Node.js をインストールする（バージョンは v16.17.1 以降）
+- Node.js をインストールする（バージョンは v18.12.0 以降）
 - corepack を有効化するために次のコマンドを実行する
   - `corepack enable npm`
 - ルートディレクトリで次のコマンドを実行する

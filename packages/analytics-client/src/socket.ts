@@ -68,7 +68,7 @@ export class Socket {
 
   readonly onConnectionFailed = new Event<void>();
 
-  private _reconnectTimer: NodeJS.Timer | undefined;
+  private _reconnectTimer: ReturnType<typeof setTimeout> | undefined;
 
   private _resendClientEvents: ClientEvent[] = [];
 

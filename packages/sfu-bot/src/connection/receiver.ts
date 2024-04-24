@@ -26,7 +26,9 @@ export class Receiver {
   transport?: SfuTransport;
 
   private _disposer = new EventDisposer();
-  private sendSubscriptionStatsReportTimer: NodeJS.Timer | null = null;
+  private sendSubscriptionStatsReportTimer: ReturnType<
+    typeof setInterval
+  > | null = null;
   private _waitingSendSubscriptionStatsReports: string[] = [];
 
   constructor(

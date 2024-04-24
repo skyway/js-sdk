@@ -32,7 +32,9 @@ export class P2PConnection implements SkyWayConnection {
     localPersonId: this.localPerson.id,
   });
   private _pubsubQueue = new PromiseQueue();
-  private sendSubscriptionStatsReportTimer: NodeJS.Timer | null = null;
+  private sendSubscriptionStatsReportTimer: ReturnType<
+    typeof setInterval
+  > | null = null;
   private _waitingSendSubscriptionStatsReportsFromPublish: Map<string, string> =
     new Map();
   private _waitingSendSubscriptionStatsReportsFromSubscribe: string[] = [];
