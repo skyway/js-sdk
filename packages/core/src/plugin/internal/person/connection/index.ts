@@ -32,9 +32,10 @@ export class P2PConnection implements SkyWayConnection {
     localPersonId: this.localPerson.id,
   });
   private _pubsubQueue = new PromiseQueue();
-  private sendSubscriptionStatsReportTimer: ReturnType<
-    typeof setInterval
-  > | null = null;
+  private sendSubscriptionStatsReportTimers: Map<
+    string,
+    ReturnType<typeof setInterval>
+  > = new Map();
   private _waitingSendSubscriptionStatsReportsFromPublish: Map<string, string> =
     new Map();
   private _waitingSendSubscriptionStatsReportsFromSubscribe: string[] = [];
@@ -155,8 +156,12 @@ export class P2PConnection implements SkyWayConnection {
       this._log.debug('<stopPublishing> end', { publication });
     });
 
-    if (this.sendSubscriptionStatsReportTimer) {
-      clearInterval(this.sendSubscriptionStatsReportTimer);
+    // publication(=stream）のidをkeyとして一致するタイマーを取得する
+    const sendSubscriptionStatsReportTimer =
+      this.sendSubscriptionStatsReportTimers.get(publication.id);
+    if (sendSubscriptionStatsReportTimer) {
+      clearInterval(sendSubscriptionStatsReportTimer);
+      this.sendSubscriptionStatsReportTimers.delete(publication.id);
     }
   }
 
@@ -221,8 +226,12 @@ export class P2PConnection implements SkyWayConnection {
       this._closeIfNeeded();
     });
 
-    if (this.sendSubscriptionStatsReportTimer) {
-      clearInterval(this.sendSubscriptionStatsReportTimer);
+    // subscription(=stream）のidをkeyとして一致するタイマーを取得する
+    const sendSubscriptionStatsReportTimer =
+      this.sendSubscriptionStatsReportTimers.get(subscription.id);
+    if (sendSubscriptionStatsReportTimer) {
+      clearInterval(sendSubscriptionStatsReportTimer);
+      this.sendSubscriptionStatsReportTimers.delete(subscription.id);
     }
   }
 
@@ -286,38 +295,44 @@ export class P2PConnection implements SkyWayConnection {
     if (this._analytics) {
       const role = stream instanceof PublicationImpl ? 'sender' : 'receiver';
       const intervalSec = this._analytics.client.getIntervalSec();
-      this.sendSubscriptionStatsReportTimer = setInterval(async () => {
-        if (!this._analytics) {
-          throw createError({
-            operationName: 'P2PConnection.sendSubscriptionStatsReportTimer',
-            info: {
-              ...errors.missingProperty,
-              detail: 'AnalyticsSession not exist',
-            },
-            path: log.prefix,
-            context: this._context,
-            channel: this.localPerson.channel,
-          });
-        }
-
-        // AnalyticsSessionがcloseされていたらタイマーを止める
-        if (this._analytics.isClosed()) {
-          if (this.sendSubscriptionStatsReportTimer) {
-            clearInterval(this.sendSubscriptionStatsReportTimer);
+      this.sendSubscriptionStatsReportTimers.set(
+        stream.id,
+        setInterval(async () => {
+          if (!this._analytics) {
+            throw createError({
+              operationName: 'P2PConnection.sendSubscriptionStatsReportTimer',
+              info: {
+                ...errors.missingProperty,
+                detail: 'AnalyticsSession not exist',
+              },
+              path: log.prefix,
+              context: this._context,
+              channel: this.localPerson.channel,
+            });
           }
-          return;
-        }
 
-        const stats = await this.getStats(stream);
-        if (stats) {
-          // 再送時に他の処理をブロックしないためにawaitしない
-          void this._analytics.client.sendSubscriptionStatsReport(stats, {
-            subscriptionId: subscriptionId,
-            role: role,
-            createdAt: Date.now(),
-          });
-        }
-      }, intervalSec * 1000);
+          // AnalyticsSessionがcloseされていたらタイマーを止める
+          if (this._analytics.isClosed()) {
+            const subscriptionStatsReportTimer =
+              this.sendSubscriptionStatsReportTimers.get(stream.id);
+            if (subscriptionStatsReportTimer) {
+              clearInterval(subscriptionStatsReportTimer);
+              this.sendSubscriptionStatsReportTimers.delete(stream.id);
+            }
+            return;
+          }
+
+          const stats = await this.getStats(stream);
+          if (stats) {
+            // 再送時に他の処理をブロックしないためにawaitしない
+            void this._analytics.client.sendSubscriptionStatsReport(stats, {
+              subscriptionId: subscriptionId,
+              role: role,
+              createdAt: Date.now(),
+            });
+          }
+        }, intervalSec * 1000)
+      );
     }
   }
 }
