@@ -48,7 +48,10 @@ export interface RtcApi {
     metadata: string
   ): Promise<void>;
   /**@throws {@link SkyWayError} */
-  publish(appId: string, init: PublicationInit): Promise<model.Publication>;
+  publish(
+    appId: string,
+    init: PublicationInit
+  ): Promise<model.Publication['id']>;
   unpublish(
     appId: string,
     channelId: Channel['id'],
@@ -71,7 +74,10 @@ export interface RtcApi {
     publicationId: Publication['id']
   ): Promise<void>;
   /**@throws {@link SkyWayError} */
-  subscribe(appId: string, init: SubscriptionInit): Promise<model.Subscription>;
+  subscribe(
+    appId: string,
+    init: SubscriptionInit
+  ): Promise<model.Subscription['id']>;
   unsubscribe(
     appId: string,
     channelId: string,
@@ -108,6 +114,7 @@ export type PublicationInit = {
   contentType: model.ContentType;
   codecCapabilities?: model.Codec[];
   encodings?: model.Encoding[];
+  isEnabled?: boolean;
 };
 
 export type SubscriptionInit = {

@@ -521,6 +521,7 @@ export class RtcRpcApiClient {
     origin,
     codecCapabilities,
     encodings,
+    isEnabled,
   }: {
     appId: string;
     channelId: string;
@@ -530,6 +531,7 @@ export class RtcRpcApiClient {
     origin?: string;
     codecCapabilities?: Codec[];
     encodings?: Encoding[];
+    isEnabled?: boolean;
   }) {
     const res = await this._rpc.request<{
       id: Publication['id'];
@@ -544,6 +546,7 @@ export class RtcRpcApiClient {
       encodings: encodings?.map((e) => ({
         id: e.id,
       })),
+      isEnabled,
       appId,
       authToken: this.token,
     });

@@ -192,6 +192,7 @@ export class P2PConnection implements SkyWayConnection {
         stream = this.receiver.streams[publicationId];
       }
 
+      stream.setIsEnabled(subscription.publication.state === 'enabled');
       subscription.codec = stream.codec;
       subscription._setStream(stream);
 

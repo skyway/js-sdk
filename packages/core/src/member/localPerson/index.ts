@@ -477,6 +477,7 @@ export class LocalPersonImpl extends MemberImpl implements LocalPerson {
       channel: this.channel.id,
       contentType: stream.contentType,
       codecCapabilities: options.codecCapabilities ?? [],
+      isEnabled: options.isEnabled,
     };
     if (
       stream.contentType === 'video' &&
@@ -502,6 +503,14 @@ export class LocalPersonImpl extends MemberImpl implements LocalPerson {
         });
       })
     );
+
+    // publication作成時にpublication.state=isEnabledとなり、その後isEnabledに合わせてpublicationのenableStream/disableStreamを呼び出してもsetIsEnabled/setEnabledが実行されない。
+    // そのままではpublication.stateとstreamで状態の乖離が発生する場合があるため、ここで直接実行し一致させておく。
+    if (stream.contentType === 'data') {
+      stream.setIsEnabled(published.isEnabled);
+    } else {
+      await stream.setEnabled(published.isEnabled);
+    }
 
     const publication = this.channel._addPublication(published);
     publication._setStream(stream);
@@ -956,6 +965,13 @@ export type PublicationOptions = {
    * P2Pを利用している場合、最もビットレートの低い設定のみが適用される。
    */
   encodings?: EncodingParameters[];
+  /**
+   * @description [japanese]
+   * publicationを有効にしてpublishするか指定する。
+   * デフォルトではtrueが設定される。
+   * falseに設定された場合、publicationは一時停止された状態でpublishされる。
+   */
+  isEnabled?: boolean;
 };
 
 export type SubscriptionOptions = {

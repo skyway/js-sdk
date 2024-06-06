@@ -233,10 +233,10 @@ export class PublicationImpl<T extends LocalStream = LocalStream>
     this.origin = args.origin;
     this.setCodecCapabilities(args.codecCapabilities ?? []);
     this.setEncodings(normalizeEncodings(args.encodings ?? []));
+    this._state = args.isEnabled ? 'enabled' : 'disabled';
     if (args.stream) {
       this._setStream(args.stream);
     }
-    this._state = args.isEnabled ? 'enabled' : 'disabled';
     this._analytics = this._channel.localPerson?._analytics;
 
     log.debug('publication spawned', this.toJSON());
@@ -255,8 +255,8 @@ export class PublicationImpl<T extends LocalStream = LocalStream>
   }
 
   /**@private */
-  _disable() {
-    this._disableStream();
+  async _disable() {
+    await this._disableStream();
 
     this.onDisabled.emit();
     this.onStateChanged.emit();
@@ -393,7 +393,7 @@ export class PublicationImpl<T extends LocalStream = LocalStream>
         this
       );
 
-      this._disableStream();
+      await this._disableStream();
 
       let failed = false;
       this._channel._disablePublication(this.id).catch((e) => {
@@ -421,7 +421,7 @@ export class PublicationImpl<T extends LocalStream = LocalStream>
         });
     });
 
-  private _disableStream() {
+  private async _disableStream() {
     if (this.state === 'disabled') {
       return;
     }
@@ -433,7 +433,7 @@ export class PublicationImpl<T extends LocalStream = LocalStream>
     if (this.stream.contentType === 'data') {
       this.stream.setIsEnabled(false);
     } else {
-      this.stream.setEnabled(false).catch((e) => {
+      await this.stream.setEnabled(false).catch((e) => {
         log.warn(
           createWarnPayload({
             channel: this._channel,

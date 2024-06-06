@@ -369,8 +369,9 @@ export class SkyWayChannelImpl implements Channel {
       async ({ publication }) =>
         await this._handleOnPublicationEnabled(publication)
     );
-    this._channelImpl.onPublicationDisabled.add(({ publication }) =>
-      this._handleOnPublicationDisabled(publication)
+    this._channelImpl.onPublicationDisabled.add(
+      async ({ publication }) =>
+        await this._handleOnPublicationDisabled(publication)
     );
     this._channelImpl.onPublicationSubscribed.add(({ subscription }) => {
       this._handleOnStreamSubscribe(subscription);
@@ -458,9 +459,11 @@ export class SkyWayChannelImpl implements Channel {
     this.onPublicationEnabled.emit({ publication });
   }
 
-  private _handleOnPublicationDisabled(publicationDto: model.Publication) {
+  private async _handleOnPublicationDisabled(
+    publicationDto: model.Publication
+  ) {
     const publication = this._getPublication(publicationDto.id);
-    publication._disable();
+    await publication._disable();
 
     this.onPublicationDisabled.emit({ publication });
   }
