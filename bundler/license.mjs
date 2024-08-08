@@ -5,7 +5,7 @@ import { appendFile, readFile, unlink } from 'fs/promises';
 import https from 'https';
 
 export async function createLicenses() {
-  await $`npm i`;
+  await $`npm i --ws false`; // ignore npm's workspace to create node_modules; license-checker needs to read node_modules.
 
   const deps = JSON.parse(
     (await $`npx license-checker --json --production`).stdout

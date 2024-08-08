@@ -17,7 +17,6 @@
     "LICENSE"
   ],
   "scripts": {
-    "bootstrap": "lerna bootstrap",
     "build": "cp -r ../../bundler ./ && zx ./bundler/private.mjs && rm -rf ./bundler",
     "compile": "npm run compile:tsc && npm run compile:esbuild",
     "compile:esbuild": "esbuild src/index.ts --bundle --format=esm --target=es6 --outfile=dist/index.mjs",

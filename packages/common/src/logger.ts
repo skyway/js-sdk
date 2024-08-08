@@ -100,7 +100,7 @@ export class Logger {
 
       switch (level) {
         case 'debug':
-          console.log(...log);
+          console.debug(...log);
           break;
         case 'info':
           console.info(...log);

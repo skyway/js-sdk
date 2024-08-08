@@ -1,6 +1,6 @@
 {
   "name": "@skyway-sdk/token",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "description": "The official Next Generation JavaScript SDK for SkyWay",
   "homepage": "https://skyway.ntt.com/",
   "repository": {
@@ -17,7 +17,6 @@
     "LICENSE"
   ],
   "scripts": {
-    "bootstrap": "lerna bootstrap",
     "build": "zx bundle.mjs",
     "compile": "npm run compile:tsc && npm run compile:esbuild",
     "compile:esbuild": "esbuild src/index.ts --bundle --format=esm --target=es6 --outfile=dist/index.mjs",
@@ -34,7 +33,7 @@
     "watch:tsc": "tsc -p tsconfig.build.json -w"
   },
   "dependencies": {
-    "@skyway-sdk/common": "^1.4.6",
+    "@skyway-sdk/common": "^1.4.7",
     "jsrsasign": "^11.0.0",
     "jwt-decode": "3.1.2",
     "uuid": "^9.0.0"
