@@ -1,11 +1,12 @@
 import {
   nowInSec,
+
   SkyWayAuthToken,
   SkyWayContext,
   SkyWayRoom,
   SkyWayStreamFactory,
-  uuidV4,
-} from '@skyway-sdk/room';
+  uuidV4 } from
+'@skyway-sdk/room';
 
 import { appId, secret } from '../../../env';
 
@@ -19,51 +20,52 @@ const token = new SkyWayAuthToken({
       turn: true,
       actions: ['read'],
       channels: [
+      {
+        id: '*',
+        name: '*',
+        actions: ['write'],
+        members: [
         {
           id: '*',
           name: '*',
           actions: ['write'],
-          members: [
-            {
-              id: '*',
-              name: '*',
-              actions: ['write'],
-              publication: {
-                actions: ['write'],
-              },
-              subscription: {
-                actions: ['write'],
-              },
-            },
-          ],
+          publication: {
+            actions: ['write']
+          },
+          subscription: {
+            actions: ['write']
+          }
+        }],
 
-          sfuBots: [
-            {
-              actions: ['write'],
-              forwardings: [
-                {
-                  actions: ['write'],
-                },
-              ],
-            },
-          ],
-        },
-      ],
-    },
-  },
+        sfuBots: [
+        {
+          actions: ['write'],
+          forwardings: [
+          {
+            actions: ['write']
+          }]
+
+        }]
+
+      }]
+
+    }
+  }
 }).encode(secret);
 
-(async () => {
+void (async () => {
   const localVideo = document.getElementById('local-video');
   const buttonArea = document.getElementById('button-area');
   const remoteMediaArea = document.getElementById('remote-media-area');
-  const roomNameInput = document.getElementById('room-name');
-
+  const roomNameInput = document.getElementById(
+    'room-name'
+  );
   const myId = document.getElementById('my-id');
   const joinButton = document.getElementById('join');
+  const leaveButton = document.getElementById('leave');
 
   const { audio, video } =
-    await SkyWayStreamFactory.createMicrophoneAudioAndCameraStream();
+  await SkyWayStreamFactory.createMicrophoneAudioAndCameraStream();
   video.attach(localVideo);
   await localVideo.play();
 
@@ -73,7 +75,7 @@ const token = new SkyWayAuthToken({
     const context = await SkyWayContext.Create(token);
     const room = await SkyWayRoom.FindOrCreate(context, {
       type: 'p2p',
-      name: roomNameInput.value,
+      name: roomNameInput.value
     });
     const me = await room.join();
 
@@ -86,11 +88,14 @@ const token = new SkyWayAuthToken({
       if (publication.publisher.id === me.id) return;
 
       const subscribeButton = document.createElement('button');
+      subscribeButton.id = `subscribe-button-${publication.id}`;
       subscribeButton.textContent = `${publication.publisher.id}: ${publication.contentType}`;
       buttonArea.appendChild(subscribeButton);
 
       subscribeButton.onclick = async () => {
-        const { stream } = await me.subscribe(publication.id);
+        const { stream } = await me.subscribe(
+          publication.id
+        );
 
         let newMedia;
         switch (stream.track.kind) {
@@ -107,7 +112,7 @@ const token = new SkyWayAuthToken({
           default:
             return;
         }
-
+        newMedia.id = `media-${publication.id}`;
         stream.attach(newMedia);
         remoteMediaArea.appendChild(newMedia);
       };
@@ -115,5 +120,19 @@ const token = new SkyWayAuthToken({
 
     room.publications.forEach(subscribeAndAttach);
     room.onStreamPublished.add((e) => subscribeAndAttach(e.publication));
+
+    leaveButton.onclick = async () => {
+      await me.leave();
+      await room.dispose();
+
+      myId.textContent = '';
+      buttonArea.replaceChildren();
+      remoteMediaArea.replaceChildren();
+    };
+
+    room.onStreamUnpublished.add((e) => {
+      document.getElementById(`subscribe-button-${e.publication.id}`)?.remove();
+      document.getElementById(`media-${e.publication.id}`)?.remove();
+    });
   };
 })();

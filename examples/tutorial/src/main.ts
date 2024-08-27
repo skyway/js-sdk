@@ -62,6 +62,7 @@ void (async () => {
   ) as HTMLInputElement;
   const myId = document.getElementById('my-id');
   const joinButton = document.getElementById('join');
+  const leaveButton = document.getElementById('leave');
 
   const { audio, video } =
     await SkyWayStreamFactory.createMicrophoneAudioAndCameraStream();
@@ -87,6 +88,7 @@ void (async () => {
       if (publication.publisher.id === me.id) return;
 
       const subscribeButton = document.createElement('button');
+      subscribeButton.id = `subscribe-button-${publication.id}`;
       subscribeButton.textContent = `${publication.publisher.id}: ${publication.contentType}`;
       buttonArea.appendChild(subscribeButton);
 
@@ -110,6 +112,7 @@ void (async () => {
           default:
             return;
         }
+        newMedia.id = `media-${publication.id}`;
         stream.attach(newMedia);
         remoteMediaArea.appendChild(newMedia);
       };
@@ -117,5 +120,19 @@ void (async () => {
 
     room.publications.forEach(subscribeAndAttach);
     room.onStreamPublished.add((e) => subscribeAndAttach(e.publication));
+
+    leaveButton.onclick = async () => {
+      await me.leave();
+      await room.dispose();
+
+      myId.textContent = '';
+      buttonArea.replaceChildren();
+      remoteMediaArea.replaceChildren();
+    };
+
+    room.onStreamUnpublished.add((e) => {
+      document.getElementById(`subscribe-button-${e.publication.id}`)?.remove();
+      document.getElementById(`media-${e.publication.id}`)?.remove();
+    });
   };
 })();
