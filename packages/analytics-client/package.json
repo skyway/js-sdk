@@ -1,6 +1,6 @@
 {
   "name": "@skyway-sdk/analytics-client",
-  "version": "0.1.0-beta4",
+  "version": "0.1.0-beta5",
   "description": "The official Next Generation JavaScript SDK for SkyWay",
   "homepage": "https://skyway.ntt.com/",
   "repository": {
@@ -44,7 +44,8 @@
     "@types/node": "^18.12.0",
     "@types/uuid": "^9.0.1",
     "@types/ws": "^8.5.10",
-    "jest": "^27.0.6"
+    "jest": "^27.0.6",
+    "jsonc-parser": "^3.3.1"
   },
   "keywords": [
     "webrtc",

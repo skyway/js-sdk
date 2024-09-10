@@ -289,6 +289,7 @@ export class Receiver {
             void analyticsSession.client.sendSubscriptionStatsReport(stats, {
               subscriptionId: this.subscription.id,
               role: 'receiver',
+              contentType: this.subscription.contentType,
               createdAt: Date.now(),
             });
           }

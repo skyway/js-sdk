@@ -705,6 +705,7 @@ export class Sender {
             void analyticsSession.client.sendSubscriptionStatsReport(stats, {
               subscriptionId: subscription.id,
               role: 'sender',
+              contentType: this.publication.contentType,
               createdAt: Date.now(),
             });
           }

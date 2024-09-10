@@ -1,3 +1,5 @@
+import { ContentType } from '@skyway-sdk/model';
+
 import {
   BindingRtcPeerConnectionToSubscriptionClientEvent,
   ClientEvent,
@@ -247,47 +249,81 @@ export class AnalyticsClient {
     });
   }
 
-  private _isDataChannelStatsReport(report: RTCStatsReport): boolean {
-    const castedStatsReport: SubscriptionStats = {};
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore RTCStatsReportの型エラー回避(TS2339: Property 'values' does not exist on type 'RTCStatsReport'.)
-    for (const rtcStatsReportValue of report.values()) {
-      castedStatsReport[rtcStatsReportValue.type] = rtcStatsReportValue;
-    }
-
-    if (castedStatsReport && 'data-channel' in castedStatsReport) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-
   /**
-   * DataChannelのstatsReportのobjectを処理する際の判定用関数
-   * 'data-channel', 'local-candidate', 'candidate-pair' が現在対象
-   * 'candidate-pair' の場合は nominated:true のもののみをtrueとする
+   * RTCStatsReportにはcandidate-pair, local-candidate, remote-candidateが複数含まれる場合がある。
+   * 現在利用されているもののみを選出して返す。
    */
-  private _isTargetTypeOfStatsReport(report: any, targetType: string[]): boolean {
-    if (!report) return false;
-    for (const type of targetType) {
-      if (report.type === type) {
-        if (type === 'data-channel' || type === 'local-candidate') {
-          return true;
-        } else if (type === 'candidate-pair') {
-          // 'candidate-pair' の場合は nominated:true のものであるかを確認
-          if ('nominated' in report && report.nominated === true) {
-            return true;
-          }
+  private filterStatsReport(report: RTCStatsReport) {
+    /**
+     * candidate-pairの選出について
+     * transportから現在利用されているcandidate-pairを特定することができる。
+     * ただしFirefoxの場合はtransportが含まれていない。(2024/09/04時点)
+     * 代わりにcandidate-pairにselectedが含まれているのでFFではこれを利用する。
+     */
+    const connectedTransport = Array.from(report.values()).find(
+      (rtcStatsReportValue) => rtcStatsReportValue.type === 'transport' && rtcStatsReportValue.dtlsState === 'connected'
+    );
+    const candidatePairKeys = [];
+    if (connectedTransport) {
+      /**
+       * connectedTransportが取れる場合:
+       * ChromeやSafariの場合はtransportの情報を使ってcandidate-pairを選出する
+       */
+      const nominatedCandidatePair = Array.from(report.values()).find(
+        (rtcStatsReportValue) =>
+          rtcStatsReportValue.type === 'candidate-pair' &&
+          rtcStatsReportValue.nominated &&
+          rtcStatsReportValue.id === connectedTransport?.selectedCandidatePairId
+      );
+      candidatePairKeys.push(
+        nominatedCandidatePair.id,
+        nominatedCandidatePair.localCandidateId,
+        nominatedCandidatePair.remoteCandidateId,
+        nominatedCandidatePair.transportId
+      );
+    } else {
+      /**
+       * connectedTransportが取れない場合:
+       * 現行FFの場合はcandidate-pairを直接みてnominated:trueかつselected:trueのものを選出する
+       */
+      const nominatedCandidatePair = Array.from(report.values()).find(
+        (rtcStatsReportValue) =>
+          rtcStatsReportValue.type === 'candidate-pair' && rtcStatsReportValue.nominated && rtcStatsReportValue.selected
+      );
+      candidatePairKeys.push(
+        nominatedCandidatePair.id,
+        nominatedCandidatePair.localCandidateId,
+        nominatedCandidatePair.remoteCandidateId,
+        nominatedCandidatePair.transportId
+      );
+    }
+
+    const filteredReport: Map<string, object> = new Map();
+    const duplicatableTypes = ['candidate-pair', 'local-candidate', 'remote-candidate', 'transport'];
+    for (const [key, rtcStatsReportValue] of report.entries()) {
+      if (duplicatableTypes.includes(rtcStatsReportValue.type)) {
+        // 重複し得るstats typeはnominateされたcandidate-pairから選出する
+        if (candidatePairKeys.includes(rtcStatsReportValue.id)) {
+          filteredReport.set(key, rtcStatsReportValue);
         }
+      } else {
+        filteredReport.set(key, rtcStatsReportValue);
       }
     }
-    // すべてのtypeに一致しない場合や条件に当てはまらない場合はfalse
-    return false;
+    return filteredReport as RTCStatsReport;
+  }
+
+  private bundleStatsReportByStatsType(report: RTCStatsReport): Record<string, Record<string, unknown>> {
+    const stats: SubscriptionStats = {};
+    for (const v of report.values()) {
+      stats[v.type] = v;
+    }
+    return stats;
   }
 
   async sendSubscriptionStatsReport(
     report: RTCStatsReport,
-    subscriptionParams: Omit<SubscriptionStatsReport, 'stats'>
+    subscriptionParams: Omit<SubscriptionStatsReport, 'stats'> & { contentType: ContentType }
   ): Promise<void> {
     const previousSubscriptionStat = this._previousSubscriptionStats.get(subscriptionParams.subscriptionId);
     this._previousSubscriptionStats.set(subscriptionParams.subscriptionId, {
@@ -299,6 +335,8 @@ export class AnalyticsClient {
       // 初回の場合は時間あたりの値が出せないので送信しない
       return;
     }
+    const filteredPreviousSubscriptionStats = this.filterStatsReport(previousSubscriptionStat.stats);
+    const prevBundledSubscriptionStats = this.bundleStatsReportByStatsType(filteredPreviousSubscriptionStats);
 
     const previousCreatedAt = previousSubscriptionStat.createdAt;
     const duration = (subscriptionParams.createdAt - previousCreatedAt) / 1000; // mills to sec.
@@ -306,121 +344,89 @@ export class AnalyticsClient {
       throw new Error('duration must be greater than 0. also sendSubscriptionStatsReport was duplicated.');
     }
 
-    const isDataChannelStatsReport = this._isDataChannelStatsReport(report);
-
-    const filteredStats: SubscriptionStats = {};
-    for (const statsRequestType of this._statsRequest.types) {
-      Object.keys(statsRequestType.properties).forEach((key) => {
-        const isNeedNormalization = statsRequestType.properties[key].normalization;
-        const outputKey = statsRequestType.properties[key].outputKey;
-
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore RTCStatsReportの型エラー回避(TS2339: Property 'values' does not exist on type 'RTCStatsReport'.)
-        for (const rtcStatsReportValue of report.values()) {
-          if (rtcStatsReportValue.type !== statsRequestType.type) continue;
-          Object.keys(rtcStatsReportValue).forEach((statName) => {
-            if (statName === key) {
-              // 時折プロパティがない場合があるため，今回分のデータをチェックしておく
-              if (!rtcStatsReportValue || !(statName in rtcStatsReportValue)) {
-                this._logger.warn(`statsReport key:${statName} in current statsReport is undefined`);
-                return;
-              }
-              if (isNeedNormalization) {
-                // 前回分のデータを使って時間あたりの値を計算する必要があるフィールドについてはこちらで処理
-                /**
-                 * idは接続が続いている間同じ値を取るので,前回保持したstatsから値を取り出す際に利用する
-                 * https://developer.mozilla.org/en-US/docs/Web/API/RTCStatsReport#common_instance_properties
-                 */
-
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                // @ts-ignore RTCStatsReportの型エラー回避(TS2339: Property 'get' does not exist on type 'RTCStatsReport')
-                const previousObject = previousSubscriptionStat.stats.get(rtcStatsReportValue.id);
-
-                // 時折プロパティがない場合があるため，前回分のデータをチェックしておく
-                if (!previousObject || !(key in previousObject)) {
-                  this._logger.warn(`statsReport key:${key} in previous statsReport is undefined`);
-                  return;
-                }
-                const previousValue = Number(previousObject[key]);
-                const perSecondValue = (Number(rtcStatsReportValue[statName]) - previousValue) / duration;
-
-                if (isDataChannelStatsReport) {
-                  // 'data-channel'の場合はbytesSent/bytesReceivedの両方とも格納されてしまうのでroleによって切り替える
-                  if (this._isTargetTypeOfStatsReport(rtcStatsReportValue, ['data-channel'])) {
-                    if (subscriptionParams.role === 'sender') {
-                      if (statName === 'bytesSent') {
-                        filteredStats[statsRequestType.type] = {
-                          ...filteredStats[statsRequestType.type],
-                          [outputKey]: String(perSecondValue),
-                        };
-                      }
-                    } else {
-                      if (statName === 'bytesReceived') {
-                        filteredStats[statsRequestType.type] = {
-                          ...filteredStats[statsRequestType.type],
-                          [outputKey]: String(perSecondValue),
-                        };
-                      }
-                    }
-                  } else if (
-                    this._isTargetTypeOfStatsReport(rtcStatsReportValue, ['local-candidate', 'candidate-pair'])
-                  ) {
-                    filteredStats[statsRequestType.type] = {
-                      ...filteredStats[statsRequestType.type],
-                      [outputKey]: String(perSecondValue),
-                    };
-                  }
-                } else {
-                  /**
-                   * this._statsRequest で保持している変換用のobjectは同一のkeyが複数回出てくるので，上書きしないためにスプレッド構文を利用する．
-                   * またServer側で受け付けているstatsの値はstringなので変換してやる必要あり．
-                   */
-                  filteredStats[statsRequestType.type] = {
-                    ...filteredStats[statsRequestType.type],
-                    [outputKey]: String(perSecondValue),
-                  };
-                }
-              } else {
-                // 時間あたりの値を計算する必要がないフィールドはこちらで処理
-                if (isDataChannelStatsReport) {
-                  if (
-                    this._isTargetTypeOfStatsReport(rtcStatsReportValue, [
-                      'data-channel',
-                      'local-candidate',
-                      'candidate-pair',
-                    ])
-                  ) {
-                    if (rtcStatsReportValue.type === 'candidate-pair') {
-                      // 'candidate-pair'はvideo/audioがある場合，他のフィールド:availableOutgoingBitrateも入ってきてしまうため必要なものに限定する
-                      if (statName === 'currentRoundTripTime') {
-                        filteredStats[statsRequestType.type] = {
-                          ...filteredStats[statsRequestType.type],
-                          [outputKey]: String(rtcStatsReportValue[statName]),
-                        };
-                      }
-                    } else {
-                      filteredStats[statsRequestType.type] = {
-                        ...filteredStats[statsRequestType.type],
-                        [outputKey]: String(rtcStatsReportValue[statName]),
-                      };
-                    }
-                  }
-                } else {
-                  filteredStats[statsRequestType.type] = {
-                    ...filteredStats[statsRequestType.type],
-                    [outputKey]: String(rtcStatsReportValue[statName]),
-                  };
-                }
-              }
+    // contentTypeでALからのrequestStatsを整理する
+    const isDataChannelStatsReport = subscriptionParams.contentType === 'data';
+    const requestedStatsTypes = this._statsRequest.types
+      .filter((statsRequestType) => {
+        // contentTypeによって必要とされるstatsRequestTypeが異なるので、このsubscriptionのcontentTypeに必要なものだけを抽出する
+        return (
+          (isDataChannelStatsReport &&
+            ['local-candidate', 'candidate-pair', 'data-channel'].includes(statsRequestType.type)) ||
+          (!isDataChannelStatsReport && statsRequestType.type !== 'data-channel')
+        );
+      })
+      .map((statsRequestType) => {
+        // contentTypeによって必要とされるstatsRequestTypeのpropertiesの中身が異なるので、
+        // このsubscriptionのcontentTypeに必要なものだけを抽出する
+        switch (statsRequestType.type) {
+          case 'data-channel':
+            if (subscriptionParams.role === 'sender') {
+              // senderの場合はbytesReceivedを除外
+              const { bytesReceived, ...rest } = statsRequestType.properties;
+              return {
+                type: statsRequestType.type,
+                properties: rest,
+              };
+            } else {
+              // receiverの場合はbytesSentを除外
+              const { bytesSent, ...rest } = statsRequestType.properties;
+              return {
+                type: statsRequestType.type,
+                properties: rest,
+              };
             }
-          });
+          case 'candidate-pair': {
+            if (isDataChannelStatsReport) {
+              // contentType === 'data' の場合はcandidate-pairのavailableOutgoingBitrateを除外
+              const { availableOutgoingBitrate, ...rest } = statsRequestType.properties;
+              return {
+                type: statsRequestType.type,
+                properties: rest,
+              };
+            } else {
+              return statsRequestType;
+            }
+          }
+          default:
+            return statsRequestType;
         }
       });
+
+    const filteredStatsReport = this.filterStatsReport(report);
+    const bundledStatsReport = this.bundleStatsReportByStatsType(filteredStatsReport);
+
+    // StatsReportから必要な値だけを抽出してSubscriptionStatsに格納する
+    const subscriptionStats: SubscriptionStats = {};
+    for (const { type, properties } of requestedStatsTypes) {
+      for (const [prop, { normalization: normRequired, outputKey }] of Object.entries(properties)) {
+        const statsReport = bundledStatsReport[type];
+        if (statsReport === undefined || statsReport[prop] === undefined) {
+          continue;
+        }
+        if (normRequired) {
+          const previousValue = prevBundledSubscriptionStats[type]?.[prop];
+          if (previousValue === undefined) {
+            this._logger.warn(`${type} in previous statsReport is undefined`);
+            continue;
+          }
+
+          const perSecondValue = (Number(statsReport[prop]) - Number(previousValue)) / duration;
+          subscriptionStats[type] = {
+            ...subscriptionStats[type],
+            [outputKey]: String(perSecondValue),
+          };
+        } else {
+          subscriptionStats[type] = {
+            ...subscriptionStats[type],
+            [outputKey]: String(statsReport[prop]),
+          };
+        }
+      }
     }
 
     const payload: SubscriptionStatsReport = {
       subscriptionId: subscriptionParams.subscriptionId,
-      stats: filteredStats,
+      stats: subscriptionStats,
       role: subscriptionParams.role,
       createdAt: subscriptionParams.createdAt,
     };

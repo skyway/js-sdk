@@ -329,6 +329,7 @@ export class P2PConnection implements SkyWayConnection {
             void this._analytics.client.sendSubscriptionStatsReport(stats, {
               subscriptionId: subscriptionId,
               role: role,
+              contentType: stream.contentType,
               createdAt: Date.now(),
             });
           }
