@@ -50,6 +50,10 @@ export class LocalCustomVideoStream extends LocalMediaStreamBase {
     this._onEnableChanged.emit(track);
   }
 
+  /**
+   * @deprecated
+   * @use {@link Publication.state}
+   */
   get isEnabled() {
     return this._isEnabled;
   }

@@ -1,4 +1,4 @@
-@skyway-sdk/analytics-client@0.1.0-beta5
+@skyway-sdk/analytics-client@1.0.0
 
 MIT
 
@@ -60,7 +60,7 @@ SOFTWARE.
 
 ---
 
-@skyway-sdk/core@1.9.2
+@skyway-sdk/core@1.10.0
 
 MIT
 
@@ -122,7 +122,7 @@ SOFTWARE.
 
 ---
 
-@skyway-sdk/room@1.9.2
+@skyway-sdk/room@1.10.0
 
 MIT
 
@@ -153,7 +153,7 @@ SOFTWARE.
 
 ---
 
-@skyway-sdk/rtc-api-client@1.7.2
+@skyway-sdk/rtc-api-client@1.7.3
 
 MIT
 
@@ -184,7 +184,7 @@ SOFTWARE.
 
 ---
 
-@skyway-sdk/rtc-rpc-api-client@1.7.2
+@skyway-sdk/rtc-rpc-api-client@1.7.3
 
 MIT
 
@@ -246,7 +246,7 @@ SOFTWARE.
 
 ---
 
-@skyway-sdk/sfu-bot@1.9.2
+@skyway-sdk/sfu-bot@1.10.0
 
 MIT
 
@@ -277,7 +277,7 @@ SOFTWARE.
 
 ---
 
-@skyway-sdk/signaling-client@1.0.6
+@skyway-sdk/signaling-client@1.0.7
 
 MIT
 
@@ -308,7 +308,7 @@ SOFTWARE.
 
 ---
 
-@skyway-sdk/token@1.6.2
+@skyway-sdk/token@1.6.3
 
 MIT
 
@@ -1226,7 +1226,7 @@ SOFTWARE.
 
 ---
 
-ua-parser-js@1.0.38
+ua-parser-js@1.0.39
 
 MIT
 
@@ -1234,7 +1234,7 @@ https://github.com/faisalman/ua-parser-js
 
 MIT License
 
-Copyright (c) 2012-2023 Faisal Salman <<f@faisalman.com>>
+Copyright (c) 2012-2024 Faisal Salman <<f@faisalman.com>>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -1257,7 +1257,7 @@ SOFTWARE.
 
 ---
 
-uuid@9.0.1
+uuid@9.0.0
 
 MIT
 

@@ -48,7 +48,11 @@ export interface Publication<T extends LocalStream = LocalStream> {
 
   //--------------------
 
-  /** @description [japanese] Unpublishされた時に発火するイベント */
+  /**
+   * @deprecated
+   * @use {@link LocalPerson.onStreamUnpublished} or {@link Channel.onStreamUnpublished}
+   * @description [japanese] Unpublishされた時に発火するイベント
+   */
   onCanceled: Event<void>;
   /** @description [japanese] Subscribeされた時に発火するイベント */
   onSubscribed: Event<StreamSubscribedEvent>;
@@ -79,6 +83,8 @@ export interface Publication<T extends LocalStream = LocalStream> {
    */
   updateMetadata: (metadata: string) => Promise<void>;
   /**
+   * @deprecated
+   * @use {@link LocalPerson.unpublish}
    * @description [japanese] unpublishする
    */
   cancel: () => Promise<void>;
@@ -299,6 +305,10 @@ export class PublicationImpl<T extends LocalStream = LocalStream>
     this.onSubscriptionListChanged.emit();
   }
 
+  /**
+   * @deprecated
+   * @use {@link LocalPerson.unpublish}
+   */
   cancel = () =>
     new Promise<void>((r, f) => {
       let failed = false;

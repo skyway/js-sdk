@@ -151,6 +151,7 @@ export interface Channel {
   leave: (member: Member) => Promise<void>;
 
   /**
+   * @deprecated
    * @description [japanese] 別のChannelのMemberを移動させる
    */
   moveChannel: (adapter: LocalPerson) => Promise<void>;

@@ -63,6 +63,9 @@ export class Forwarding {
     };
   }
 
+  /**
+   * @deprecated
+   */
   async confirmSubscription(subscription: Subscription) {
     log.debug('[start] Forwarding confirmSubscription');
     const { message } = await this._api

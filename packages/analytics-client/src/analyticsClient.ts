@@ -90,6 +90,8 @@ export class AnalyticsClient {
         [property: string]: {
           normalization: boolean;
           outputKey: string;
+          // property の収集・送信対象となる subscription の contentType
+          contentType: ('audio' | 'video' | 'data')[];
         };
       };
     }[];
@@ -344,61 +346,16 @@ export class AnalyticsClient {
       throw new Error('duration must be greater than 0. also sendSubscriptionStatsReport was duplicated.');
     }
 
-    // contentTypeでALからのrequestStatsを整理する
-    const isDataChannelStatsReport = subscriptionParams.contentType === 'data';
-    const requestedStatsTypes = this._statsRequest.types
-      .filter((statsRequestType) => {
-        // contentTypeによって必要とされるstatsRequestTypeが異なるので、このsubscriptionのcontentTypeに必要なものだけを抽出する
-        return (
-          (isDataChannelStatsReport &&
-            ['local-candidate', 'candidate-pair', 'data-channel'].includes(statsRequestType.type)) ||
-          (!isDataChannelStatsReport && statsRequestType.type !== 'data-channel')
-        );
-      })
-      .map((statsRequestType) => {
-        // contentTypeによって必要とされるstatsRequestTypeのpropertiesの中身が異なるので、
-        // このsubscriptionのcontentTypeに必要なものだけを抽出する
-        switch (statsRequestType.type) {
-          case 'data-channel':
-            if (subscriptionParams.role === 'sender') {
-              // senderの場合はbytesReceivedを除外
-              const { bytesReceived, ...rest } = statsRequestType.properties;
-              return {
-                type: statsRequestType.type,
-                properties: rest,
-              };
-            } else {
-              // receiverの場合はbytesSentを除外
-              const { bytesSent, ...rest } = statsRequestType.properties;
-              return {
-                type: statsRequestType.type,
-                properties: rest,
-              };
-            }
-          case 'candidate-pair': {
-            if (isDataChannelStatsReport) {
-              // contentType === 'data' の場合はcandidate-pairのavailableOutgoingBitrateを除外
-              const { availableOutgoingBitrate, ...rest } = statsRequestType.properties;
-              return {
-                type: statsRequestType.type,
-                properties: rest,
-              };
-            } else {
-              return statsRequestType;
-            }
-          }
-          default:
-            return statsRequestType;
-        }
-      });
-
     const filteredStatsReport = this.filterStatsReport(report);
     const bundledStatsReport = this.bundleStatsReportByStatsType(filteredStatsReport);
 
     // StatsReportから必要な値だけを抽出してSubscriptionStatsに格納する
     const subscriptionStats: SubscriptionStats = {};
-    for (const { type, properties } of requestedStatsTypes) {
-      for (const [prop, { normalization: normRequired, outputKey }] of Object.entries(properties)) {
+    for (const { type, properties } of this._statsRequest.types) {
+      for (const [prop, { normalization: normRequired, outputKey, contentType }] of Object.entries(properties)) {
+        if (!contentType.includes(subscriptionParams.contentType)) {
+          continue;
+        }
         const statsReport = bundledStatsReport[type];
         if (statsReport === undefined || statsReport[prop] === undefined) {
           continue;

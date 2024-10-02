@@ -32,7 +32,11 @@ export interface RoomSubscription<
   readonly publication: RoomPublication;
   /**@description [japanese] このSubscriptionにStreamが紐つけられた時に発火する */
   readonly onStreamAttached: Event<void>;
-  /**@description [japanese] このSubscriptionがUnsubscribeされた時に発火する */
+  /**
+   * @deprecated
+   * @use {@link LocalPerson.onPublicationUnsubscribed} or {@link Channel.onPublicationUnsubscribed}
+   * @description [japanese] このSubscriptionがUnsubscribeされた時に発火する
+   */
   readonly onCanceled: Event<void>;
   /**
    * @description [japanese] メディア通信の状態が変化した時に発火するイベント
@@ -51,6 +55,8 @@ export interface RoomSubscription<
   preferredEncoding?: string;
   state: RoomSubscriptionState;
   /**
+   * @deprecated
+   * @use {@link LocalPerson.unsubscribe}
    * @description [japanese] unsubscribeする
    */
   cancel: () => Promise<void>;

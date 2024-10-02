@@ -33,7 +33,11 @@ export interface Subscription<
   publication: Publication;
   subscriber: RemoteMember;
   state: SubscriptionState;
-  /** @description [japanese] unsubscribeした時に発火するイベント */
+  /**
+   * @deprecated
+   * @use {@link LocalPerson.onPublicationUnsubscribed} or {@link Channel.onPublicationUnsubscribed}
+   * @description [japanese] unsubscribeした時に発火するイベント
+   */
   onCanceled: Event<void>;
   /** @description [japanese] SubscriptionにStreamが紐つけられた時に発火するイベント */
   onStreamAttached: Event<void>;
@@ -55,6 +59,8 @@ export interface Subscription<
    */
   preferredEncoding?: string;
   /**
+   * @deprecated
+   * @use {@link LocalPerson.unsubscribe}
    * @description [japanese] unsubscribeする
    */
   cancel: () => Promise<void>;

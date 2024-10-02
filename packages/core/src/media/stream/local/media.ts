@@ -36,6 +36,10 @@ export abstract class LocalMediaStreamBase extends LocalStreamBase {
   _replacingTrack = false;
   /**@internal */
   _onReplacingTrackDone = new Event<void>();
+  /**
+   * @deprecated
+   * @use {@link Publication.state}
+   */
   abstract isEnabled: boolean;
   /**@internal */
   _onEnableChanged = new Event<MediaStreamTrack | null>();

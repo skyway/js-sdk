@@ -7,6 +7,7 @@ export type OpenServerEventPayload = {
         [property: string]: {
           normalization: boolean;
           outputKey: string;
+          contentType: ('audio' | 'video' | 'data')[];
         };
       };
     }[];

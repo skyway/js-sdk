@@ -53,7 +53,11 @@ export interface RoomPublication<T extends LocalStream = LocalStream> {
    * ローカルで作られたPublicationでなければundefinedとなる
    */
   readonly stream?: T;
-  /**@description [japanese] このPublicationがUnPublishされたときに発火するイベント */
+  /**
+   * @deprecated
+   * @use {@link LocalPerson.onStreamUnpublished} or {@link Channel.onStreamUnpublished}
+   * @description [japanese] このPublicationがUnPublishされたときに発火するイベント
+   */
   readonly onCanceled: Event<void>;
   /**@description [japanese] このPublicationがSubscribeされたときに発火するイベント */
   readonly onSubscribed: Event<StreamSubscribedEvent>;
@@ -84,6 +88,8 @@ export interface RoomPublication<T extends LocalStream = LocalStream> {
    */
   updateMetadata: (metadata: string) => Promise<void>;
   /**
+   * @deprecated
+   * @use {@link LocalPerson.unpublish}
    * @description [japanese] unpublishする
    */
   cancel: () => Promise<void>;
@@ -241,6 +247,11 @@ export class RoomPublicationImpl<StreamType extends LocalStream = LocalStream>
     return this._preferredPublication.metadata;
   }
 
+  /**
+   * @deprecated
+   * @use {@link LocalPerson.unpublish}
+   * @description [japanese] unpublishする
+   */
   async cancel() {
     await Promise.all([
       this._preferredPublication.cancel(),

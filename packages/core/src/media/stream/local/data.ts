@@ -19,6 +19,10 @@ export class LocalDataStream extends LocalStreamBase {
     this._setLabel('LocalDataStream');
   }
 
+  /**
+   * @deprecated
+   * @use {@link Publication.state}
+   */
   get isEnabled() {
     return this._isEnabled;
   }
