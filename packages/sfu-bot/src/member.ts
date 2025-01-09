@@ -168,17 +168,6 @@ export class SfuBotMember
       configure.maxSubscribers = defaultMaxSubscribers;
     }
 
-    if (configure.maxSubscribers === 0) {
-      throw createError({
-        operationName: 'SfuBotMember._startForwarding',
-        context: this._context,
-        channel: this.channel,
-        info: errors.maxSubscribersMustNotBeZero,
-        path: log.prefix,
-        payload: { configure },
-      });
-    }
-
     if (this.state !== 'joined') {
       throw createError({
         operationName: 'SfuBotMember._startForwarding',

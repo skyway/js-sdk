@@ -10,11 +10,6 @@ export const errors = {
     detail: 'SfuBotがChannelに存在しません',
     solution: '操作しようとしているSfuBotが正しいか確かめてください',
   },
-  maxSubscribersMustNotBeZero: {
-    name: 'maxSubscribersMustNotBeZero',
-    detail: 'maxSubscribersは１以上である必要があります',
-    solution: '正しい値を入力してください',
-  },
   remotePublisherId: {
     name: 'remotePublisherId',
     detail: 'publisherがremoteのPublicationをForwardingすることはできません',

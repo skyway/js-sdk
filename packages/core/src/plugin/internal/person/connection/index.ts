@@ -285,7 +285,12 @@ export class P2PConnection implements SkyWayConnection {
 
     this.sender.close();
     this.receiver.close();
-
+    for (const timer of this.sendSubscriptionStatsReportTimers.values()) {
+      clearInterval(timer);
+    }
+    this.sendSubscriptionStatsReportTimers.clear();
+    this._waitingSendSubscriptionStatsReportsFromPublish.clear();
+    this._waitingSendSubscriptionStatsReportsFromSubscribe = [];
     this.onClose.emit();
   }
 

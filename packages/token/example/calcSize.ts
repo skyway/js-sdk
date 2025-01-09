@@ -1,47 +1,40 @@
 import { secret } from '../../../env';
 import { nowInSec } from '../dist';
 import {
-  AppActions,
-  ChannelActions,
   ChannelScope,
-  ForwardingActions,
-  MemberActions,
-  PublicationActions,
-  SfuBotActions,
-  SfuSubscriptionActions,
   SkyWayAuthToken,
-  SubscriptionActions,
   uuidV4,
 } from '../src';
 
 const token = new SkyWayAuthToken({
+  version: 1,
   jti: uuidV4(),
   iat: nowInSec(),
   exp: nowInSec() + 60 * 60,
   scope: {
     app: {
       id: uuidV4(),
-      actions: AppActions,
+      actions: ['read'],
       channels: [...new Array(10)].map(
         () =>
           ({
             name: uuidV4(),
-            actions: ChannelActions,
+            actions: ['write'],
             members: [
               {
                 name: uuidV4(),
-                actions: MemberActions,
-                publication: { actions: PublicationActions },
-                subscription: { actions: SubscriptionActions },
+                actions: ['write'],
+                publication: { actions: ['write'] },
+                subscription: { actions: ['write'] },
               },
             ],
             sfuBots: [
               {
-                actions: SfuBotActions,
+                actions: ['write'],
                 forwardings: [
                   {
-                    actions: ForwardingActions,
-                    subscription: { actions: SfuSubscriptionActions },
+                    actions: ['write'],
+                    subscription: { actions: ['write'] },
                   },
                 ],
               },

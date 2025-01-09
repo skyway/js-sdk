@@ -1,6 +1,6 @@
 {
   "name": "@skyway-sdk/room",
-  "version": "1.10.0",
+  "version": "1.11.0",
   "description": "The official Next Generation JavaScript SDK for SkyWay",
   "homepage": "https://skyway.ntt.com/",
   "repository": {
@@ -45,8 +45,8 @@
     "watch:tsc": "tsc -p tsconfig.build.json -w"
   },
   "dependencies": {
-    "@skyway-sdk/core": "^1.10.0",
-    "@skyway-sdk/sfu-bot": "^1.10.0",
+    "@skyway-sdk/core": "^1.11.0",
+    "@skyway-sdk/sfu-bot": "^1.11.0",
     "uuid": "^9.0.0"
   },
   "devDependencies": {

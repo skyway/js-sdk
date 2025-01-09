@@ -93,8 +93,9 @@ export class SfuBotPlugin extends SkyWayPlugin {
         channel: channel as SkyWayChannelImpl,
       })
     );
+    const appId = this._context!.authToken.getAppId();
     const botId = await this._api.createBot({
-      appId: this._context!.authToken.scope.app.id,
+      appId,
       channelId: channel.id,
     });
     const member =
@@ -129,7 +130,8 @@ export class SfuBotPlugin extends SkyWayPlugin {
   };
 
   /**
-   * @description [japanese] SFU BotをChannelから削除する
+   * @description [japanese] SFU BotをChannelから削除する。
+   * @remarks SkyWayAuthToken v3 を利用した場合はこのメソッドを使うことができません。代替手段として Channel.leave メソッドまたは Member.leave メソッドを使用して SFU Bot を Channel から退出させてください。
    */
   deleteBot = async (channel: Channel, botId: string) =>
     new Promise<void>(async (r, f) => {

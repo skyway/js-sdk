@@ -1,7 +1,7 @@
 import WebSocket from 'isomorphic-ws';
 
 import { ClientEvent } from './clientEvent';
-import { isOpenServerEventPayload, OpenServerEventPayload } from './payloadTypes';
+import { ConnectionFailedEventPayload, isOpenServerEventPayload, OpenServerEventPayload } from './payloadTypes';
 import { Event } from './utils/event';
 import { Logger } from './utils/logger';
 
@@ -66,7 +66,7 @@ export class Socket {
 
   readonly onEventReceived = new Event<ServerEvent>();
 
-  readonly onConnectionFailed = new Event<void>();
+  readonly onConnectionFailed = new Event<ConnectionFailedEventPayload>();
 
   private _reconnectTimer: ReturnType<typeof setTimeout> | undefined;
 
@@ -163,13 +163,8 @@ export class Socket {
         return;
       }
 
-      // Return not to destroy _ws successfully reconnected
-      if (event.code === 4000) {
-        return;
-      }
-
       this._logger.debug('Closed the connection to analytics-logging-server');
-      this.onConnectionFailed.emit();
+      this.onConnectionFailed.emit({ code: event.code, reason: event.reason });
       this.close();
     };
 
@@ -193,7 +188,7 @@ export class Socket {
 
     // getReconnectWaitTime により30秒程まで再試行するため5を指定している
     if (this._reconnectCount >= 5) {
-      this.onConnectionFailed.emit();
+      this.onConnectionFailed.emit({});
       this.close();
       this._logger.error('Failed to reconnect for five times', new Error());
     } else {

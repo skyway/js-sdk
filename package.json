@@ -59,10 +59,11 @@
     "organize-imports-cli": "^0.10.0",
     "prettier": "^2.4.1",
     "ts-jest": "^29.2.5",
-    "typedoc": "^0.26.7",
+    "typedoc": "^0.25.0",
     "typedoc-plugin-markdown": "3.17.1",
+    "typedoc-plugin-zod": "^1.3.1",
     "typescript": "4.7.4",
-    "zx": "^7.0.8"
+    "zx": "^7.2.3"
   },
   "packageManager": "npm@10.8.1+sha256.b8807aebb9656758e2872fa6e7c564b506aa2faa9297439a478d471d2fe32483",
   "engines": {

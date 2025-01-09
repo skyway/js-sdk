@@ -64,3 +64,8 @@ export function isAcknowledgePayload(payload: any): payload is AcknowledgePayloa
     return false;
   return true;
 }
+
+export type ConnectionFailedEventPayload = {
+  code?: number;
+  reason?: string;
+};

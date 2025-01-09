@@ -10,7 +10,7 @@ import {
   SubscriptionStatsReportClientEvent,
   SubscriptionUpdatePreferredEncodingReportClientEvent,
 } from './clientEvent';
-import { AcknowledgePayload, isAcknowledgePayload } from './payloadTypes';
+import { AcknowledgePayload, ConnectionFailedEventPayload, isAcknowledgePayload } from './payloadTypes';
 import { ConnectionState, ServerEvent, Socket } from './socket';
 import { BackOff } from './utils/backoff';
 import { Event } from './utils/event';
@@ -53,6 +53,8 @@ export class AnalyticsClient {
   readonly onConnectionStateChanged = new Event<ConnectionState>();
 
   readonly onConnectionFailed = new Event<void>();
+
+  readonly onAnalyticsNotEnabledError = new Event<ConnectionFailedEventPayload>();
 
   private _token: string;
 
@@ -162,7 +164,12 @@ export class AnalyticsClient {
       }
     });
 
-    this._socket.onConnectionFailed.addListener(() => {
+    this._socket.onConnectionFailed.addListener((data) => {
+      // 現状の実装として4000はダッシュボード上でAnalyticsが有効になってない場合のエラーである
+      // 初回接続時のconnectWithTimeoutのtimeoutよりPromiseを先に解決させるためのEventをemitする
+      if (data.code === 4000) {
+        this.onAnalyticsNotEnabledError.emit(data);
+      }
       this.onConnectionFailed.emit();
       this._cleanupAnalyticsClientMaps();
     });
@@ -277,12 +284,14 @@ export class AnalyticsClient {
           rtcStatsReportValue.nominated &&
           rtcStatsReportValue.id === connectedTransport?.selectedCandidatePairId
       );
-      candidatePairKeys.push(
-        nominatedCandidatePair.id,
-        nominatedCandidatePair.localCandidateId,
-        nominatedCandidatePair.remoteCandidateId,
-        nominatedCandidatePair.transportId
-      );
+      if (nominatedCandidatePair) {
+        candidatePairKeys.push(
+          nominatedCandidatePair.id,
+          nominatedCandidatePair.localCandidateId,
+          nominatedCandidatePair.remoteCandidateId,
+          nominatedCandidatePair.transportId
+        );
+      }
     } else {
       /**
        * connectedTransportが取れない場合:
@@ -292,12 +301,14 @@ export class AnalyticsClient {
         (rtcStatsReportValue) =>
           rtcStatsReportValue.type === 'candidate-pair' && rtcStatsReportValue.nominated && rtcStatsReportValue.selected
       );
-      candidatePairKeys.push(
-        nominatedCandidatePair.id,
-        nominatedCandidatePair.localCandidateId,
-        nominatedCandidatePair.remoteCandidateId,
-        nominatedCandidatePair.transportId
-      );
+      if (nominatedCandidatePair) {
+        candidatePairKeys.push(
+          nominatedCandidatePair.id,
+          nominatedCandidatePair.localCandidateId,
+          nominatedCandidatePair.remoteCandidateId,
+          nominatedCandidatePair.transportId
+        );
+      }
     }
 
     const filteredReport: Map<string, object> = new Map();

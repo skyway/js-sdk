@@ -41,7 +41,7 @@ export async function createLocalPerson(
       : await setupSignalingSession(context, channel, memberDto);
 
   const decodedToken = SkyWayAuthToken.Decode(context.authTokenString);
-  const existAnalyticsScope = decodedToken.scope.app.analytics ?? false;
+  const existAnalyticsScope = decodedToken.getAnalyticsEnabled();
 
   const analyticsSession =
     disableAnalytics === true || !existAnalyticsScope

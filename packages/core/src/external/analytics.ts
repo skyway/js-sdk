@@ -137,8 +137,18 @@ export class AnalyticsSession {
         reject(new Error('failed connect analyticsService'));
       }, 30 * 1000);
     });
+    const firstConnectionFailedPromise = new Promise<void>((resolve, _) => {
+      this.client.onAnalyticsNotEnabledError.addOneTimeListener((data) => {
+        log.warn(`[end] failed connect analyticsService: ${data.reason}`);
+        resolve();
+      });
+    });
 
-    return Promise.race([this._connect(), timeoutPromise]).finally(() => {
+    return Promise.race([
+      this._connect(),
+      timeoutPromise,
+      firstConnectionFailedPromise,
+    ]).finally(() => {
       clearTimeout(connectTimeout);
     });
   }

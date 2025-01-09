@@ -56,8 +56,9 @@ export class SkyWayContext {
     });
 
     try {
+      const appId = token.getAppId();
       const api = await RtcApiClient.Create({
-        appId: token.scope.app.id,
+        appId,
         token: authTokenString,
         log: config.log,
         rtcApi: config.rtcApi,
@@ -124,7 +125,7 @@ export class SkyWayContext {
     readonly info: { endpoint: EndpointInfo; runtime: RuntimeInfo }
   ) {
     this._authTokenString = authToken.tokenString!;
-    this.appId = this.authToken.scope.app.id;
+    this.appId = this.authToken.getAppId();
 
     registerPersonPlugin(this);
 
@@ -201,18 +202,19 @@ export class SkyWayContext {
    */
   async updateAuthToken(token: string) {
     const newToken = SkyWayAuthToken.Decode(token);
+    const newAppId = newToken.getAppId();
     log.info(
       { operationName: 'SkyWayContext.updateAuthToken' },
       { oldToken: this.authToken, newToken }
     );
 
-    if (newToken.scope.app.id !== this.appId) {
+    if (newAppId !== this.appId) {
       throw createError({
         operationName: 'SkyWayContext.updateAuthToken',
         context: this,
         info: errors.invalidTokenAppId,
         path: log.prefix,
-        payload: { invalid: this.authToken.scope.app.id, expect: this.appId },
+        payload: { invalid: newAppId, expect: this.appId },
       });
     }
 
