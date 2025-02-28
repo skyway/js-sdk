@@ -1,5 +1,6 @@
 {
   "name": "p2p-room",
+  "private": true,
   "version": "1.0.0",
   "description": "",
   "author": "",
@@ -14,7 +15,7 @@
     "last 3 chrome versions"
   ],
   "dependencies": {
-    "@skyway-sdk/room": "^1.0.0-rc.0"
+    "@skyway-sdk/room": "^1.11.1"
   },
   "devDependencies": {
     "@babel/cli": "^7.0.0",

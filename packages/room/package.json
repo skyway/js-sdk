@@ -1,6 +1,6 @@
 {
   "name": "@skyway-sdk/room",
-  "version": "1.11.0",
+  "version": "1.11.1",
   "description": "The official Next Generation JavaScript SDK for SkyWay",
   "homepage": "https://skyway.ntt.com/",
   "repository": {
@@ -26,17 +26,15 @@
     "doc:md": "rm -rf docs/md && typedoc --excludePrivate --disableSources --excludeInternal --tsconfig ./tsconfig.build.json --out docs/md --plugin typedoc-plugin-markdown ./src/index.ts ",
     "test": "npm run e2e",
     "e2e": "npm-run-all -p jest test-large test-extra",
-    "e2e:firefox": "karma start ./karma.large.js --single-run --browsers FirefoxHeadlessAutoAllowGUM && karma start ./karma.extra.js --single-run --browsers FirefoxHeadlessAutoAllowGUM",
-    "e2e:safari": "karma start ./karma.large.js --single-run --browsers safari && karma start ./karma.extra.js --single-run --browsers safari",
     "format": "eslint ./src --fix && eslint ./tests --fix",
     "graph": "dependency-cruiser --include-only '^src' --output-type dot src | dot -T svg > docs/dependencygraph.svg",
     "jest": "jest",
     "lint": "eslint ./src --fix && eslint ./tests --fix",
     "publish:npm": "npx can-npm-publish --verbose && npm run build && npm publish --access public",
-    "test-extra": "karma start ./karma.extra.js --single-run --browsers chrome_headless_with_fake_device",
-    "test-extra:dev": "karma start ./karma.extra.js --browsers chrome_with_fake_device",
-    "test-large": "karma start ./karma.large.js --single-run --browsers chrome_headless_with_fake_device",
-    "test-large:dev": "karma start ./karma.large.js --browsers chrome_with_fake_device",
+    "test-extra": "vitest --config vitest.extra.ts run ./tests/extra",
+    "test-extra:dev": "vitest --config vitest.extra.ts --browser.headless=false run ./tests/extra",
+    "test-large": "vitest --config vitest.large.ts run ./tests/large",
+    "test-large:dev": "vitest --config vitest.large.ts --browser.headless=false run ./tests/large",
     "type": "npm run type:main",
     "type:main": "tsc --noEmit -p ./tsconfig.json",
     "type:prod": "tsc --noEmit -p ./tsconfig.build.json",
@@ -46,7 +44,7 @@
   },
   "dependencies": {
     "@skyway-sdk/core": "^1.11.0",
-    "@skyway-sdk/sfu-bot": "^1.11.0",
+    "@skyway-sdk/sfu-bot": "^1.11.1",
     "uuid": "^9.0.0"
   },
   "devDependencies": {

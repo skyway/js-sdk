@@ -1,4 +1,7 @@
-import { AnalyticsClient, ConnectionState } from '@skyway-sdk/analytics-client';
+import {
+  AnalyticsClient,
+  type ConnectionState,
+} from '@skyway-sdk/analytics-client';
 import { Event, Logger } from '@skyway-sdk/common';
 import { Member } from '@skyway-sdk/model';
 

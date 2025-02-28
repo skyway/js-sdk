@@ -19,7 +19,7 @@ import { SfuRoom, SfuRoomImpl } from './sfu';
 
 const log = new Logger('packages/room/src/room/index.ts');
 
-export { SfuApiOptions, SfuBotPluginOptions };
+export type { SfuApiOptions, SfuBotPluginOptions };
 
 export class SkyWayRoom {
   /**@private */

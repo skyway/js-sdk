@@ -1,5 +1,6 @@
 {
   "name": "sfu-bot-example",
+  "private": true,
   "version": "1.0.0",
   "description": "",
   "author": "",
@@ -15,7 +16,7 @@
   ],
   "dependencies": {
     "@skyway-sdk/core": "^1.0.0-rc.0",
-    "@skyway-sdk/sfu-bot": "^1.0.0-rc.0"
+    "@skyway-sdk/sfu-bot": "^1.11.1"
   },
   "devDependencies": {
     "parcel": "^2.8.0",

@@ -21,8 +21,6 @@
     "compile": "npm run compile:tsc && npm run compile:esbuild",
     "compile:tsc": "rm -rf dist && tsc -p tsconfig.build.json",
     "compile:esbuild": "esbuild src/index.ts --bundle --format=esm --target=es6 --outfile=dist/index.mjs",
-    "e2e": "karma start ./karma.e2e.js --single-run --browsers chrome_headless_with_fake_device",
-    "e2e:dev": "karma start ./karma.e2e.js --browsers chrome_with_fake_device",
     "format": "eslint ./src --fix",
     "lint": "eslint ./src --fix",
     "graph": "dependency-cruiser --include-only '^src' --output-type dot src | dot -T svg > docs/dependencygraph.svg",

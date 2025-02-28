@@ -16,7 +16,7 @@ export {
   LocalCustomVideoStream,
   LocalDataStream,
   LocalMediaStreamBase,
-  LocalMediaStreamOptions,
+  type LocalMediaStreamOptions,
   LocalStreamBase,
   LocalVideoStream,
 };

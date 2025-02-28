@@ -1,6 +1,6 @@
 {
   "name": "@skyway-sdk/sfu-bot",
-  "version": "1.11.0",
+  "version": "1.11.1",
   "description": "The official Next Generation JavaScript SDK for SkyWay",
   "homepage": "https://skyway.ntt.com/",
   "repository": {
@@ -31,8 +31,8 @@
     "graph": "dependency-cruiser --include-only '^src' --output-type dot src | dot -T svg > docs/dependencygraph.svg",
     "pre:test": "cd ../../ && npm run build && cd packages/core",
     "publish:npm": "npx can-npm-publish --verbose && npm run build && npm publish --access public",
-    "test": "jest && karma start ./karma.conf.js --single-run --browsers chrome_headless_with_fake_device",
-    "test:dev": "karma start ./karma.conf.js --browsers chrome_with_fake_device",
+    "test": "jest && vitest --config vitest.config.ts run ./tests",
+    "test:dev": "vitest --config vitest.config.ts --browser.headless=false run ./tests",
     "type": "npm-run-all --parallel type:main",
     "type:main": "tsc --noEmit -p ./tsconfig.json",
     "watch": "npm-run-all --parallel watch:tsc watch:esbuild",
@@ -43,7 +43,7 @@
     "@skyway-sdk/core": "^1.11.0",
     "@skyway-sdk/sfu-api-client": "^1.4.8",
     "lodash": "4.17.21",
-    "mediasoup-client": "3.6.82"
+    "mediasoup-client": "3.8.1"
   },
   "keywords": [
     "webrtc",

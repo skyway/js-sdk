@@ -1,5 +1,9 @@
 {
   "extends": "../../tsconfig.json",
-  "compilerOptions": { "types": ["jasmine"] },
+  "compilerOptions": {
+    "types": [
+      "vitest/globals"
+    ]
+  },
   "exclude": ["example"]
 }
