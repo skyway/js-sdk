@@ -1,12 +1,11 @@
 import {
   nowInSec,
-
   SkyWayAuthToken,
   SkyWayContext,
   SkyWayRoom,
   SkyWayStreamFactory,
-  uuidV4 } from
-'@skyway-sdk/room';
+  uuidV4
+} from '@skyway-sdk/room';
 
 import { appId, secret } from '../../../env';
 
@@ -14,41 +13,20 @@ const token = new SkyWayAuthToken({
   jti: uuidV4(),
   iat: nowInSec(),
   exp: nowInSec() + 60 * 60 * 24,
+  version: 3,
   scope: {
-    app: {
-      id: appId,
-      turn: true,
-      actions: ['read'],
-      channels: [
-      {
-        id: '*',
-        name: '*',
-        actions: ['write'],
-        members: [
-        {
-          id: '*',
-          name: '*',
-          actions: ['write'],
-          publication: {
-            actions: ['write']
-          },
-          subscription: {
-            actions: ['write']
-          }
-        }],
-
-        sfuBots: [
-        {
-          actions: ['write'],
-          forwardings: [
-          {
-            actions: ['write']
-          }]
-
-        }]
-
-      }]
-
+    appId: appId,
+    rooms: [
+    {
+      name: "*",
+      methods: ["create", "close", "updateMetadata"],
+      member: {
+        name: "*",
+        methods: ["publish", "subscribe", "updateMetadata"]
+      }
+    }],
+    turn: {
+      enabled: true
     }
   }
 }).encode(secret);
