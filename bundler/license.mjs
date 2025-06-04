@@ -4,6 +4,11 @@
 import { appendFile, readFile, unlink } from 'fs/promises';
 import https from 'https';
 
+const LICENSE_POLICY = {
+  allow: ["MIT", "ISC", "BSD"],
+  deny:  ["GPL", "Apache"]
+}; 
+
 export async function createLicenses() {
   await $`npm i --ws false`; // ignore npm's workspace to create node_modules; license-checker needs to read node_modules.
 
@@ -23,13 +28,21 @@ export async function createLicenses() {
       (await readFile(path + '/license.md').catch(() => '')).toString();
 
     const [, , , user, repo] = (detail.repository ?? '').split('/');
-    licenseFile = licenseFile || (await downloadLicenses(user, repo));
+    const version = getPackageVersion(name);
+    licenseFile = licenseFile || (await downloadLicenses(user, repo, version));
 
     const pkg = JSON.parse((await readFile(path + '/package.json')).toString());
+    const license = pkg.license ?? detail.licenses ?? 'unlicensed';
+
+    if(isRestrictedLicense(license)) {
+      throw new Error(
+        `License of ${name} is Restricted (${license}). Please use a different package.`
+      );
+    }
 
     output += name;
     output += '\n\n';
-    output += pkg.license ?? detail.licenses ?? 'unlicensed';
+    output += license;
     output += '\n\n';
     output += detail.repository ?? detail.url ?? '';
     output += '\n\n';
@@ -55,21 +68,56 @@ export async function appendLicenses(dist, licenses) {
   await appendFile(`${dist}`, '*/');
 }
 
-async function downloadLicenses(user, repo) {
+async function downloadLicenses(user, repo, version) {
   const filenames = ['LICENSE', 'LICENSE.md', 'license', 'license.md'];
-  const branches = ['main', 'master'];
+
   let result = '';
   for (const filename of filenames) {
-    for (const branch of branches) {
-      result = await downloadFromGithub(user, repo, branch, filename).catch(
+    result = await downloadFromVersionBranch(user, repo, version, filename).catch(
+      () => ''
+    );
+    if (result) {
+      break;
+    }
+  }
+
+  if (!result) {
+    for (const filename of filenames) {
+      result = await downloadFromDefaultBranch(user, repo, filename).catch(
         () => ''
       );
       if (result) {
         break;
       }
     }
+  }
+  return result;
+}
+
+const downloadFromVersionBranch = async (user, repo, version, filename) => {
+  const prefixes = ["", "v"];
+  let result = '';
+  for (const prefix of prefixes) {
+    const branch = prefix + version;
+    result = await downloadFromGithub(user, repo, branch, filename).catch(
+      () => ''
+    );
     if (result) {
       break;
+    }
+  }
+  return result;
+}
+
+const downloadFromDefaultBranch = async (user, repo, filename) => {
+  const defaultBranches = ["main", "master"];
+  let result = '';
+  for (const branch of defaultBranches) {
+    result = await downloadFromGithub(user, repo, branch, filename).catch(
+      () => ''
+    );
+    if (result) {
+      return result;
     }
   }
   return result;
@@ -96,3 +144,29 @@ const downloadFromGithub = async (user, repo, branch, filename) => {
 
   return text;
 };
+
+function getPackageVersion(name) {
+  const match = name.match(/@([^@]+)$/);
+  if (match) {
+    return match[1];
+  }
+  return "";
+}
+
+function isRestrictedLicense(license) {
+  if (!license) return true;
+
+  for (const denied of LICENSE_POLICY.deny) {
+    if (license.includes(denied)) {
+      return true;
+    }
+  }
+
+  for (const allowed of LICENSE_POLICY.allow) {
+    if (license.includes(allowed)) {
+      return false;
+    }
+  }
+
+  return true;
+}

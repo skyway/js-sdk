@@ -304,7 +304,7 @@ export class Receiver extends Peer {
         channel: this.localPerson.channel,
       });
     }
-    const codecPT = media.payloads!.split(' ')[0];
+    const codecPT = media.payloads?.toString()!.split(' ')[0];
 
     const rtp = media.rtp.find((r) => r.payload.toString() === codecPT)!;
     const mimeType = `${kind}/${rtp.codec}`.toLowerCase();
