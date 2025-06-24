@@ -75,9 +75,9 @@ const { SkyWayContext, SkyWayStreamFactory, SkyWayRoom } = skyway_room;
 
 - Node.js をインストールする（バージョンは v20.0.0 以降）
 - corepack を有効化するために次のコマンドを実行する
-  - `corepack enable npm`
+  - `corepack enable pnpm`
 - ルートディレクトリで次のコマンドを実行する
-  - `npm run first`
+  - `pnpm run first`
 - `env.ts.template`を`env.ts`にリネームし、ファイル中の appId と secret にダッシュボードで発行した appId と secret を入力する
   - appId と secret の発行方法は[こちら](https://skyway.ntt.com/ja/docs/user-guide/javascript-sdk/quickstart/#199)
 
@@ -86,7 +86,7 @@ const { SkyWayContext, SkyWayStreamFactory, SkyWayRoom } = skyway_room;
 git で更新を同期した時や packages ディレクトリ以下のソースコードを編集した際にはルートディレクトリで以下のコマンドを実行する必要がある。
 
 ```sh
-npm run compile
+pnpm run compile
 ```
 
 # サンプルアプリの起動方法
@@ -95,7 +95,7 @@ npm run compile
 - examples ディレクトリ以下の任意のサンプルアプリのディレクトリに移動する
 - そのディレクトリで以下のコマンドを実行する
 
-  - `npm run dev`
+  - `pnpm run dev`
 
 - コマンドを実行するとローカルサーバが起動するので Web ブラウザでアクセスする
 
@@ -103,7 +103,7 @@ npm run compile
 
 - 環境構築のセクションの作業を実施する
 - ルートディレクトリで次のコマンドを実行する
-  - `npm run build`
+  - `pnpm run build`
 
 # License
 

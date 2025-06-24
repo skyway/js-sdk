@@ -15,8 +15,8 @@
     "last 3 chrome versions"
   ],
   "dependencies": {
-    "@skyway-sdk/core": "^1.11.0",
-    "@skyway-sdk/sfu-bot": "^1.11.1"
+    "@skyway-sdk/core": "workspace:*",
+    "@skyway-sdk/sfu-bot": "workspace:*"
   },
   "devDependencies": {
     "parcel": "^2.8.0",

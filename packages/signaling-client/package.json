@@ -1,6 +1,6 @@
 {
   "name": "@skyway-sdk/signaling-client",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "The official Next Generation JavaScript SDK for SkyWay",
   "homepage": "https://skyway.ntt.com/",
   "repository": {
@@ -18,14 +18,15 @@
   ],
   "scripts": {
     "build": "cp -r ../../bundler ./ && zx ./bundler/private.mjs && rm -rf ./bundler",
-    "compile": "npm run compile:tsc && npm run compile:esbuild",
+    "compile": "pnpm run compile:tsc && pnpm run compile:esbuild",
     "compile:esbuild": "esbuild src/index.ts --bundle --format=esm --target=es6 --outfile=dist/index.mjs",
     "compile:tsc": "rm -rf dist && tsc -p tsconfig.build.json",
-    "fix": "npm run format && npm run lint",
+    "fix": "pnpm run format && pnpm run lint",
     "format": "prettier --write src __tests__",
     "graph": "dependency-cruiser --include-only '^src' --output-type dot src | dot -T svg > docs/dependencygraph.svg",
+    "license": "zx ../../scripts/license.mjs @skyway-sdk/signaling-client",
     "lint": "eslint --fix src __tests__",
-    "publish:npm": "npx can-npm-publish --verbose && npm run build && npm publish --access public",
+    "publish:npm": "pnpm dlx can-npm-publish --verbose && pnpm run build && npm publish --access public",
     "test": "jest --silent",
     "test:console": "jest",
     "type": "tsc --noEmit -p ./tsconfig.build.json",

@@ -1,6 +1,6 @@
 {
   "name": "@skyway-sdk/sfu-bot",
-  "version": "1.13.0",
+  "version": "1.13.1",
   "description": "The official Next Generation JavaScript SDK for SkyWay",
   "homepage": "https://skyway.ntt.com/",
   "repository": {
@@ -18,19 +18,20 @@
   ],
   "scripts": {
     "build": "zx bundle.mjs",
-    "compile": "npm run compile:tsc && npm run compile:esbuild",
+    "compile": "pnpm run compile:tsc && pnpm run compile:esbuild",
     "compile:esbuild": "esbuild src/index.ts --bundle --format=esm --target=es6 --outfile=dist/index.mjs",
     "compile:tsc": "rm -rf dist && tsc -p tsconfig.build.json",
-    "doc": "npm run doc:html && npm run doc:md",
+    "doc": "pnpm run doc:html && pnpm run doc:md",
     "doc:html": "rm -rf docs/html && typedoc --excludePrivate --disableSources --excludeInternal --tsconfig ./tsconfig.build.json --out docs/html ./src/index.ts ",
     "doc:md": "rm -rf docs/md && typedoc --excludePrivate --disableSources --excludeInternal --tsconfig ./tsconfig.build.json --out docs/md --plugin typedoc-plugin-markdown ./src/index.ts ",
-    "e2e": "npm run test",
-    "e2e:dev": "npm run test:dev",
+    "e2e": "pnpm run test",
+    "e2e:dev": "pnpm run test:dev",
     "format": "eslint ./src --fix",
+    "license": "zx ../../scripts/license.mjs @skyway-sdk/sfu-bot",
     "lint": "eslint ./src --fix",
     "graph": "dependency-cruiser --include-only '^src' --output-type dot src | dot -T svg > docs/dependencygraph.svg",
-    "pre:test": "cd ../../ && npm run build && cd packages/core",
-    "publish:npm": "npx can-npm-publish --verbose && npm run build && npm publish --access public",
+    "pre:test": "cd ../../ && pnpm run build && cd packages/core",
+    "publish:npm": "pnpm dlx can-npm-publish --verbose && pnpm run build && npm publish --access public",
     "test": "jest && vitest --config vitest.config.ts run ./tests",
     "test:dev": "vitest --config vitest.config.ts --browser.headless=false run ./tests",
     "type": "npm-run-all --parallel type:main",
@@ -40,8 +41,9 @@
     "watch:tsc": "tsc -p tsconfig.build.json -w"
   },
   "dependencies": {
-    "@skyway-sdk/core": "^1.13.0",
-    "@skyway-sdk/sfu-api-client": "^1.5.0",
+    "@skyway-sdk/common": "workspace:*",
+    "@skyway-sdk/core": "workspace:*",
+    "@skyway-sdk/sfu-api-client": "workspace:*",
     "lodash": "4.17.21",
     "mediasoup-client": "3.7.17"
   },
@@ -50,5 +52,10 @@
     "skyway",
     "conferencing",
     "sfu"
-  ]
+  ],
+  "devDependencies": {
+    "@skyway-sdk/model": "workspace:*",
+    "@skyway-sdk/token": "workspace:*",
+    "@types/lodash": "4.17.16"
+  }
 }

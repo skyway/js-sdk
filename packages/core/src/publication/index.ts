@@ -394,6 +394,12 @@ export class PublicationImpl<T extends LocalStream = LocalStream>
 
   disable = () =>
     new Promise<void>(async (r, f) => {
+      // すでに disabled の場合は何もしない
+      if (this.state === 'disabled') {
+        r();
+        return;
+      }
+
       const timestamp = log.info(
         '[start] disable',
         await createLogPayload({
@@ -476,6 +482,12 @@ export class PublicationImpl<T extends LocalStream = LocalStream>
             path: log.prefix,
           })
         );
+        return;
+      }
+
+      // すでに enabled の場合は何もしない
+      if (this.state === 'enabled') {
+        r();
         return;
       }
 

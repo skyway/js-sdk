@@ -1,36 +1,34 @@
 {
   "name": "skyway-sdk",
   "private": true,
-  "workspaces": [
-    "packages/*",
-    "examples/*"
-  ],
   "scripts": {
     "build": "lerna run build",
-    "build:example": "npm run build && lerna run build:example",
-    "clean": "lerna clean -y && rm -rf ./packages/*/dist && rm -rf ./packages/*/node_modules && rm -rf ./packages/*/bundler && rm -rf node_modules",
+    "build:example": "pnpm run build && lerna run build:example",
+    "clean": "pnpm run clean:example && lerna clean -y && rm -rf ./packages/*/dist && rm -rf ./packages/*/node_modules && rm -rf ./packages/*/bundler && rm -rf node_modules",
+    "clean:example": "rm -rf ./examples/*/dist && rm -rf ./examples/*/node_modules",
     "type": "lerna run type",
     "compile": "lerna run compile && lerna run type",
-    "doc": "npm run compile && npm run doc:update",
-    "doc:update": "lerna run doc && zx ./scripts/update-api-reference.mjs",
+    "doc": "pnpm run compile && pnpm run doc:update",
+    "doc:update": "lerna run doc && zx ./scripts/update-api-reference.mjs && zx ./scripts/insert-gtm-script.mjs",
     "format": "lerna run format",
     "lint": "lerna run lint",
     "graph": "lerna run graph",
-    "playground": "cd examples/playground && npm run dev",
-    "playground-room": "cd examples/playground-room && npm run dev",
-    "test": "npm run compile && zx ./scripts/test.mjs",
+    "playground": "cd examples/playground && pnpm run dev",
+    "playground-room": "cd examples/playground-room && pnpm run dev",
+    "test": "pnpm run compile && zx ./scripts/test.mjs",
     "test:no-compile": "zx ./scripts/test.mjs",
-    "test:sfu": "npm run compile && zx ./scripts/test-sfu.mjs",
+    "test:sfu": "pnpm run compile && zx ./scripts/test-sfu.mjs",
     "test:sfu-no-compile": "zx ./scripts/test-sfu.mjs",
-    "test:p2p": "npm run compile && zx ./scripts/test-p2p.mjs",
+    "test:p2p": "pnpm run compile && zx ./scripts/test-p2p.mjs",
     "test:p2p-no-compile": "zx ./scripts/test-p2p.mjs",
     "watch": "lerna run watch",
-    "upgrade-interactive": "npx npm-check --update",
-    "first": "npm i && npm run compile",
+    "upgrade-interactive": "pnpm dlx npm-check --update",
+    "first": "pnpm i && pnpm run compile",
     "update-mirror": "zx scripts/update-mirror-repo.mjs",
     "changeset": "changeset",
-    "changeset:version": "changeset version && npm i && npm run doc",
-    "changeset:publish": "npm run build && changeset publish"
+    "changeset:version": "changeset version && pnpm i",
+    "changeset:version:ci": "pnpm run changeset:version && pnpm run doc && pnpm run build",
+    "changeset:publish": "pnpm run build && changeset publish"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.9",
@@ -62,11 +60,11 @@
     "typedoc-plugin-zod": "^1.3.1",
     "typescript": "4.7.4",
     "vitest": "^3.0.5",
-    "zx": "^7.0.8"
+    "zx": "^8.4.0"
   },
-  "packageManager": "npm@10.8.1+sha256.b8807aebb9656758e2872fa6e7c564b506aa2faa9297439a478d471d2fe32483",
   "engines": {
     "node": ">=20.0.0",
-    "npm": "=10.8.1"
-  }
+    "npm": ">=10.8.1"
+  },
+  "packageManager": "pnpm@10.5.2+sha512.da9dc28cd3ff40d0592188235ab25d3202add8a207afbedc682220e4a0029ffbff4562102b9e6e46b4e3f9e8bd53e6d05de48544b0c57d4b0179e22c76d1199b"
 }

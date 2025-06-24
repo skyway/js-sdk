@@ -8,14 +8,14 @@ const pkg = require('./package.json');
 const globalName = 'skyway_token';
 const dist = 'dist';
 
-await $`npm run compile`;
+await $`pnpm compile`;
 
 await $`cp -r ../../bundler/shims ./ `;
 
 await $`esbuild src/index.ts --bundle --inject:./shims/process.js --format=esm --target=es6 --outfile=${dist}/index.mjs`;
 await $`esbuild src/index.ts --bundle --inject:./shims/process.js --format=iife --global-name=${globalName} --target=es6 --outfile=${dist}/${globalName}-latest.js`;
 
-const licenses = await createLicenses();
+const licenses = await createLicenses(pkg);
 await appendLicenses(`${dist}/index.mjs`, licenses);
 await appendLicenses(`${dist}/${globalName}-latest.js`, licenses);
 

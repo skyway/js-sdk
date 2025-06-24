@@ -84,6 +84,16 @@ export const errors = {
     detail: 'リソースを規定仕様以上に消費しています',
     solution: 'リソースの消費量を減らしてください',
   },
+  projectUsageLimitExceeded: {
+    name: 'projectUsageLimitExceeded',
+    detail: 'フリープランプロジェクトのリソース利用上限に達しています',
+    solution: 'エンタープライズプランにアップグレードしてください',
+  },
+  invalidAuthToken: {
+    name: 'invalidAuthToken',
+    detail: 'AuthTokenが無効です',
+    solution: '適切なAuthTokenを使用してください',
+  },
   authTokenExpired: {
     name: 'authTokenExpired',
     detail: 'AuthTokenが期限切れです',

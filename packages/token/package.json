@@ -1,6 +1,6 @@
 {
   "name": "@skyway-sdk/token",
-  "version": "1.7.0",
+  "version": "1.7.1",
   "description": "The official Next Generation JavaScript SDK for SkyWay",
   "homepage": "https://skyway.ntt.com/",
   "repository": {
@@ -18,22 +18,23 @@
   ],
   "scripts": {
     "build": "zx bundle.mjs",
-    "compile": "npm run compile:tsc && npm run compile:esbuild",
+    "compile": "pnpm run compile:tsc && pnpm run compile:esbuild",
     "compile:esbuild": "esbuild src/index.ts --bundle --format=esm --target=es6 --outfile=dist/index.mjs",
     "compile:tsc": "rm -rf dist && tsc -p tsconfig.build.json",
-    "doc": "npm run doc:html && npm run doc:md",
+    "doc": "pnpm run doc:html && pnpm run doc:md",
     "doc:html": "rm -rf docs/html && typedoc --excludePrivate --disableSources --excludeInternal --tsconfig ./tsconfig.build.json --out docs/html --plugin typedoc-plugin-zod ./src/index.ts ",
     "doc:md": "rm -rf docs/md && typedoc --excludePrivate --disableSources --excludeInternal --tsconfig ./tsconfig.build.json --out docs/md --plugin typedoc-plugin-markdown ./src/index.ts ",
     "format": "eslint ./src --fix",
+    "license": "zx ../../scripts/license.mjs @skyway-sdk/token",
     "lint": "eslint ./src --fix",
     "graph": "dependency-cruiser --include-only '^src' --output-type dot src | dot -T svg > docs/dependencygraph.svg",
-    "publish:npm": "npx can-npm-publish --verbose && npm run build && npm publish --access public",
+    "publish:npm": "pnpm dlx can-npm-publish --verbose && pnpm run build && npm publish --access public",
     "watch": "npm-run-all --parallel watch:tsc watch:esbuild",
     "watch:esbuild": "esbuild src/index.ts --bundle --watch --format=esm --target=es6 --outfile=dist/index.mjs",
     "watch:tsc": "tsc -p tsconfig.build.json -w"
   },
   "dependencies": {
-    "@skyway-sdk/common": "^1.4.8",
+    "@skyway-sdk/common": "workspace:*",
     "jsrsasign": "^11.1.0",
     "jwt-decode": "3.1.2",
     "uuid": "^9.0.0",
@@ -42,8 +43,7 @@
   },
   "devDependencies": {
     "@types/jsrsasign": "^10.5.14",
-    "@types/uuid": "^9.0.1",
-    "vitest": "^2.1.8"
+    "@types/uuid": "^9.0.1"
   },
   "keywords": [
     "webrtc",

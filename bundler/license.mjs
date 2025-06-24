@@ -9,55 +9,43 @@ const LICENSE_POLICY = {
   deny:  ["GPL", "Apache"]
 }; 
 
-export async function createLicenses() {
-  await $`npm i --ws false`; // ignore npm's workspace to create node_modules; license-checker needs to read node_modules.
-
-  const deps = JSON.parse(
-    (await $`npx license-checker --json --production`).stdout
-  );
-
+export async function createLicenses(pkg) {
   let output = '';
 
-  for (const [name, detail] of Object.entries(deps)) {
-    const { path } = detail;
+  const licenseInfo = (await $`pnpm --silent --filter=${pkg.name} license`)
+    .stdout;
 
-    let licenseFile =
-      (await readFile(path + '/LICENSE').catch(() => '')).toString() ||
-      (await readFile(path + '/license').catch(() => '')).toString() ||
-      (await readFile(path + '/LICENSE.md').catch(() => '')).toString() ||
-      (await readFile(path + '/license.md').catch(() => '')).toString();
+  const deps = JSON.parse(licenseInfo);
 
-    const [, , , user, repo] = (detail.repository ?? '').split('/');
-    const version = getPackageVersion(name);
-    licenseFile = licenseFile || (await downloadLicenses(user, repo, version));
+  for (const [, details] of Object.entries(deps)) {
+    for (const detail of details) {
+      const { name, versions, paths, license, homepage } = detail;
+      for (const [i, version] of versions.entries()) {
+        const path = paths[i];
+        const pkg = JSON.parse(
+          (await readFile(path + '/package.json')).toString()
+        );
+        const repoUrl = pkg.repository ? fmtRepoUrl(pkg.repository) : '';
+        const [, , , user, repo] = (repoUrl ?? '').split('/');
+        const licenseText = await getLicenseText({ path, user, repo, version });
+        const licenseLevel = pkg.license ?? license ?? 'unlicensed'
 
-    const pkg = JSON.parse((await readFile(path + '/package.json')).toString());
-    const license = pkg.license ?? detail.licenses ?? 'unlicensed';
+        if (isRestrictedLicense(licenseLevel)) {
+          throw new Error(
+            `License of ${name} is Restricted (${licenseLevel}). Please use a different package.`
+          );
+        }
 
-    if(isRestrictedLicense(license)) {
-      throw new Error(
-        `License of ${name} is Restricted (${license}). Please use a different package.`
-      );
+        output += fmtLicenseText({
+          name,
+          version,
+          license: licenseLevel,
+          url: repoUrl ?? homepage ?? pkg.url ?? '',
+          licenseText,
+        });
+      }
     }
-
-    output += name;
-    output += '\n\n';
-    output += license;
-    output += '\n\n';
-    output += detail.repository ?? detail.url ?? '';
-    output += '\n\n';
-    if (licenseFile) {
-      output += licenseFile;
-      output += '\n\n';
-    } else {
-      console.log('no license file', name);
-    }
-    output += '---';
-    output += '\n\n';
   }
-
-  await $`rm -rf node_modules`;
-  await $`rm package-lock.json`;
 
   return output;
 }
@@ -66,6 +54,66 @@ export async function appendLicenses(dist, licenses) {
   await appendFile(`${dist}`, '\n/*\n');
   await appendFile(`${dist}`, licenses);
   await appendFile(`${dist}`, '*/');
+}
+
+export async function getLicenseText({ path, user, repo, version }) {
+  let licenseText =
+    (await readFile(path + '/LICENSE').catch(() => '')).toString() ||
+    (await readFile(path + '/license').catch(() => '')).toString() ||
+    (await readFile(path + '/LICENSE.md').catch(() => '')).toString() ||
+    (await readFile(path + '/license.md').catch(() => '')).toString();
+
+  licenseText =
+    licenseText || (user && repo && (await downloadLicenses(user, repo, version)));
+
+  return licenseText;
+}
+
+// cf. https://github.com/davglass/license-checker/blob/de6e9a42513aa38a58efc6b202ee5281ed61f486/lib/index.js#L60
+function fmtRepoUrl(repo) {
+  if (typeof repo === 'string') {
+    return `https://github.com/${repo}`;
+  }
+
+  if (typeof repo.url === 'string') {
+    let url = repo.url;
+    url = url.replace('git+ssh://git@', 'git://');
+    url = url.replace('git+https://github.com', 'https://github.com');
+    url = url.replace('git://github.com', 'https://github.com');
+    url = url.replace('git@github.com:', 'https://github.com/');
+    url = url.replace(/\.git$/, '');
+    if (!url.startsWith('https://github.com')) {
+      // https://github.com/clux/sdp-transform/blob/649ed1279b78a577e6944df2f675e8a285da5dd7/package.json#L8
+      url = 'https://github.com/' + url;
+    }
+    return url;
+  }
+
+  return '';
+}
+
+function fmtLicenseText({
+  name,
+  version,
+  license = 'unlicensed',
+  url = '',
+  licenseText,
+}) {
+  let output = `${name}@${version}`;
+  output += '\n\n';
+  output += license;
+  output += '\n\n';
+  output += url;
+  output += '\n\n';
+  if (licenseText) {
+    output += licenseText;
+    output += '\n\n';
+  } else {
+    console.log('no license file', name);
+  }
+  output += '---';
+  output += '\n\n';
+  return output;
 }
 
 async function downloadLicenses(user, repo, version) {
@@ -144,14 +192,6 @@ const downloadFromGithub = async (user, repo, branch, filename) => {
 
   return text;
 };
-
-function getPackageVersion(name) {
-  const match = name.match(/@([^@]+)$/);
-  if (match) {
-    return match[1];
-  }
-  return "";
-}
 
 function isRestrictedLicense(license) {
   if (!license) return true;

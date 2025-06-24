@@ -1,6 +1,6 @@
 {
   "name": "@skyway-sdk/common",
-  "version": "1.4.8",
+  "version": "1.4.9",
   "description": "The official Next Generation JavaScript SDK for SkyWay",
   "homepage": "https://skyway.ntt.com/",
   "repository": {
@@ -18,13 +18,14 @@
   ],
   "scripts": {
     "build": "cp -r ../../bundler ./ && zx ./bundler/private.mjs && rm -rf ./bundler",
-    "compile": "npm run compile:tsc && npm run compile:esbuild",
+    "compile": "pnpm run compile:tsc && pnpm run compile:esbuild",
     "compile:esbuild": "esbuild src/index.ts --bundle --format=esm --target=es6 --outfile=dist/index.mjs",
     "compile:tsc": "rm -rf dist && tsc -p tsconfig.build.json",
     "format": "eslint ./src --fix",
+    "license": "zx ../../scripts/license.mjs @skyway-sdk/common",
     "lint": "eslint ./src --fix",
     "graph": "dependency-cruiser --include-only '^src' --output-type dot src | dot -T svg > docs/dependencygraph.svg",
-    "publish:npm": "npx can-npm-publish --verbose && npm run build && npm publish --access public",
+    "publish:npm": "pnpm dlx can-pnpm-publish --verbose && pnpm run build && npm publish --access public",
     "watch": "npm-run-all --parallel watch:tsc watch:esbuild",
     "watch:esbuild": "esbuild src/index.ts --bundle --watch --format=esm --target=es6 --outfile=dist/index.mjs",
     "watch:tsc": "tsc -p tsconfig.build.json -w"

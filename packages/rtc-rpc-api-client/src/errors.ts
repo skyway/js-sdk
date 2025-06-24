@@ -12,7 +12,8 @@ export const errors = {
   websocketConnectionFailure: {
     name: 'connectionFailure',
     detail: 'サーバへの接続に失敗しました',
-    solution: 'ネットワーク接続状況を確認してください',
+    solution:
+      'ネットワーク接続状況およびフリープランをご利用の場合はリソース利用量を確認してください',
   },
   rpcResponseError: {
     name: 'rpcResponseError',
@@ -28,7 +29,8 @@ export const errors = {
   failedToConnectRtcAPI: {
     name: 'failedToConnectRtcAPI',
     detail: 'rtc-api serverへの接続に失敗しました',
-    solution: 'インターネット接続状況とTokenの内容が正しいかを確かめてください',
+    solution:
+      'インターネット接続状況とTokenの内容が正しいか、またフリープランをご利用の場合はリソース利用量を確かめてください',
   },
   failedToUpdateMemberTTL: {
     name: 'failedToUpdateMemberTTL',

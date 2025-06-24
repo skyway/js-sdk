@@ -121,8 +121,7 @@ export const errors = {
   connectRtcApiFailed: {
     name: 'connectRtcApiFailed',
     detail: 'RtcAPIへの接続に失敗しました',
-    solution:
-      'インターネットへの接続できているか、もしくはTokenのパラメータが正しいかを確かめてください',
+    solution: 'インターネットへ接続できているか、もしくはTokenのパラメータが正しいかを確かめてください',
   },
   rtcApiFatalError: {
     name: 'rtcApiFatalError',

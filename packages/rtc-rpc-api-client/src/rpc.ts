@@ -8,6 +8,8 @@ import { createError, createWarnPayload } from './util';
 
 const log = new Logger('packages/rtc-rpc-api-client/src/rpc.ts');
 
+const WS_CLOSE_CODE_USAGE_LIMIT_EXCEEDED = 4291;
+
 export class RPC {
   private readonly _id = uuidV4();
   /**@private */
@@ -51,9 +53,19 @@ export class RPC {
       this._onMessage.emit(JSON.parse(ev.data as string));
     };
 
-    this._ws.onclose = async () => {
-      log.debug('websocket closed', { id: this._id });
-      this.onDisconnected.emit();
+    this._ws.onclose = async (e) => {
+      log.debug('websocket closed', {
+        id: this._id,
+        code: e.code,
+        reason: e.reason,
+      });
+
+      if (e.code === WS_CLOSE_CODE_USAGE_LIMIT_EXCEEDED) {
+        // USAGE_LIMIT_EXCEEDED_WS_CLOSE_CODEはProjectUsageLimitExceededエラーに起因してWebSocket接続が閉じられたことを示すSkyWay特有のカスタムコード
+        this.close();
+      } else {
+        this.onDisconnected.emit();
+      }
     };
 
     this._onMessage.add((msg) => {
@@ -395,7 +407,12 @@ interface ResponseMessage {
 export interface ResponseError {
   code: number;
   message: string;
-  data: object;
+  data: RtcApiRpcError;
+}
+
+type RtcApiRpcError = {
+  code: number;
+  message: string;
 }
 
 const isNotifyMessage = (

@@ -1,6 +1,6 @@
 {
   "name": "@skyway-sdk/core",
-  "version": "1.13.0",
+  "version": "1.13.1",
   "description": "The official Next Generation JavaScript SDK for SkyWay",
   "homepage": "https://skyway.ntt.com/",
   "repository": {
@@ -18,18 +18,19 @@
   ],
   "scripts": {
     "build": "zx bundle.mjs",
-    "compile": "npm run compile:tsc && npm run compile:esbuild",
+    "compile": "pnpm run compile:tsc && pnpm run compile:esbuild",
     "compile:esbuild": "esbuild src/index.ts --bundle --format=esm --target=es6 --outfile=dist/index.mjs",
     "compile:tsc": "rm -rf dist && tsc -p tsconfig.build.json",
-    "doc": "npm run doc:html && npm run doc:md",
+    "doc": "pnpm run doc:html && pnpm run doc:md",
     "doc:html": "rm -rf docs/html && typedoc --excludePrivate --disableSources --excludeInternal --tsconfig ./tsconfig.build.json --out docs/html ./src/index.ts ",
     "doc:md": "rm -rf docs/md && typedoc --excludePrivate --disableSources --excludeInternal --tsconfig ./tsconfig.build.json --out docs/md --plugin typedoc-plugin-markdown ./src/index.ts ",
-    "e2e": "npm run test-large",
+    "e2e": "pnpm run test-large",
     "format": "eslint ./src --fix && eslint ./tests --fix",
     "graph": "dependency-cruiser --include-only '^src' --output-type dot src | dot -T svg > docs/dependencygraph.svg",
+    "license": "zx ../../scripts/license.mjs @skyway-sdk/core",
     "lint": "eslint ./src --fix && eslint ./tests --fix",
-    "pre:test": "cd ../../ && npm run build && cd packages/core",
-    "publish:npm": "npx can-npm-publish --verbose && npm run build && npm publish --access public",
+    "pre:test": "cd ../../ && pnpm run build && cd packages/core",
+    "publish:npm": "pnpm dlx can-npm-publish --verbose && pnpm run build && npm publish --access public",
     "test-all": "npm-run-all -p test-large test-middle test-small",
     "test-large": "vitest --config vitest.large.ts run ./tests/large",
     "test-large:dev": "vitest --config vitest.large.ts --browser.headless=false run ./tests/large",
@@ -45,16 +46,21 @@
     "watch:tsc": "tsc -p tsconfig.build.json -w"
   },
   "dependencies": {
-    "@skyway-sdk/analytics-client": "^1.0.1",
-    "@skyway-sdk/rtc-api-client": "^1.8.0",
-    "@skyway-sdk/signaling-client": "^1.0.7",
+    "@skyway-sdk/analytics-client": "workspace:*",
+    "@skyway-sdk/common": "workspace:*",
+    "@skyway-sdk/rtc-api-client": "workspace:*",
+    "@skyway-sdk/signaling-client": "workspace:*",
+    "@skyway-sdk/token": "workspace:*",
     "bowser": "^2.11.0",
     "deepmerge": "^4.3.1",
+    "lodash": "4.17.21",
     "sdp-transform": "^2.14.2",
     "ua-parser-js": "^1.0.35",
     "uuid": "^9.0.0"
   },
   "devDependencies": {
+    "@skyway-sdk/model": "workspace:*",
+    "@types/lodash": "4.17.16",
     "@types/sdp-transform": "^2.4.9",
     "@types/ua-parser-js": "^0.7.39",
     "@types/uuid": "^9.0.1"

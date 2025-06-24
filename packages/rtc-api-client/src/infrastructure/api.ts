@@ -43,7 +43,41 @@ export class RtcApiImpl implements RtcApi {
 
   async updateAuthToken(token: string) {
     this._token = SkyWayAuthToken.Decode(token);
-    await this._client.updateToken(token);
+    await this._client.updateToken(token).catch((e) => {
+      const { info } = e as { info: typeof rpcErrors.rpcResponseError };
+      if (info?.error?.data?.code === 429001) {
+        throw createError({
+          operationName: 'RtcApiImpl.updateAuthToken',
+          path: log.prefix,
+          info: errors.projectUsageLimitExceeded,
+          error: e,
+        });
+      }
+      const error = this._commonError(
+        'RtcApiImpl.updateAuthToken',
+        info?.error?.code ?? -1,
+        e
+      );
+      if (error) {
+        throw error;
+      }
+      switch (info?.error?.code) {
+        case 401:
+          throw createError({
+            operationName: 'RtcApiImpl.updateAuthToken',
+            path: log.prefix,
+            info: errors.invalidAuthToken,
+            error: e,
+          });
+        default:
+          throw createError({
+            operationName: 'RtcApiImpl.updateAuthToken',
+            path: log.prefix,
+            info: errors.internalError,
+            error: e,
+          });
+      }
+    });
   }
 
   close(): void {
@@ -81,6 +115,13 @@ export class RtcApiImpl implements RtcApi {
         return createError({
           operationName: method,
           info: errors.insufficientPermissions,
+          path: log.prefix,
+          error: detail,
+        });
+      case 429:
+        return createError({
+          operationName: method,
+          info: errors.rateLimitExceeded,
           path: log.prefix,
           error: detail,
         });

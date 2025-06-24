@@ -224,7 +224,19 @@ export class SkyWayContext {
     this._onTokenUpdated.emit(token);
     await this._setTokenExpireTimer();
 
-    await this._api.updateAuthToken(token);
+    await this._api.updateAuthToken(token).catch((e) => {
+      log.warn('[failed] SkyWayContext.updateAuthToken', { detail: e });
+
+      if (
+        e instanceof SkyWayError &&
+        e.info?.name === 'projectUsageLimitExceeded'
+      ) {
+        this.dispose();
+        clearTimeout(this.tokenExpiredTimer);
+      }
+
+      throw e;
+    });
   }
 
   /**
