@@ -1,4 +1,4 @@
-@skyway-sdk/room@1.13.1
+@skyway-sdk/room@1.13.2
 
 MIT
 
@@ -6,7 +6,7 @@ https://github.com/skyway/js-sdk
 
 MIT License
 
-Copyright (c) 2023 NTT Communications Corporation
+Copyright (c) 2023 NTT DOCOMO BUSINESS, Inc.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -29,7 +29,7 @@ SOFTWARE.
 
 ---
 
-@skyway-sdk/token@1.7.1
+@skyway-sdk/token@1.7.2
 
 MIT
 
@@ -37,7 +37,7 @@ https://github.com/skyway/js-sdk
 
 MIT License
 
-Copyright (c) 2023 NTT Communications Corporation
+Copyright (c) 2023 NTT DOCOMO BUSINESS, Inc.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -60,7 +60,7 @@ SOFTWARE.
 
 ---
 
-@skyway-sdk/common@1.4.9
+@skyway-sdk/common@1.4.10
 
 MIT
 
@@ -68,7 +68,7 @@ https://github.com/skyway/js-sdk
 
 MIT License
 
-Copyright (c) 2023 NTT Communications Corporation
+Copyright (c) 2023 NTT DOCOMO BUSINESS, Inc.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -91,7 +91,7 @@ SOFTWARE.
 
 ---
 
-@skyway-sdk/sfu-bot@1.13.1
+@skyway-sdk/sfu-bot@1.13.2
 
 MIT
 
@@ -99,7 +99,7 @@ https://github.com/skyway/js-sdk
 
 MIT License
 
-Copyright (c) 2023 NTT Communications Corporation
+Copyright (c) 2023 NTT DOCOMO BUSINESS, Inc.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -122,7 +122,7 @@ SOFTWARE.
 
 ---
 
-@skyway-sdk/sfu-api-client@1.5.1
+@skyway-sdk/sfu-api-client@1.5.2
 
 MIT
 
@@ -130,7 +130,7 @@ https://github.com/skyway/js-sdk
 
 MIT License
 
-Copyright (c) 2023 NTT Communications Corporation
+Copyright (c) 2023 NTT DOCOMO BUSINESS, Inc.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -153,7 +153,7 @@ SOFTWARE.
 
 ---
 
-@skyway-sdk/core@1.13.1
+@skyway-sdk/core@1.13.2
 
 MIT
 
@@ -161,7 +161,7 @@ https://github.com/skyway/js-sdk
 
 MIT License
 
-Copyright (c) 2023 NTT Communications Corporation
+Copyright (c) 2023 NTT DOCOMO BUSINESS, Inc.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -184,7 +184,7 @@ SOFTWARE.
 
 ---
 
-@skyway-sdk/signaling-client@1.0.8
+@skyway-sdk/signaling-client@1.0.9
 
 MIT
 
@@ -192,7 +192,7 @@ https://github.com/skyway/js-sdk
 
 MIT License
 
-Copyright (c) 2023 NTT Communications Corporation
+Copyright (c) 2023 NTT DOCOMO BUSINESS, Inc.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -215,7 +215,7 @@ SOFTWARE.
 
 ---
 
-@skyway-sdk/rtc-api-client@1.8.1
+@skyway-sdk/rtc-api-client@1.8.2
 
 MIT
 
@@ -223,7 +223,7 @@ https://github.com/skyway/js-sdk
 
 MIT License
 
-Copyright (c) 2023 NTT Communications Corporation
+Copyright (c) 2023 NTT DOCOMO BUSINESS, Inc.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -246,7 +246,7 @@ SOFTWARE.
 
 ---
 
-@skyway-sdk/rtc-rpc-api-client@1.8.1
+@skyway-sdk/rtc-rpc-api-client@1.8.2
 
 MIT
 
@@ -254,7 +254,7 @@ https://github.com/skyway/js-sdk
 
 MIT License
 
-Copyright (c) 2023 NTT Communications Corporation
+Copyright (c) 2023 NTT DOCOMO BUSINESS, Inc.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -277,7 +277,7 @@ SOFTWARE.
 
 ---
 
-@skyway-sdk/model@1.0.2
+@skyway-sdk/model@1.0.3
 
 MIT
 
@@ -285,7 +285,7 @@ https://github.com/skyway/js-sdk
 
 MIT License
 
-Copyright (c) 2023 NTT Communications Corporation
+Copyright (c) 2023 NTT DOCOMO BUSINESS, Inc.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -308,7 +308,7 @@ SOFTWARE.
 
 ---
 
-@skyway-sdk/analytics-client@1.0.2
+@skyway-sdk/analytics-client@1.0.3
 
 MIT
 
@@ -316,7 +316,7 @@ https://github.com/skyway/js-sdk
 
 MIT License
 
-Copyright (c) 2024 NTT Communications Corporation
+Copyright (c) 2024 NTT DOCOMO BUSINESS, Inc.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
