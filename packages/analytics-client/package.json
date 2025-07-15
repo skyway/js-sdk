@@ -1,6 +1,6 @@
 {
   "name": "@skyway-sdk/analytics-client",
-  "version": "1.0.3",
+  "version": "1.1.0",
   "description": "The official Next Generation JavaScript SDK for SkyWay",
   "homepage": "https://skyway.ntt.com/",
   "repository": {
@@ -41,6 +41,7 @@
   },
   "devDependencies": {
     "@skyway-sdk/model": "workspace:*",
+    "@skyway-sdk/common": "workspace:*",
     "@types/jest": "^27.0.0",
     "@types/node": "^18.12.0",
     "@types/uuid": "^9.0.1",

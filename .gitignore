@@ -18,6 +18,7 @@ Release.md
 .vscode
 examples/playground
 examples/playground-room
+examples/sfu-room-for-hosting
 CNAME
 docs
 scripts

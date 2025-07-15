@@ -102,6 +102,12 @@ export const scopeV3Schema = z
         enabled: z.boolean().optional(),
       })
       .optional(),
+    /**AI Noise Cancellerの認可を有効化するかどうかの設定。設定しない場合は enabled: true として扱われる。 */
+    noiseCancelling: z
+      .object({
+        enabled: z.boolean().optional(),
+      })
+      .optional(),
     /**TURNサーバー利用の設定。enabledがfalseの場合はTURNサーバーを経由してメディア通信を行わない。指定しない場合は enabled: true として扱われる。 */
     turn: z
       .object({

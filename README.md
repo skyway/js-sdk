@@ -15,6 +15,8 @@ Enterprise プランをご契約のお客様はテクニカルサポートをご
 
 # SDK のインストール方法
 
+ユーザアプリケーションで利用する際は NPM と CDN の2通りのインストール方法があります
+
 ## NPM を利用する場合
 
 npm がインストールされている環境下で以下のコマンドを実行します
@@ -67,9 +69,9 @@ const { SkyWayContext, SkyWayStreamFactory, SkyWayRoom } = skyway_room;
 - [SFU Bot ライブラリ](https://javascript-sdk.api-reference.skyway.ntt.com/sfu-bot)
 - [Token ライブラリ](https://javascript-sdk.api-reference.skyway.ntt.com/token)
 
-# 環境構築
+# このリポジトリのセットアップ方法(環境構築)
 
-このリポジトリのサンプルアプリを起動したり、SDK をビルドするために必要な手順。
+このリポジトリのサンプルアプリを起動したり、SDK を利用者自身でビルドするために必要な手順。
 
 ## 初期設定時
 
@@ -91,11 +93,11 @@ pnpm run compile
 
 # サンプルアプリの起動方法
 
-- 環境構築のセクションの作業を実施する
 - examples ディレクトリ以下の任意のサンプルアプリのディレクトリに移動する
 - そのディレクトリで以下のコマンドを実行する
 
-  - `pnpm run dev`
+  - `npm i`
+  - `npm run dev`
 
 - コマンドを実行するとローカルサーバが起動するので Web ブラウザでアクセスする
 

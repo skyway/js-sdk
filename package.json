@@ -4,8 +4,8 @@
   "scripts": {
     "build": "lerna run build",
     "build:example": "pnpm run build && lerna run build:example",
-    "clean": "pnpm run clean:example && lerna clean -y && rm -rf ./packages/*/dist && rm -rf ./packages/*/node_modules && rm -rf ./packages/*/bundler && rm -rf node_modules",
-    "clean:example": "rm -rf ./examples/*/dist && rm -rf ./examples/*/node_modules",
+    "clean": "pnpm run clean:example && lerna clean -y && rm -rf ./packages/*/dist && rm -rf ./packages/*/node_modules && rm -rf ./packages/*/bundler && rm -rf ./.parcel-cache && rm -rf node_modules",
+    "clean:example": "rm -rf ./examples/*/dist && rm -rf ./examples/*/.parcel-cache && rm -rf ./examples/*/node_modules",
     "type": "lerna run type",
     "compile": "lerna run compile && lerna run type",
     "doc": "pnpm run compile && pnpm run doc:update",
@@ -38,6 +38,7 @@
     "@typescript-eslint/eslint-plugin": "^4.32.0",
     "@typescript-eslint/parser": "^4.32.0",
     "@vitest/browser": "^3.0.5",
+    "buffer": "^5.5.0||^6.0.0",
     "esbuild": "^0.25.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",

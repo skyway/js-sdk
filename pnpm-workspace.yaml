@@ -1,3 +1,5 @@
 packages:
   - 'packages/*'
-  - 'examples/*'
+  - 'examples/playground'
+  - 'examples/playground-room'
+  - 'examples/sfu-room-for-hosting'

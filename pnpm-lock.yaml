@@ -29,6 +29,9 @@ importers:
       '@vitest/browser':
         specifier: ^3.0.5
         version: 3.2.4(playwright@1.53.1)(vite@5.4.19(@types/node@18.19.112)(lightningcss@1.30.1))(vitest@3.2.4)
+      buffer:
+        specifier: ^5.5.0||^6.0.0
+        version: 5.7.1
       esbuild:
         specifier: ^0.25.0
         version: 0.25.5
@@ -99,118 +102,6 @@ importers:
         specifier: ^8.4.0
         version: 8.5.5
 
-  examples/auto-subscribe:
-    dependencies:
-      '@skyway-sdk/room':
-        specifier: latest
-        version: 1.13.1(encoding@0.1.13)
-    devDependencies:
-      '@babel/cli':
-        specifier: ^7.0.0
-        version: 7.27.2(@babel/core@7.27.4)
-      '@babel/core':
-        specifier: ^7.0.0
-        version: 7.27.4
-      '@babel/preset-typescript':
-        specifier: ^7.18.6
-        version: 7.27.1(@babel/core@7.27.4)
-      parcel:
-        specifier: ^2.8.0
-        version: 2.15.2(@swc/helpers@0.5.17)
-
-  examples/core:
-    dependencies:
-      '@skyway-sdk/core':
-        specifier: latest
-        version: 1.13.1(encoding@0.1.13)(ws@8.18.2)
-    devDependencies:
-      '@babel/cli':
-        specifier: ^7.0.0
-        version: 7.27.2(@babel/core@7.27.4)
-      '@babel/core':
-        specifier: ^7.0.0
-        version: 7.27.4
-      '@babel/preset-typescript':
-        specifier: ^7.18.6
-        version: 7.27.1(@babel/core@7.27.4)
-      parcel:
-        specifier: ^2.8.0
-        version: 2.15.2(@swc/helpers@0.5.17)
-
-  examples/large-room:
-    dependencies:
-      '@chakra-ui/react':
-        specifier: ^2.2.1
-        version: 2.10.9(@emotion/react@11.14.0(@types/react@18.3.23)(react@18.3.1))(@emotion/styled@11.14.0(@emotion/react@11.14.0(@types/react@18.3.23)(react@18.3.1))(@types/react@18.3.23)(react@18.3.1))(@types/react@18.3.23)(framer-motion@6.5.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@emotion/css':
-        specifier: ^11.1.3
-        version: 11.13.5
-      '@skyway-sdk/room':
-        specifier: latest
-        version: 1.13.1(encoding@0.1.13)
-      framer-motion:
-        specifier: ^6.4.1
-        version: 6.5.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      hark:
-        specifier: ^1.2.3
-        version: 1.2.3
-      qrcode:
-        specifier: ^1.5.0
-        version: 1.5.4
-      qrcode.react:
-        specifier: ^3.1.0
-        version: 3.2.0(react@18.3.1)
-      react:
-        specifier: ^18.0.0
-        version: 18.3.1
-      react-dom:
-        specifier: ^18.0.0
-        version: 18.3.1(react@18.3.1)
-    devDependencies:
-      '@types/hark':
-        specifier: ^1.2.1
-        version: 1.2.5
-      '@types/qrcode':
-        specifier: ^1.4.2
-        version: 1.5.5
-      '@types/qrcode.react':
-        specifier: ^1.0.2
-        version: 1.0.5
-      '@types/react':
-        specifier: ^18.0.0
-        version: 18.3.23
-      '@types/react-dom':
-        specifier: ^18.0.0
-        version: 18.3.7(@types/react@18.3.23)
-      '@vitejs/plugin-react':
-        specifier: ^1.3.0
-        version: 1.3.2
-      typescript:
-        specifier: ^4.6.3
-        version: 4.7.4
-      vite:
-        specifier: ^5.4.8
-        version: 5.4.19(@types/node@18.19.112)(lightningcss@1.30.1)
-
-  examples/p2p-room:
-    dependencies:
-      '@skyway-sdk/room':
-        specifier: latest
-        version: 1.13.1(encoding@0.1.13)
-    devDependencies:
-      '@babel/cli':
-        specifier: ^7.0.0
-        version: 7.27.2(@babel/core@7.27.4)
-      '@babel/core':
-        specifier: ^7.0.0
-        version: 7.27.4
-      '@babel/preset-typescript':
-        specifier: ^7.18.6
-        version: 7.27.1(@babel/core@7.27.4)
-      parcel:
-        specifier: ^2.8.0
-        version: 2.15.2(@swc/helpers@0.5.17)
-
   examples/playground:
     dependencies:
       '@chakra-ui/react':
@@ -226,11 +117,11 @@ importers:
         specifier: ^11.11.5
         version: 11.14.0(@emotion/react@11.14.0(@types/react@18.3.23)(react@18.3.1))(@types/react@18.3.23)(react@18.3.1)
       '@skyway-sdk/core':
-        specifier: latest
-        version: 1.13.1(encoding@0.1.13)(ws@8.18.2)
+        specifier: workspace:*
+        version: link:../../packages/core
       '@skyway-sdk/sfu-bot':
-        specifier: latest
-        version: 1.13.1(encoding@0.1.13)(ws@8.18.2)
+        specifier: workspace:*
+        version: link:../../packages/sfu-bot
       framer-motion:
         specifier: ^6.5.1
         version: 6.5.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -290,8 +181,8 @@ importers:
         specifier: ^11.11.5
         version: 11.14.0(@emotion/react@11.14.0(@types/react@18.3.23)(react@18.3.1))(@types/react@18.3.23)(react@18.3.1)
       '@skyway-sdk/room':
-        specifier: latest
-        version: 1.13.1(encoding@0.1.13)
+        specifier: workspace:*
+        version: link:../../packages/room
       framer-motion:
         specifier: ^6.5.1
         version: 6.5.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -336,52 +227,11 @@ importers:
         specifier: ^5.4.8
         version: 5.4.19(@types/node@18.19.112)(lightningcss@1.30.1)
 
-  examples/sfu-bot:
-    dependencies:
-      '@skyway-sdk/core':
-        specifier: workspace:*
-        version: link:../../packages/core
-      '@skyway-sdk/sfu-bot':
-        specifier: workspace:*
-        version: link:../../packages/sfu-bot
-    devDependencies:
-      '@babel/cli':
-        specifier: ^7.0.0
-        version: 7.27.2(@babel/core@7.27.4)
-      '@babel/core':
-        specifier: ^7.0.0
-        version: 7.27.4
-      '@babel/preset-typescript':
-        specifier: ^7.18.6
-        version: 7.27.1(@babel/core@7.27.4)
-      parcel:
-        specifier: ^2.8.0
-        version: 2.15.2(@swc/helpers@0.5.17)
-
-  examples/sfu-room:
+  examples/sfu-room-for-hosting:
     dependencies:
       '@skyway-sdk/room':
-        specifier: latest
-        version: 1.13.1(encoding@0.1.13)
-    devDependencies:
-      '@babel/cli':
-        specifier: ^7.0.0
-        version: 7.27.2(@babel/core@7.27.4)
-      '@babel/core':
-        specifier: ^7.0.0
-        version: 7.27.4
-      '@babel/preset-typescript':
-        specifier: ^7.18.6
-        version: 7.27.1(@babel/core@7.27.4)
-      parcel:
-        specifier: ^2.8.0
-        version: 2.15.2(@swc/helpers@0.5.17)
-
-  examples/tutorial:
-    dependencies:
-      '@skyway-sdk/room':
-        specifier: latest
-        version: 1.13.1(encoding@0.1.13)
+        specifier: workspace:*
+        version: link:../../packages/room
     devDependencies:
       '@babel/cli':
         specifier: ^7.0.0
@@ -408,6 +258,9 @@ importers:
         specifier: ^8.17.1
         version: 8.18.2
     devDependencies:
+      '@skyway-sdk/common':
+        specifier: workspace:*
+        version: link:../common
       '@skyway-sdk/model':
         specifier: workspace:*
         version: link:../model
@@ -2363,39 +2216,6 @@ packages:
 
   '@sinonjs/fake-timers@8.1.0':
     resolution: {integrity: sha512-OAPJUAtgeINhh/TAlUID4QTs53Njm7xzddaVlEs/SXwgtiD1tW22zAB/W1wdqfrpmikgaWQ9Fw6Ws+hsiRm5Vg==}
-
-  '@skyway-sdk/analytics-client@1.0.2':
-    resolution: {integrity: sha512-CrBNX8gh8SgcK/CJDWzngpbaVEUduAZNfXU8IjpBvgTETqIvyoYYDeUY9yC2M/FrvnKwK/U1hMTS5Ki/yHWNjw==}
-
-  '@skyway-sdk/common@1.4.9':
-    resolution: {integrity: sha512-aPzSMnvmRZr0nbrw+F15h8bAKTinBj2qoIhdAePk3asOQ5oHHwtXTzjlYRbowKjT/zsEHtib+RJa8EYOV/rZZA==}
-
-  '@skyway-sdk/core@1.13.1':
-    resolution: {integrity: sha512-POST/mGgTE38aDNS2GH1ERSO3MLe6xl/nSbqCVAWYH+8EuUdpjVKKkIeVfKyUqp09J/4RWUnOCey7V4Y91CblQ==}
-
-  '@skyway-sdk/model@1.0.2':
-    resolution: {integrity: sha512-t1Xo7QibNuVLx+PK4eCy4xOT7K+Tw8B+NjknK28vpBvVDSvB/Gm4XWWOdVy83O5ZNSFSG1QOO21Tz1c/NDyW0w==}
-
-  '@skyway-sdk/room@1.13.1':
-    resolution: {integrity: sha512-3JV/dzm+l5gI2AaTLW0+KpjG3Y0pzASkYD3ONUMedDXkmgJn/snCxNN/PRxwhkBvuJHZYdB7ErZ72Vj6C9/6lg==}
-
-  '@skyway-sdk/rtc-api-client@1.8.1':
-    resolution: {integrity: sha512-qkfn9zUVE930lC8h6hdLPp3wvkVooCVjSMeBY7u6452pD9+OXzCl3Dm7V8iGSt/ZBlMM4+aRkTsC17ZWIFjI3w==}
-
-  '@skyway-sdk/rtc-rpc-api-client@1.8.1':
-    resolution: {integrity: sha512-b5ciEoUfCM8Z28q5wmg80x92UcjQ6ffAKEOcH1QFAwdMv/wB1/yvs3CjBTq7JFpU3Sp9MwLRX/ugxOSHprEgqA==}
-
-  '@skyway-sdk/sfu-api-client@1.5.1':
-    resolution: {integrity: sha512-DkySfrBaro5UTCsptfoQKx7W3fGsdFThGHg2Gr5D0jZPFcxln/SuzEfFxsOL+wye0/Kxb+QDhw2BnxsEoEpxcg==}
-
-  '@skyway-sdk/sfu-bot@1.13.1':
-    resolution: {integrity: sha512-7IBmpxDMdOrbSlHE+Fque7ixrjEWxJC2IebYe9hKZAj6VvFdnA9qMIMGKkUGlg8JAfclU7UcHhUKLWFYxSJoKg==}
-
-  '@skyway-sdk/signaling-client@1.0.8':
-    resolution: {integrity: sha512-bcNPNkMiAfHiZJB492FxwTDuqN6u/Ikpv+8KT9izhqxI5dBk0qhIVQnJWDGceFORx/dZ2JG78ABkKD4Wj8C0kg==}
-
-  '@skyway-sdk/token@1.7.1':
-    resolution: {integrity: sha512-BnlWDGkKpEe18g9G7Uy5Fn4LeTfUyJrDUJwsCMPPq7qBpBY1Qvmb7YdPM9W0+grWG9DAA6aa9RlSzQd/Z5dHCQ==}
 
   '@swc/core-darwin-arm64@1.12.4':
     resolution: {integrity: sha512-HihKfeitjZU2ab94Zf893sxzFryLKX0TweGsNXXOLNtkSMLw50auuYfpRM0BOL9/uXXtuCWgRIF6P030SAX5xQ==}
@@ -9426,121 +9246,6 @@ snapshots:
     dependencies:
       '@sinonjs/commons': 1.8.6
 
-  '@skyway-sdk/analytics-client@1.0.2':
-    dependencies:
-      isomorphic-ws: 4.0.1(ws@8.18.2)
-      uuid: 9.0.1
-      ws: 8.18.2
-    transitivePeerDependencies:
-      - bufferutil
-      - utf-8-validate
-
-  '@skyway-sdk/common@1.4.9':
-    dependencies:
-      axios: 1.10.0
-    transitivePeerDependencies:
-      - debug
-
-  '@skyway-sdk/core@1.13.1(encoding@0.1.13)(ws@8.18.2)':
-    dependencies:
-      '@skyway-sdk/analytics-client': 1.0.2
-      '@skyway-sdk/common': 1.4.9
-      '@skyway-sdk/rtc-api-client': 1.8.1(ws@8.18.2)
-      '@skyway-sdk/signaling-client': 1.0.8(encoding@0.1.13)
-      '@skyway-sdk/token': 1.7.1
-      bowser: 2.11.0
-      deepmerge: 4.3.1
-      lodash: 4.17.21
-      sdp-transform: 2.15.0
-      ua-parser-js: 1.0.40
-      uuid: 9.0.1
-    transitivePeerDependencies:
-      - bufferutil
-      - debug
-      - encoding
-      - utf-8-validate
-      - ws
-
-  '@skyway-sdk/model@1.0.2': {}
-
-  '@skyway-sdk/room@1.13.1(encoding@0.1.13)':
-    dependencies:
-      '@skyway-sdk/common': 1.4.9
-      '@skyway-sdk/core': 1.13.1(encoding@0.1.13)(ws@8.18.2)
-      '@skyway-sdk/sfu-bot': 1.13.1(encoding@0.1.13)(ws@8.18.2)
-      '@skyway-sdk/token': 1.7.1
-      uuid: 9.0.1
-    transitivePeerDependencies:
-      - bufferutil
-      - debug
-      - encoding
-      - utf-8-validate
-      - ws
-
-  '@skyway-sdk/rtc-api-client@1.8.1(ws@8.18.2)':
-    dependencies:
-      '@skyway-sdk/common': 1.4.9
-      '@skyway-sdk/rtc-rpc-api-client': 1.8.1(ws@8.18.2)
-      '@skyway-sdk/token': 1.7.1
-      deepmerge: 4.3.1
-      uuid: 9.0.1
-    transitivePeerDependencies:
-      - debug
-      - ws
-
-  '@skyway-sdk/rtc-rpc-api-client@1.8.1(ws@8.18.2)':
-    dependencies:
-      '@skyway-sdk/common': 1.4.9
-      '@skyway-sdk/model': 1.0.2
-      isomorphic-ws: 4.0.1(ws@8.18.2)
-      uuid: 9.0.1
-    transitivePeerDependencies:
-      - debug
-      - ws
-
-  '@skyway-sdk/sfu-api-client@1.5.1':
-    dependencies:
-      '@skyway-sdk/common': 1.4.9
-      mediasoup-client: 3.7.17
-    transitivePeerDependencies:
-      - debug
-
-  '@skyway-sdk/sfu-bot@1.13.1(encoding@0.1.13)(ws@8.18.2)':
-    dependencies:
-      '@skyway-sdk/common': 1.4.9
-      '@skyway-sdk/core': 1.13.1(encoding@0.1.13)(ws@8.18.2)
-      '@skyway-sdk/sfu-api-client': 1.5.1
-      lodash: 4.17.21
-      mediasoup-client: 3.7.17
-    transitivePeerDependencies:
-      - bufferutil
-      - debug
-      - encoding
-      - utf-8-validate
-      - ws
-
-  '@skyway-sdk/signaling-client@1.0.8(encoding@0.1.13)':
-    dependencies:
-      isomorphic-fetch: 3.0.0(encoding@0.1.13)
-      isomorphic-ws: 4.0.1(ws@8.18.2)
-      uuid: 9.0.1
-      ws: 8.18.2
-    transitivePeerDependencies:
-      - bufferutil
-      - encoding
-      - utf-8-validate
-
-  '@skyway-sdk/token@1.7.1':
-    dependencies:
-      '@skyway-sdk/common': 1.4.9
-      jsrsasign: 11.1.0
-      jwt-decode: 3.1.2
-      uuid: 9.0.1
-      zod: 3.25.67
-      zod-validation-error: 3.5.2(zod@3.25.67)
-    transitivePeerDependencies:
-      - debug
-
   '@swc/core-darwin-arm64@1.12.4':
     optional: true
 
@@ -10759,7 +10464,7 @@ snapshots:
 
   dotenv-expand@11.0.7:
     dependencies:
-      dotenv: 16.4.7
+      dotenv: 16.5.0
 
   dotenv@16.4.7: {}
 
@@ -12098,7 +11803,7 @@ snapshots:
 
   jest-diff@29.7.0:
     dependencies:
-      chalk: 4.1.0
+      chalk: 4.1.2
       diff-sequences: 29.6.3
       jest-get-type: 29.6.3
       pretty-format: 29.7.0
@@ -13342,7 +13047,7 @@ snapshots:
       '@yarnpkg/parsers': 3.0.2
       '@zkochan/js-yaml': 0.0.7
       axios: 1.10.0
-      chalk: 4.1.0
+      chalk: 4.1.2
       cli-cursor: 3.1.0
       cli-spinners: 2.6.1
       cliui: 8.0.1
@@ -13427,7 +13132,7 @@ snapshots:
   ora@5.3.0:
     dependencies:
       bl: 4.1.0
-      chalk: 4.1.0
+      chalk: 4.1.2
       cli-cursor: 3.1.0
       cli-spinners: 2.6.1
       is-interactive: 1.0.0

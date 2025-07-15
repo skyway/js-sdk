@@ -18,13 +18,10 @@ export type ConnectionState = 'connecting' | 'connected' | 'reconnecting' | 'clo
 
 export type SocketParams = {
   sessionEndpoint: string;
-  channelId: string;
-  channelName?: string;
-  memberId: string;
-  memberName?: string;
   token: string;
   logger: Logger;
   sdkVersion: string;
+  contextId: string;
 };
 
 const getReconnectWaitTime = (reconnectCount: number): number => {
@@ -34,19 +31,13 @@ const getReconnectWaitTime = (reconnectCount: number): number => {
 export class Socket {
   private _sessionEndpoint: string;
 
-  private readonly _channelId: string;
-
-  private readonly _channelName?: string;
-
-  private readonly _memberId: string;
-
-  private readonly _memberName?: string;
-
   private _token: string;
 
   private _logger: Logger;
 
   private _sdkVersion: string;
+
+  private _contextId: string;
 
   private _isOpen = false;
 
@@ -72,24 +63,12 @@ export class Socket {
 
   private _resendClientEvents: ClientEvent[] = [];
 
-  constructor({
-    channelId,
-    channelName,
-    memberId,
-    memberName,
-    sessionEndpoint,
-    token,
-    logger,
-    sdkVersion,
-  }: SocketParams) {
+  constructor({ sessionEndpoint, token, logger, sdkVersion, contextId }: SocketParams) {
     this._sessionEndpoint = sessionEndpoint;
-    this._channelId = channelId;
-    this._channelName = channelName;
-    this._memberId = memberId;
-    this._memberName = memberName;
     this._token = token;
     this._logger = logger;
     this._sdkVersion = sdkVersion;
+    this._contextId = contextId;
 
     this._connect();
   }
@@ -109,12 +88,9 @@ export class Socket {
       const subProtocol = `SkyWayAuthToken!${this._token}`;
 
       const wsProperties = {
-        channelId: this._channelId,
-        channelName: this._channelName,
-        memberId: this._memberId,
-        memberName: this._memberName,
         sdkPlatform: 'js',
         sdkVersion: this._sdkVersion,
+        contextId: this._contextId,
       };
       const queryString = Object.entries(wsProperties)
         .filter(([_, v]) => v !== undefined)
@@ -145,16 +121,16 @@ export class Socket {
         'Close event fired: ' + JSON.stringify({ code: event.code, reason: event.reason, type: event.type });
 
       // 1000, 4000~4099: normal case (should not reconnect)
-      // 4100~4199: non-normal case (should not reconnect)
+      // 1009, 4100~4199: non-normal case (should not reconnect)
       // 4200~4299: non-normal case (should reconnect)
       // others: unexpected case (should reconnect)
-      if (4100 <= event.code && event.code <= 4199) {
+      if ((4100 <= event.code && event.code <= 4199) || event.code === 1009) {
         this._logger.error(logMessage, new Error());
       } else {
         this._logger.debug(logMessage);
       }
 
-      if (event.code !== 1000 && !(4000 <= event.code && event.code <= 4199)) {
+      if (event.code !== 1000 && event.code !== 1009 && !(4000 <= event.code && event.code <= 4199)) {
         if (4200 === event.code) {
           this.onTokenExpired.emit();
         } else {

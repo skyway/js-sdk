@@ -5,7 +5,6 @@ import {
   PromiseQueue,
   SkyWayError,
 } from '@skyway-sdk/common';
-import { Encoding } from '@skyway-sdk/model';
 import { PublicationInit } from '@skyway-sdk/rtc-api-client';
 
 import { PersonInit, SkyWayChannelImpl } from '../../channel';
@@ -159,6 +158,11 @@ export class LocalPersonImpl extends MemberImpl implements LocalPerson {
   static async Create(...args: ConstructorParameters<typeof LocalPersonImpl>) {
     const person = new LocalPersonImpl(...args);
     await person._setupTtlTimer();
+    if (person._analytics) {
+      void person._analytics.client.sendJoinReport({
+        memberId: person.id,
+      });
+    }
     return person;
   }
 

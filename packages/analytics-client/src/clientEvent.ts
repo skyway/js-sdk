@@ -7,7 +7,9 @@ export type ClientEventType =
   | 'SubscriptionStatsReport'
   | 'RtcPeerConnectionEventReport'
   | 'PublicationUpdateEncodingsReport'
-  | 'SubscriptionUpdatePreferredEncodingReport';
+  | 'SubscriptionUpdatePreferredEncodingReport'
+  | 'SdkLog'
+  | 'JoinReport';
 
 export type MediaDeviceReportClientEvent = {
   id: string;
@@ -100,6 +102,14 @@ export type SubscriptionUpdatePreferredEncodingReportClientEvent = {
     preferredEncodingIndex: number;
     preferredEncodingVersion: number;
     updatedAt: number; // UnixTimestamp (milliseconds);
+  };
+};
+
+export type JoinReportClientEvent = {
+  id: string;
+  type: 'JoinReport';
+  payload: {
+    memberId: string;
   };
 };
 

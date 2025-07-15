@@ -1,8 +1,10 @@
+import { OnLogForAnalyticsProps } from '@skyway-sdk/common';
 import { ContentType } from '@skyway-sdk/model';
 
 import {
   BindingRtcPeerConnectionToSubscriptionClientEvent,
   ClientEvent,
+  JoinReportClientEvent,
   MediaDeviceReportClientEvent,
   PublicationUpdateEncodingsReportClientEvent,
   RtcPeerConnectionEventReportClientEvent,
@@ -17,16 +19,13 @@ import { Event } from './utils/event';
 import { Logger } from './utils/logger';
 
 const ANALYTICS_LOGGING_SERVER_DOMAIN = 'analytics-logging.skyway.ntt.com';
-const API_VERSION = 'v1';
+const API_VERSION = 'v2';
 const TIMEOUT_SEC = 5;
 
 type AnalyticsClientParams = {
   token: string;
-  channelId: string;
-  channelName?: string;
-  memberId: string;
-  memberName?: string;
   sdkVersion: string;
+  contextId: string;
 };
 
 type AnalyticsClientOptions = {
@@ -42,6 +41,7 @@ type SubscriptionStatsReport = SubscriptionStatsReportClientEvent['payload'];
 type RtcPeerConnectionEventReport = RtcPeerConnectionEventReportClientEvent['payload'];
 type PublicationUpdateEncodingsReport = PublicationUpdateEncodingsReportClientEvent['payload'];
 type SubscriptionUpdatePreferredEncodingReport = SubscriptionUpdatePreferredEncodingReportClientEvent['payload'];
+type JoinReport = JoinReportClientEvent['payload'];
 
 export class AnalyticsClient {
   private readonly _options: AnalyticsClientInternalOptions;
@@ -60,15 +60,9 @@ export class AnalyticsClient {
 
   private _newToken: string | undefined;
 
-  private readonly _channelId: string;
-
-  private readonly _channelName?: string;
-
-  private readonly _memberId: string;
-
-  private readonly _memberName?: string;
-
   private readonly _sdkVersion: string;
+
+  private readonly _contextId: string;
 
   private _isClosed = false;
 
@@ -103,17 +97,16 @@ export class AnalyticsClient {
     types: [],
   };
 
-  constructor(
-    { token, channelId, channelName, memberId, memberName, sdkVersion }: AnalyticsClientParams,
-    options?: AnalyticsClientOptions
-  ) {
+  private _pendingSdkLogs: OnLogForAnalyticsProps[] = [];
+  private _sdkLogTimer: NodeJS.Timeout;
+
+  private static readonly MAX_PENDING_SDK_LOGS = 50;
+
+  constructor({ token, sdkVersion, contextId }: AnalyticsClientParams, options?: AnalyticsClientOptions) {
     this._token = token;
     this._newToken = undefined;
-    this._channelId = channelId;
-    this._channelName = channelName;
-    this._memberId = memberId;
-    this._memberName = memberName;
     this._sdkVersion = sdkVersion;
+    this._contextId = contextId;
 
     const defaultOptions: AnalyticsClientInternalOptions = {
       analyticsLoggingServerDomain: ANALYTICS_LOGGING_SERVER_DOMAIN,
@@ -134,6 +127,15 @@ export class AnalyticsClient {
 
     this._logger = this._options.logger;
     this._logger.debug(`Created instance with the options: ${this._options}`);
+
+    this._sdkLogTimer = setInterval(() => {
+      if (this._pendingSdkLogs.length > 0) {
+        const logs = this._pendingSdkLogs.splice(0, this._pendingSdkLogs.length);
+        this.sendSdkLogReport(logs).catch((err) => {
+          this._logger.warn('sendSdkLogReport (interval) failed', err);
+        });
+      }
+    }, 5 * 1000);
   }
 
   get connectionState(): ConnectionState {
@@ -147,10 +149,7 @@ export class AnalyticsClient {
 
     this._socket = new Socket({
       sessionEndpoint: `${WSProtocol}://${analyticsLoggingServerDomain}/${API_VERSION}/client/ws`,
-      channelId: this._channelId,
-      channelName: this._channelName,
-      memberId: this._memberId,
-      memberName: this._memberName,
+      contextId: this._contextId,
       token: this._token,
       logger: this._logger,
       sdkVersion: this._sdkVersion,
@@ -171,7 +170,7 @@ export class AnalyticsClient {
         this.onAnalyticsNotEnabledError.emit(data);
       }
       this.onConnectionFailed.emit();
-      this._cleanupAnalyticsClientMaps();
+      this.dispose();
     });
 
     this._socket.onConnectionStateChanged.addListener((state) => {
@@ -197,7 +196,21 @@ export class AnalyticsClient {
     }
   }
 
+  bufferOrSendSdkLog(log: OnLogForAnalyticsProps): void {
+    const shouldImmediateSend = log.level === 'warn' || log.level === 'error';
+    this._pendingSdkLogs.push(log);
+
+    if (shouldImmediateSend || this._pendingSdkLogs.length >= AnalyticsClient.MAX_PENDING_SDK_LOGS) {
+      const logsToSend = [...this._pendingSdkLogs];
+      this._pendingSdkLogs.length = 0;
+      this.sendSdkLogReport(logsToSend).catch((err) => {
+        this._logger.warn('sendSdkLogReport failed', err);
+      });
+    }
+  }
+
   dispose(): void {
+    clearInterval(this._sdkLogTimer);
     this._disconnect();
     this._cleanupAnalyticsClientMaps();
   }
@@ -247,6 +260,25 @@ export class AnalyticsClient {
 
     await this._sendClientEvent(clientEvent).catch((err) => {
       this._logger.warn('_sendClientEvent in sendMediaDeviceReport is failed', err);
+    });
+  }
+
+  async sendSdkLogReport(logs: OnLogForAnalyticsProps[]): Promise<void> {
+    if (logs.length === 0) return;
+    const sdkLogs = logs.map((l) => ({
+      timestamp: l.timestamp,
+      level: l.level,
+      message: Array.isArray(l.message)
+        ? l.message.map((m) => (typeof m === 'string' ? m : JSON.stringify(m))).join(',')
+        : String(l.message),
+    }));
+    const clientEvent = new ClientEvent('SdkLog', {
+      sdkLogs,
+      contextId: this._contextId,
+    });
+
+    await this._sendClientEvent(clientEvent).catch((err) => {
+      this._logger.warn('_sendClientEvent in sendSdkLogReport is failed', err);
     });
   }
 
@@ -458,6 +490,14 @@ export class AnalyticsClient {
 
     await this._sendClientEvent(clientEvent).catch((err) => {
       this._logger.warn('_sendClientEvent in sendSubscriptionUpdatePreferredEncodingReport is failed', err);
+    });
+  }
+
+  async sendJoinReport(report: JoinReport): Promise<void> {
+    const clientEvent = new ClientEvent('JoinReport', report);
+
+    await this._sendClientEvent(clientEvent).catch((err) => {
+      this._logger.warn('_sendClientEvent in sendJoinReport is failed', err);
     });
   }
 

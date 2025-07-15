@@ -17,6 +17,14 @@ export const logLevelTypes = [
 export type LogLevel = (typeof logLevelTypes)[number];
 export type LogFormat = 'object' | 'string';
 
+export type OnLogForAnalyticsProps = {
+  level: string;
+  timestamp: string;
+  message: any[];
+  id: string;
+  prefix: string;
+};
+
 export class Logger {
   static level: LogLevel = 'error';
   static format: LogFormat = 'object';
@@ -26,9 +34,21 @@ export class Logger {
     message: any[];
     id: string;
   }) => void = () => {};
+  /**@internal */
+  static _onLogForAnalytics: (props: OnLogForAnalyticsProps) => void = () => {};
 
   /**@internal */
   static readonly id = Math.random().toString().slice(2, 7);
+  static readonly formatter = new Intl.DateTimeFormat('ja-JP', {
+    timeZone: 'Asia/Tokyo',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+  });
 
   /**@internal */
   prefix: string;
@@ -71,8 +91,17 @@ export class Logger {
     const logLevel = logLevelTypes.indexOf(Logger.level);
 
     if (logLevel >= logType) {
-      const timestamp =
-        new Date(Date.now() + 60 * 9 * 60_000).toISOString() + '+JST';
+      const now = new Date();
+
+      const parts = Logger.formatter.formatToParts(now);
+      const get = (type: Intl.DateTimeFormatPartTypes) =>
+        parts.find((p) => p.type === type)?.value;
+
+      const milliseconds = String(now.getMilliseconds()).padStart(3, '0');
+
+      const timestamp = `${get('year')}-${get('month')}-${get('day')}T${get(
+        'hour'
+      )}:${get('minute')}:${get('second')}.${milliseconds}+09:00`;
 
       const parsed = [this.prefix, ...msg].map((m) => {
         if (m instanceof Error) {
@@ -113,7 +142,19 @@ export class Logger {
           break;
       }
 
-      Logger.onLog({ id: Logger.id, timestamp, level, message: msg });
+      Logger.onLog({
+        id: Logger.id,
+        timestamp,
+        level,
+        message: msg,
+      });
+      Logger._onLogForAnalytics({
+        id: Logger.id,
+        timestamp,
+        level,
+        message: msg,
+        prefix: this.prefix,
+      });
     }
   }
 
