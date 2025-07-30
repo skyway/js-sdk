@@ -265,8 +265,12 @@ export async function getRtcRtpCapabilities(): Promise<{
 }> {
   const pc = new RTCPeerConnection();
 
-  pc.addTransceiver('audio');
-  pc.addTransceiver('video');
+  pc.addTransceiver('audio', {
+    direction: 'sendonly',
+  });
+  pc.addTransceiver('video', {
+    direction: 'sendonly',
+  });
 
   const offer = await pc.createOffer();
 
@@ -312,10 +316,7 @@ export const fmtpConfigParser = (config: string) => {
     .reduce((acc: { [k: string]: number | string | undefined }, cur) => {
       const [k, v] = cur.split('=');
       if (k) {
-        acc[k] = Number(v);
-        if (k === 'profile-level-id') {
-          acc[k] = v;
-        }
+        acc[k] = !isNaN(Number(v)) ? Number(v) : v;
       }
       return acc;
     }, {});

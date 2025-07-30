@@ -105,6 +105,8 @@ export class LocalPersonImpl extends MemberImpl implements LocalPerson {
   ttlSec?: number;
   readonly keepaliveIntervalSec = this.args.keepaliveIntervalSec;
   readonly keepaliveIntervalGapSec = this.args.keepaliveIntervalGapSec;
+  readonly preventAutoLeaveOnBeforeUnload =
+    this.args.preventAutoLeaveOnBeforeUnload;
   readonly disableSignaling = this.args.disableSignaling;
   readonly disableAnalytics = this.args.disableAnalytics;
   readonly config = this.context.config;
@@ -278,7 +280,7 @@ export class LocalPersonImpl extends MemberImpl implements LocalPerson {
   }
 
   private _listenBeforeUnload() {
-    if (window) {
+    if (window && !this.preventAutoLeaveOnBeforeUnload) {
       const leave = async () => {
         window.removeEventListener('beforeunload', leave);
         if (this.state !== 'joined') {

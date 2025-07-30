@@ -35,10 +35,11 @@ export type SkyWayConfigOptions = {
   log: Partial<{ level: LogLevel; format: LogFormat }>;
   /**@internal */
   internal: { disableDPlane?: boolean };
-  member: Partial<MemberKeepAliveConfig>;
+  member: Partial<LocalMemberConfig>;
 };
 
 /**
+ * @deprecated [japanese] LocalMemberConfigを使用してください
  * @description [japanese] MemberのChannelとのKeepAliveに関する設定
  * @description [japanese]
  * Memberはブラウザのタブを閉じるとChannelから削除される。
@@ -51,6 +52,14 @@ export type MemberKeepAliveConfig = {
   keepaliveIntervalSec: number;
   /**@description [japanese] KeepAliveの周期を超えてChannelからMemberが削除されるまでの時間 */
   keepaliveIntervalGapSec: number;
+};
+
+/**
+ * @description [japanese] LocalMemberに関する設定
+ */
+export type LocalMemberConfig = MemberKeepAliveConfig & {
+  /**@description [japanese] trueの場合、beforeunloadイベントで自動的にleaveしない。デフォルトはfalse */
+  preventAutoLeaveOnBeforeUnload: boolean;
 };
 
 /**@internal */
@@ -109,6 +118,7 @@ export class ContextConfig implements SkyWayConfigOptions {
   member: Required<SkyWayConfigOptions['member']> = {
     keepaliveIntervalGapSec: 30,
     keepaliveIntervalSec: 30,
+    preventAutoLeaveOnBeforeUnload: false,
   };
   /**@internal */
   constructor(options: Partial<SkyWayConfigOptions> = {}) {

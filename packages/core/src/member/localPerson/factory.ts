@@ -21,6 +21,7 @@ export async function createLocalPerson(
   {
     keepaliveIntervalSec,
     keepaliveIntervalGapSec,
+    preventAutoLeaveOnBeforeUnload,
     disableSignaling,
   }: PersonInit = {}
 ) {
@@ -29,6 +30,7 @@ export async function createLocalPerson(
     memberDto,
     keepaliveIntervalSec,
     keepaliveIntervalGapSec,
+    preventAutoLeaveOnBeforeUnload,
   });
 
   const { iceParamServer } = context.config;
@@ -67,6 +69,7 @@ export async function createLocalPerson(
     id: memberDto.id,
     keepaliveIntervalSec,
     keepaliveIntervalGapSec,
+    preventAutoLeaveOnBeforeUnload,
     context,
   });
 

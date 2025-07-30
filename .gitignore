@@ -28,3 +28,4 @@ __tests__
 packages/signaling-client/examples
 packages/analytics-client/examples
 jest
+test-*.json
