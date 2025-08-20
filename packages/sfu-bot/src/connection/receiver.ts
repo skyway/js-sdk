@@ -11,7 +11,7 @@ import {
 } from '@skyway-sdk/core';
 import { createRemoteStream } from '@skyway-sdk/core';
 import { SfuRestApiClient } from '@skyway-sdk/sfu-api-client';
-import { Consumer } from 'mediasoup-client/lib/Consumer';
+import { Consumer } from '@skyway-sdk/mediasoup-client/lib/Consumer';
 
 import { errors } from '../errors';
 import { SfuBotMember } from '../member';

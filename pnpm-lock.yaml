@@ -420,9 +420,9 @@ importers:
       '@skyway-sdk/common':
         specifier: workspace:*
         version: link:../common
-      mediasoup-client:
-        specifier: 3.7.17
-        version: 3.7.17
+      '@skyway-sdk/mediasoup-client':
+        specifier: ^3.15.2
+        version: 3.15.2
 
   packages/sfu-bot:
     dependencies:
@@ -432,15 +432,15 @@ importers:
       '@skyway-sdk/core':
         specifier: workspace:*
         version: link:../core
+      '@skyway-sdk/mediasoup-client':
+        specifier: ^3.15.2
+        version: 3.15.2
       '@skyway-sdk/sfu-api-client':
         specifier: workspace:*
         version: link:../sfu-api-client
       lodash:
         specifier: 4.17.21
         version: 4.17.21
-      mediasoup-client:
-        specifier: 3.7.17
-        version: 3.7.17
     devDependencies:
       '@skyway-sdk/model':
         specifier: workspace:*
@@ -2217,6 +2217,10 @@ packages:
   '@sinonjs/fake-timers@8.1.0':
     resolution: {integrity: sha512-OAPJUAtgeINhh/TAlUID4QTs53Njm7xzddaVlEs/SXwgtiD1tW22zAB/W1wdqfrpmikgaWQ9Fw6Ws+hsiRm5Vg==}
 
+  '@skyway-sdk/mediasoup-client@3.15.2':
+    resolution: {integrity: sha512-0nNB6OPSU3aTKaoElJ0jI76gLYzkO96n8oExs94hd+b2bCBIpKznvzRxlmdZQH8T4fzLfeIU7AK3WROGr+iMQA==}
+    engines: {node: '>=18'}
+
   '@swc/core-darwin-arm64@1.12.4':
     resolution: {integrity: sha512-HihKfeitjZU2ab94Zf893sxzFryLKX0TweGsNXXOLNtkSMLw50auuYfpRM0BOL9/uXXtuCWgRIF6P030SAX5xQ==}
     engines: {node: '>=10'}
@@ -2788,9 +2792,9 @@ packages:
     resolution: {integrity: sha512-wvUjBtSGN7+7SjNpq/9M2Tg350UZD3q62IFZLbRAR1bSMlCo1ZaeW+BJ+D090e4hIIZLBcTDWe4Mh4jvUDajzQ==}
     engines: {node: '>= 0.4'}
 
-  awaitqueue@3.2.0:
-    resolution: {integrity: sha512-yFka1VP9+ucU7n3wGerwZ9OzrdxluWl6qngiOlSe+nQyn6PtrR2BQt6HEoShI6sjo1sXAYQHQlUtPXzXSYAJfA==}
-    engines: {node: '>=18'}
+  awaitqueue@3.2.4:
+    resolution: {integrity: sha512-aZMQSpozgcAfKFLkhTRUMtiDo40EUb8KkXBrI2uHOysDzgRt/prnrt0oh9N8Mp7tRKtusmWxOimt8npn1vorug==}
+    engines: {node: '>=20'}
 
   axios@1.10.0:
     resolution: {integrity: sha512-/1xYAC4MP/HEG+3duIhFr4ZQXR4sQXOIe+o6sdqzeykGLx6Upp/1p8MHqhINOvGeP7xyNHe7tsiJByc4SSVUxw==}
@@ -3603,10 +3607,6 @@ packages:
     resolution: {integrity: sha512-kVscqXk4OCp68SZ0dkgEKVi6/8ij300KBWTJq32P/dYeWTSwK41WyTxalN1eRmA5Z9UU/LX9D7FWSmV9SAYx6g==}
     engines: {node: '>=0.10.0'}
 
-  event-target-shim@6.0.2:
-    resolution: {integrity: sha512-8q3LsZjRezbFZ2PN+uP+Q7pnHUMmAOziU2vA2OwoFaKIXxlxl38IylhSSgUorWu/rf4er67w0ikBqjBFk/pomA==}
-    engines: {node: '>=10.13.0'}
-
   eventemitter3@4.0.7:
     resolution: {integrity: sha512-8guHBZCwKnFhYdHr2ysuRWErTwhoN2X8XELRlrRwpmfeY2jjuUN4taQMsULKUVo1K4DvZl+0pgfyoysHxvmvEw==}
 
@@ -3648,8 +3648,9 @@ packages:
     resolution: {integrity: sha512-hMQ4CX1p1izmuLYyZqLMO/qGNw10wSv9QDCPfzXfyFrOaCSSoRfqE1Kf1s5an66J5JZC62NewG+mK49jOCtQew==}
     engines: {node: '>=4'}
 
-  fake-mediastreamtrack@1.2.0:
-    resolution: {integrity: sha512-AxHtlEmka1sqNoe3Ej1H1hJc9gjjO/6vCbCPm4D4QeEXvzhjYumA+iZ7wOi2WrmkAhGElHhBgWoNgJhFccectA==}
+  fake-mediastreamtrack@2.1.2:
+    resolution: {integrity: sha512-7ZFSI2vUmg63lqGzMYUG97GeqTVPBAOv2NbQe7YIDH+AU3ucEBcBzVmIDU89V17dezLxqi8U0U1C0X9TmhYYGA==}
+    engines: {node: '>=18'}
 
   fast-deep-equal@3.1.3:
     resolution: {integrity: sha512-f3qQ9oQy9j2AhBe/H9VC91wLmKBCCU/gDOnKNAYG5hswO7BLKj09Hc5HYNz9cGI++xlpDCIgDaitVs03ATR84Q==}
@@ -3932,8 +3933,8 @@ packages:
   graceful-fs@4.2.11:
     resolution: {integrity: sha512-RbJ5/jmFcNNCcDV5o9eTnBLJ/HszWV0P73bc+Ff4nS/rJj+YaS6IGyiOL0VoBYX+l1Wrl3k63h/KrH+nhJ0XvQ==}
 
-  h264-profile-level-id@2.2.0:
-    resolution: {integrity: sha512-CwCzxvUWuOvJ0zI8Ltysq+7BBQ9kCoP2FnfYg5ZLLY3pZ2YfH+o6IqP9Eu8XHWqJM2JlmHMHfAApiQ5IDWSRQA==}
+  h264-profile-level-id@2.2.3:
+    resolution: {integrity: sha512-LhhB3zIIu2TTZFyBC57s+pBddH6eTz8NMr6CwlWWRdy2kurhxxOU5TS0CguJ3i9MEc2B6a0aElAwBxMqS6FdLA==}
     engines: {node: '>=18'}
 
   handlebars@4.7.8:
@@ -4939,10 +4940,6 @@ packages:
   math-intrinsics@1.1.0:
     resolution: {integrity: sha512-/IXtbwEk5HTPyEwyKX6hGkYXxM9nbj64B+ilVJnC/R6B0pH5G4V3b0pVbL7DBj4tkhBAppbQUlf6F6Xl9LHu1g==}
     engines: {node: '>= 0.4'}
-
-  mediasoup-client@3.7.17:
-    resolution: {integrity: sha512-yAOYrA30W+8I8RWdMHy6ahAD8y/zeKQSe8HXnUiKxRvBFgor3q1lOLCf1zk96fvpv69ayX4Ti6Ve1pWSCU36dw==}
-    engines: {node: '>=18'}
 
   memorystream@0.3.1:
     resolution: {integrity: sha512-S3UwM3yj5mtUSEfP41UZmt/0SCoVYUcU1rkXv+BQ5Ig8ndL4sPoJNBUJERafdPb5jjHJGuMgytgKvKIf58XNBw==}
@@ -6135,6 +6132,10 @@ packages:
   stylis@4.2.0:
     resolution: {integrity: sha512-Orov6g6BB1sDfYgzWfTHDOxamtX1bE/zo104Dh9e6fqJ3PooipYyfJ0pUmrZO2wAvO8YbEyeFrkV91XTsGMSrw==}
 
+  supports-color@10.2.0:
+    resolution: {integrity: sha512-5eG9FQjEjDbAlI5+kdpdyPIBMRH4GfTVDGREVupaZHmVoppknhM29b/S9BkQz7cathp85BVgRi/As3Siln7e0Q==}
+    engines: {node: '>=18'}
+
   supports-color@5.5.0:
     resolution: {integrity: sha512-QjVjwdXIt408MIiAqCX4oUKsgU2EqAGzs2Ppkm4aQYbjm+ZEWEcW4SfFNTr4uMNZma0ey4f5lgLrkB0aX0QMow==}
     engines: {node: '>=4'}
@@ -6146,10 +6147,6 @@ packages:
   supports-color@8.1.1:
     resolution: {integrity: sha512-MpUEN2OodtUzxvKQl72cUF7RQ5EiHsGvSsVG0ia9c5RbWGL2CI4C7EpPS8UTBIplnlzZiNuV56w+FuNxy3ty2Q==}
     engines: {node: '>=10'}
-
-  supports-color@9.4.0:
-    resolution: {integrity: sha512-VL+lNrEoIXww1coLPOmiEmK/0sGigko5COxI09KzHc2VJXJsQ37UaQ+8quuxjDeA7+KnLGTWRyOXSLLR2Wb4jw==}
-    engines: {node: '>=12'}
 
   supports-hyperlinks@2.3.0:
     resolution: {integrity: sha512-RpsAZlpWcDwOPQA22aCH4J0t7L8JmAvsCxfOSEwm7cQs3LshN36QaTkwd70DnBOXDWGssw2eUoc8CaRWT0XunA==}
@@ -6520,6 +6517,10 @@ packages:
 
   uuid@10.0.0:
     resolution: {integrity: sha512-8XkAphELsDnEGrDxUOHB3RGvXz6TeuYSGEZBOjtTtPm2lwhGBjLgOzLHB63IUWfBpNucQjND6d3AOudO+H3RWQ==}
+    hasBin: true
+
+  uuid@11.1.0:
+    resolution: {integrity: sha512-0/A9rDy9P7cJ+8w1c9WD9V//9Wj15Ce2MPz8Ri6032usz+NfePxx5AcN3bN+r6ZL6jEo066/yNYB3tn4pQEx+A==}
     hasBin: true
 
   uuid@9.0.1:
@@ -6920,7 +6921,7 @@ snapshots:
       '@babel/traverse': 7.27.4
       '@babel/types': 7.27.6
       convert-source-map: 2.0.0
-      debug: 4.4.1(supports-color@9.4.0)
+      debug: 4.4.1(supports-color@10.2.0)
       gensync: 1.0.0-beta.2
       json5: 2.2.3
       semver: 6.3.1
@@ -7185,7 +7186,7 @@ snapshots:
       '@babel/parser': 7.27.5
       '@babel/template': 7.27.2
       '@babel/types': 7.27.6
-      debug: 4.4.1(supports-color@9.4.0)
+      debug: 4.4.1(supports-color@10.2.0)
       globals: 11.12.0
     transitivePeerDependencies:
       - supports-color
@@ -7666,7 +7667,7 @@ snapshots:
   '@eslint/eslintrc@0.4.3':
     dependencies:
       ajv: 6.12.6
-      debug: 4.4.1(supports-color@9.4.0)
+      debug: 4.4.1(supports-color@10.2.0)
       espree: 7.3.1
       globals: 13.24.0
       ignore: 4.0.6
@@ -7680,7 +7681,7 @@ snapshots:
   '@humanwhocodes/config-array@0.5.0':
     dependencies:
       '@humanwhocodes/object-schema': 1.2.1
-      debug: 4.4.1(supports-color@9.4.0)
+      debug: 4.4.1(supports-color@10.2.0)
       minimatch: 3.1.2
     transitivePeerDependencies:
       - supports-color
@@ -9246,6 +9247,19 @@ snapshots:
     dependencies:
       '@sinonjs/commons': 1.8.6
 
+  '@skyway-sdk/mediasoup-client@3.15.2':
+    dependencies:
+      '@types/debug': 4.1.12
+      '@types/events-alias': '@types/events@3.0.3'
+      awaitqueue: 3.2.4(supports-color@10.2.0)
+      debug: 4.4.1(supports-color@10.2.0)
+      events-alias: events@3.3.0
+      fake-mediastreamtrack: 2.1.2
+      h264-profile-level-id: 2.2.3(supports-color@10.2.0)
+      sdp-transform: 2.15.0
+      supports-color: 10.2.0
+      ua-parser-js: 1.0.40
+
   '@swc/core-darwin-arm64@1.12.4':
     optional: true
 
@@ -9497,7 +9511,7 @@ snapshots:
       '@typescript-eslint/experimental-utils': 4.33.0(eslint@7.32.0)(typescript@4.7.4)
       '@typescript-eslint/parser': 4.33.0(eslint@7.32.0)(typescript@4.7.4)
       '@typescript-eslint/scope-manager': 4.33.0
-      debug: 4.4.1(supports-color@9.4.0)
+      debug: 4.4.1(supports-color@10.2.0)
       eslint: 7.32.0
       functional-red-black-tree: 1.0.1
       ignore: 5.3.2
@@ -9527,7 +9541,7 @@ snapshots:
       '@typescript-eslint/scope-manager': 4.33.0
       '@typescript-eslint/types': 4.33.0
       '@typescript-eslint/typescript-estree': 4.33.0(typescript@4.7.4)
-      debug: 4.4.1(supports-color@9.4.0)
+      debug: 4.4.1(supports-color@10.2.0)
       eslint: 7.32.0
     optionalDependencies:
       typescript: 4.7.4
@@ -9552,7 +9566,7 @@ snapshots:
     dependencies:
       '@typescript-eslint/types': 4.33.0
       '@typescript-eslint/visitor-keys': 4.33.0
-      debug: 4.4.1(supports-color@9.4.0)
+      debug: 4.4.1(supports-color@10.2.0)
       globby: 11.1.0
       is-glob: 4.0.3
       semver: 7.7.2
@@ -9566,7 +9580,7 @@ snapshots:
     dependencies:
       '@typescript-eslint/types': 6.21.0
       '@typescript-eslint/visitor-keys': 6.21.0
-      debug: 4.4.1(supports-color@9.4.0)
+      debug: 4.4.1(supports-color@10.2.0)
       globby: 11.1.0
       is-glob: 4.0.3
       minimatch: 9.0.3
@@ -9731,7 +9745,7 @@ snapshots:
 
   agent-base@6.0.2:
     dependencies:
-      debug: 4.4.1(supports-color@9.4.0)
+      debug: 4.4.1(supports-color@10.2.0)
     transitivePeerDependencies:
       - supports-color
 
@@ -9840,9 +9854,9 @@ snapshots:
     dependencies:
       possible-typed-array-names: 1.1.0
 
-  awaitqueue@3.2.0(supports-color@9.4.0):
+  awaitqueue@3.2.4(supports-color@10.2.0):
     dependencies:
-      debug: 4.4.1(supports-color@9.4.0)
+      debug: 4.4.1(supports-color@10.2.0)
     transitivePeerDependencies:
       - supports-color
 
@@ -10367,11 +10381,11 @@ snapshots:
 
   dateformat@3.0.3: {}
 
-  debug@4.4.1(supports-color@9.4.0):
+  debug@4.4.1(supports-color@10.2.0):
     dependencies:
       ms: 2.1.3
     optionalDependencies:
-      supports-color: 9.4.0
+      supports-color: 10.2.0
 
   decamelize-keys@1.1.1:
     dependencies:
@@ -10745,7 +10759,7 @@ snapshots:
       ajv: 6.12.6
       chalk: 4.1.2
       cross-spawn: 7.0.6
-      debug: 4.4.1(supports-color@9.4.0)
+      debug: 4.4.1(supports-color@10.2.0)
       doctrine: 3.0.0
       enquirer: 2.4.1
       escape-string-regexp: 4.0.0
@@ -10810,8 +10824,6 @@ snapshots:
 
   esutils@2.0.3: {}
 
-  event-target-shim@6.0.2: {}
-
   eventemitter3@4.0.7: {}
 
   events@3.3.0: {}
@@ -10869,10 +10881,9 @@ snapshots:
       iconv-lite: 0.4.24
       tmp: 0.0.33
 
-  fake-mediastreamtrack@1.2.0:
+  fake-mediastreamtrack@2.1.2:
     dependencies:
-      event-target-shim: 6.0.2
-      uuid: 9.0.1
+      uuid: 11.1.0
 
   fast-deep-equal@3.1.3: {}
 
@@ -11182,9 +11193,9 @@ snapshots:
 
   graceful-fs@4.2.11: {}
 
-  h264-profile-level-id@2.2.0(supports-color@9.4.0):
+  h264-profile-level-id@2.2.3(supports-color@10.2.0):
     dependencies:
-      debug: 4.4.1(supports-color@9.4.0)
+      debug: 4.4.1(supports-color@10.2.0)
     transitivePeerDependencies:
       - supports-color
 
@@ -11261,7 +11272,7 @@ snapshots:
     dependencies:
       '@tootallnate/once': 1.1.2
       agent-base: 6.0.2
-      debug: 4.4.1(supports-color@9.4.0)
+      debug: 4.4.1(supports-color@10.2.0)
     transitivePeerDependencies:
       - supports-color
 
@@ -11269,28 +11280,28 @@ snapshots:
     dependencies:
       '@tootallnate/once': 2.0.0
       agent-base: 6.0.2
-      debug: 4.4.1(supports-color@9.4.0)
+      debug: 4.4.1(supports-color@10.2.0)
     transitivePeerDependencies:
       - supports-color
 
   http-proxy-agent@7.0.2:
     dependencies:
       agent-base: 7.1.3
-      debug: 4.4.1(supports-color@9.4.0)
+      debug: 4.4.1(supports-color@10.2.0)
     transitivePeerDependencies:
       - supports-color
 
   https-proxy-agent@5.0.1:
     dependencies:
       agent-base: 6.0.2
-      debug: 4.4.1(supports-color@9.4.0)
+      debug: 4.4.1(supports-color@10.2.0)
     transitivePeerDependencies:
       - supports-color
 
   https-proxy-agent@7.0.6:
     dependencies:
       agent-base: 7.1.3
-      debug: 4.4.1(supports-color@9.4.0)
+      debug: 4.4.1(supports-color@10.2.0)
     transitivePeerDependencies:
       - supports-color
 
@@ -11602,7 +11613,7 @@ snapshots:
 
   istanbul-lib-source-maps@4.0.1:
     dependencies:
-      debug: 4.4.1(supports-color@9.4.0)
+      debug: 4.4.1(supports-color@10.2.0)
       istanbul-lib-coverage: 3.2.2
       source-map: 0.6.1
     transitivePeerDependencies:
@@ -12739,20 +12750,6 @@ snapshots:
 
   math-intrinsics@1.1.0: {}
 
-  mediasoup-client@3.7.17:
-    dependencies:
-      '@types/debug': 4.1.12
-      '@types/npm-events-package': '@types/events@3.0.3'
-      awaitqueue: 3.2.0(supports-color@9.4.0)
-      debug: 4.4.1(supports-color@9.4.0)
-      fake-mediastreamtrack: 1.2.0
-      h264-profile-level-id: 2.2.0(supports-color@9.4.0)
-      npm-events-package: events@3.3.0
-      queue-microtask: 1.2.3
-      sdp-transform: 2.15.0
-      supports-color: 9.4.0
-      ua-parser-js: 1.0.40
-
   memorystream@0.3.1: {}
 
   meow@8.1.2:
@@ -13882,7 +13879,7 @@ snapshots:
   socks-proxy-agent@8.0.5:
     dependencies:
       agent-base: 7.1.3
-      debug: 4.4.1(supports-color@9.4.0)
+      debug: 4.4.1(supports-color@10.2.0)
       socks: 2.8.5
     transitivePeerDependencies:
       - supports-color
@@ -14056,6 +14053,8 @@ snapshots:
 
   stylis@4.2.0: {}
 
+  supports-color@10.2.0: {}
+
   supports-color@5.5.0:
     dependencies:
       has-flag: 3.0.0
@@ -14067,8 +14066,6 @@ snapshots:
   supports-color@8.1.1:
     dependencies:
       has-flag: 4.0.0
-
-  supports-color@9.4.0: {}
 
   supports-hyperlinks@2.3.0:
     dependencies:
@@ -14259,7 +14256,7 @@ snapshots:
   tuf-js@2.2.1:
     dependencies:
       '@tufjs/models': 2.0.1
-      debug: 4.4.1(supports-color@9.4.0)
+      debug: 4.4.1(supports-color@10.2.0)
       make-fetch-happen: 13.0.1
     transitivePeerDependencies:
       - supports-color
@@ -14410,6 +14407,8 @@ snapshots:
 
   uuid@10.0.0: {}
 
+  uuid@11.1.0: {}
+
   uuid@9.0.1: {}
 
   v8-compile-cache@2.4.0: {}
@@ -14436,7 +14435,7 @@ snapshots:
   vite-node@3.2.4(@types/node@18.19.112)(lightningcss@1.30.1):
     dependencies:
       cac: 6.7.14
-      debug: 4.4.1(supports-color@9.4.0)
+      debug: 4.4.1(supports-color@10.2.0)
       es-module-lexer: 1.7.0
       pathe: 2.0.3
       vite: 5.4.19(@types/node@18.19.112)(lightningcss@1.30.1)
@@ -14472,7 +14471,7 @@ snapshots:
       '@vitest/spy': 3.2.4
       '@vitest/utils': 3.2.4
       chai: 5.2.0
-      debug: 4.4.1(supports-color@9.4.0)
+      debug: 4.4.1(supports-color@10.2.0)
       expect-type: 1.2.1
       magic-string: 0.30.17
       pathe: 2.0.3

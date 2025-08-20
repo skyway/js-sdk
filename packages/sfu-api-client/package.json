@@ -1,6 +1,6 @@
 {
   "name": "@skyway-sdk/sfu-api-client",
-  "version": "1.5.3",
+  "version": "1.5.4",
   "description": "The official Next Generation JavaScript SDK for SkyWay",
   "homepage": "https://skyway.ntt.com/",
   "repository": {
@@ -34,9 +34,8 @@
   },
   "dependencies": {
     "@skyway-sdk/common": "workspace:*",
-    "mediasoup-client": "3.7.17"
+    "@skyway-sdk/mediasoup-client": "^3.15.2"
   },
-  "devDependencies": {},
   "keywords": [
     "webrtc",
     "skyway",

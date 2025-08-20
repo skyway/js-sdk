@@ -9,13 +9,13 @@ import {
   TransportConnectionState,
 } from '@skyway-sdk/core';
 import { SfuRestApiClient } from '@skyway-sdk/sfu-api-client';
-import { DataProducerOptions } from 'mediasoup-client/lib/DataProducer';
-import { MediaKind, RtpParameters } from 'mediasoup-client/lib/RtpParameters';
+import { DataProducerOptions } from '@skyway-sdk/mediasoup-client/lib/DataProducer';
+import { MediaKind, RtpParameters } from '@skyway-sdk/mediasoup-client/lib/RtpParameters';
 import {
   ConnectionState,
   DtlsParameters,
   Transport,
-} from 'mediasoup-client/lib/Transport';
+} from '@skyway-sdk/mediasoup-client/lib/Transport';
 
 import { errors } from '../../errors';
 import { SfuBotMember } from '../../member';

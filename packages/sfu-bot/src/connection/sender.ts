@@ -21,12 +21,12 @@ import {
 } from '@skyway-sdk/core';
 import { SfuRestApiClient } from '@skyway-sdk/sfu-api-client';
 import isEqual from 'lodash/isEqual';
-import { Producer, ProducerOptions } from 'mediasoup-client/lib/Producer';
+import { Producer, ProducerOptions } from '@skyway-sdk/mediasoup-client/lib/Producer';
 import {
   RtpCodecCapability,
   RtpCodecParameters,
   RtpParameters,
-} from 'mediasoup-client/lib/RtpParameters';
+} from '@skyway-sdk/mediasoup-client/lib/RtpParameters';
 
 import { errors } from '../errors';
 import { Forwarding, ForwardingConfigure } from '../forwarding';

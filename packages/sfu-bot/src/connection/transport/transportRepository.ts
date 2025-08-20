@@ -7,9 +7,9 @@ import {
   SkyWayContext,
 } from '@skyway-sdk/core';
 import { SfuRestApiClient } from '@skyway-sdk/sfu-api-client';
-import { Device } from 'mediasoup-client';
-import { RtpCapabilities } from 'mediasoup-client/lib/RtpParameters';
-import { TransportOptions } from 'mediasoup-client/lib/Transport';
+import { Device } from '@skyway-sdk/mediasoup-client';
+import { RtpCapabilities } from '@skyway-sdk/mediasoup-client/lib/RtpParameters';
+import { TransportOptions } from '@skyway-sdk/mediasoup-client/lib/Transport';
 
 import { errors } from '../../errors';
 import { SfuBotMember } from '../../member';
