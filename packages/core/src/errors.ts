@@ -159,4 +159,14 @@ export const errors = {
     detail: 'remoteのPublicationをenableすることはできません',
     solution: '対象のPublicationがLocalのものか確認してください',
   },
+  dataChannelSendError: {
+    name: 'dataChannelSendError',
+    detail: 'データ送信に失敗しました',
+    solution: '接続が閉じられている、バッファに空き容量が無い、データサイズが大きすぎる等の理由で送信に失敗しています。再度publish もしくは 送信するデータを分割してください',
+  },
+  dataChannelGeneralError: {
+    name: 'dataChannelGeneralError',
+    detail: 'DataStreamの内部でエラーが発生しました',
+    solution: 'DataStreamを作り直して再度publishしてください',
+  }
 } as const;

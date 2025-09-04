@@ -4,8 +4,8 @@ import {
   SkyWayContext,
   SkyWayRoom,
   SkyWayStreamFactory,
-  uuidV4,
-} from '@skyway-sdk/room';
+  uuidV4 } from
+'@skyway-sdk/room';
 
 import { appId, secret } from '../../../env';
 
@@ -25,6 +25,7 @@ const token = new SkyWayAuthToken({
         methods: ["publish", "subscribe", "updateMetadata"]
       }
     }],
+
     turn: {
       enabled: true
     }
@@ -35,16 +36,18 @@ void (async () => {
   const localVideo = document.getElementById('local-video');
   const buttonArea = document.getElementById('button-area');
   const remoteMediaArea = document.getElementById('remote-media-area');
-  const channelNameInput = document.getElementById('channel-name');
-
-  const dataStreamInput = document.getElementById('data-stream');
-
+  const channelNameInput = document.getElementById(
+    'channel-name'
+  );
+  const dataStreamInput = document.getElementById(
+    'data-stream'
+  );
   const myId = document.getElementById('my-id');
   const joinButton = document.getElementById('join');
   const writeButton = document.getElementById('write');
 
   const { audio, video } =
-    await SkyWayStreamFactory.createMicrophoneAudioAndCameraStream();
+  await SkyWayStreamFactory.createMicrophoneAudioAndCameraStream();
   video.attach(localVideo);
   await localVideo.play();
 
@@ -60,7 +63,7 @@ void (async () => {
     const context = await SkyWayContext.Create(token);
     const channel = await SkyWayRoom.FindOrCreate(context, {
       type: 'p2p',
-      name: channelNameInput.value,
+      name: channelNameInput.value
     });
     const me = await channel.join();
 
@@ -99,14 +102,14 @@ void (async () => {
               remoteMediaArea.appendChild(elm);
             }
             break;
-          case 'data': {
-            const elm = document.createElement('div');
-            remoteMediaArea.appendChild(elm);
-            elm.innerText = 'data\n';
-            stream.onData.add((data) => {
-              elm.innerText += data + '\n';
-            });
-          }
+          case 'data':{
+              const elm = document.createElement('div');
+              remoteMediaArea.appendChild(elm);
+              elm.innerText = 'data\n';
+              stream.onData.add((data) => {
+                elm.innerText += data + '\n';
+              });
+            }
         }
       };
     };

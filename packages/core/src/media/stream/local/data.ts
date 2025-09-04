@@ -6,6 +6,7 @@ import { LocalStreamBase } from '.';
 
 const log = new Logger('packages/core/src/media/stream/local/data.ts');
 
+/**@description [japanese] DataStreamにて送受信できるデータの型。object型のデータを送信する場合、ArrayBufferなどの`JSON.stringify`に非対応な型をプロパティとして含めると正しいデータが送受信されないため、別途エンコード・デコード処理の実装が必要。 */
 export type DataStreamMessageType = string | ArrayBuffer | object;
 
 export class LocalDataStream extends LocalStreamBase {
@@ -42,7 +43,8 @@ export class LocalDataStream extends LocalStreamBase {
       });
     }
 
-    if (!ArrayBuffer.isView(data) && !(typeof data === 'string')) {
+    const isObject = !ArrayBuffer.isView(data) && !(data instanceof ArrayBuffer) && !(typeof data === 'string');
+    if (isObject) {
       data = objectFlag + JSON.stringify(data);
     }
     this._onWriteData.emit(data);

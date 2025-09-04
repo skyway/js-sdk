@@ -456,10 +456,48 @@ export class Sender extends Peer {
         new DataChannelNegotiationLabel(publication.id, stream.id).toLabel(),
         stream.options
       );
+
+      dc.onerror = (err) => {
+        if ('error' in err && (err as any).error.errorDetail.includes('data-channel')) {
+          this._log.error(
+            'datachannel.send failed',
+            createError({
+              operationName: 'RTCDataChannel.onerror',
+              info: errors.dataChannelSendError,
+              path: log.prefix,
+              context: this._context,
+              channel: this.localPerson.channel,
+            })
+          );
+        } else {
+          this._log.error(
+            'datachannel operation failed',
+            createError({
+              operationName: 'RTCDataChannel.onerror',
+              info: errors.dataChannelGeneralError,
+              path: log.prefix,
+              context: this._context,
+              channel: this.localPerson.channel,
+            })
+          );
+        }
+      }
+
       stream._onWriteData
         .add((data) => {
           if (dc.readyState === 'open') {
             dc.send(data as any);
+          } else {
+            this._log.error(
+              'datachannel.send failed',
+              createError({
+                operationName: 'RTCDataChannel.onerror',
+                info: errors.dataChannelSendError,
+                path: log.prefix,
+                context: this._context,
+                channel: this.localPerson.channel,
+              })
+            );
           }
         })
         .disposer(this._disposer);
