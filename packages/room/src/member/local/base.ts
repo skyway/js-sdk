@@ -1,7 +1,10 @@
+import { Logger } from '@skyway-sdk/common';
 import { Event, SkyWayError } from '@skyway-sdk/common';
 import {
+  LocalDataStream,
   LocalPerson,
   LocalPersonAdapter,
+  LocalStream,
   PublicationOptions,
   RemoteAudioStream,
   RemoteDataStream,
@@ -9,71 +12,21 @@ import {
   SubscriptionImpl,
   SubscriptionOptions,
 } from '@skyway-sdk/core';
+import { errors as sfuErrors, SFUBotMember } from '@skyway-sdk/sfu-bot';
 
-import { RoomMember, RoomMemberImpl } from '../../member';
+import { defaultMaxSubscribers } from '../../const';
+import { errors } from '../../errors';
+import { RoomMemberImpl } from '../../member';
 import { RoomPublication } from '../../publication';
-import { Room, RoomImpl } from '../../room/base';
+import { Room } from '../../room/default';
 import { RoomSubscription } from '../../subscription';
 import { RemoteRoomMemberImpl } from '../remote/base';
+import { LocalRoomMember } from './default';
 
-export interface LocalRoomMember extends RoomMember {
-  side: 'local';
-  room: Room;
-  /**@private */
-  _updateRoom(room: Room): void;
-  /**
-   * @description [japanese] このMemberがStreamをPublishしたときに発火するイベント
-   */
-  onStreamPublished: Event<{ publication: RoomPublication }>;
-  /**
-   * @description [japanese] このMemberがStreamをUnPublishしたときに発火するイベント
-   */
-  onStreamUnpublished: Event<{ publication: RoomPublication }>;
-  /**
-   * @description [japanese] Publicationの数が変化した時に発火するイベント
-   */
-  onPublicationListChanged: Event<void>;
-  /**
-   * @description [japanese] このMemberがStreamをSubscribeしたときに発火するイベント
-   */
-  onPublicationSubscribed: Event<{
-    subscription: RoomSubscription;
-    stream: RemoteVideoStream | RemoteAudioStream | RemoteDataStream;
-  }>;
-  /**
-   * @description [japanese] このMemberがStreamをUnsubscribeしたときに発火するイベント
-   */
-  onPublicationUnsubscribed: Event<{ subscription: RoomSubscription }>;
-  /**
-   * @description [japanese] Subscriptionの数が変化した時に発火するイベント
-   */
-  onSubscriptionListChanged: Event<void>;
-  /**
-   * @description [japanese] 回復不能なエラー。このインスタンスは継続して利用できない。
-   */
-  readonly onFatalError: Event<SkyWayError>;
-
-  /**
-   * @description [japanese] StreamのPublicationをUnpublishする
-   */
-  unpublish: (publicationId: string | RoomPublication) => Promise<void>;
-  /**
-   * @description [japanese] StreamのPublicationをSubscribeする
-   */
-  subscribe: <
-    T extends RemoteVideoStream | RemoteAudioStream | RemoteDataStream
-  >(
-    publicationId: string | RoomPublication,
-    options?: SubscriptionOptions
-  ) => Promise<{ subscription: RoomSubscription<T>; stream: T }>;
-  /**
-   * @description [japanese] StreamのSubscriptionをUnsubscribeする
-   */
-  unsubscribe: (subscriptionId: string | RoomSubscription) => Promise<void>;
-}
+const log = new Logger('packages/room/src/member/local/base.ts');
 
 /**@internal */
-export abstract class LocalRoomMemberImpl
+export abstract class LocalRoomMemberBase
   extends RoomMemberImpl
   implements LocalRoomMember
 {
@@ -95,7 +48,7 @@ export abstract class LocalRoomMemberImpl
   readonly _context = this.room._context;
 
   /**@private */
-  constructor(member: LocalPersonAdapter, room: RoomImpl) {
+  constructor(member: LocalPersonAdapter, room: Room) {
     super(member, room);
 
     this._local.onPublicationSubscribed.add(async (e) => {
@@ -138,20 +91,144 @@ export abstract class LocalRoomMemberImpl
     });
   }
 
+  abstract publish<T extends LocalStream = LocalStream>(
+    stream: LocalStream,
+    options?: RoomPublicationOptions
+  ): Promise<RoomPublication<T>>;
+
   abstract unpublish(publicationId: string | RoomPublication): Promise<void>;
-  abstract subscribe<
+
+  /** internal */
+  async _publishAsP2P<T extends LocalStream = LocalStream>(
+    stream: LocalStream,
+    options: PublicationOptions = {}
+  ): Promise<RoomPublication<T>> {
+    const publication = await this._local.publish(stream, options);
+
+    const roomPublication = this.room._addPublication<T>(publication);
+    this.onStreamPublished.emit({ publication: roomPublication });
+
+    return roomPublication;
+  }
+
+  /** internal */
+  async _publishAsSFU<T extends LocalStream = LocalStream>(
+    stream: LocalStream,
+    options: PublicationOptions & SFURoomPublicationOptions = {}
+  ): Promise<RoomPublication<T>> {
+    if (stream instanceof LocalDataStream) {
+      throw errors.sfuPublicationNotSupportDataStream;
+    }
+
+    options.type = 'sfu';
+    options.maxSubscribers = options.maxSubscribers ?? defaultMaxSubscribers;
+
+    const origin = await this._local.publish(stream, options);
+    const bot = this.room._channel.members.find(
+      (m) => m.subtype === SFUBotMember.subtype
+    ) as SFUBotMember;
+    if (!bot) {
+      throw sfuErrors.sfuBotNotInChannel;
+    }
+
+    const forwarding = await bot.startForwarding(origin, {
+      maxSubscribers: options.maxSubscribers,
+    });
+    const relayingPublication = forwarding.relayingPublication;
+
+    const roomPublication = this.room._addPublication<T>(relayingPublication);
+    this.onStreamPublished.emit({ publication: roomPublication });
+
+    return roomPublication;
+  }
+
+  /** internal */
+  async _unpublishAsP2P(target: string | RoomPublication) {
+    const publicationId = typeof target === 'string' ? target : target.id;
+    this._local.unpublish(publicationId).catch((error) => {
+      log.error('_unpublishAsP2P error', error, { target }, this.toJSON());
+    });
+    const { publication } = await this.room.onStreamUnpublished
+      .watch(
+        (e) => e.publication.id === publicationId,
+        this._context.config.rtcApi.timeout
+      )
+      .catch((error) => {
+        throw [{ ...errors.timeout, detail: 'onStreamUnpublished' }, error];
+      });
+
+    this.onStreamUnpublished.emit({ publication });
+  }
+
+  /** internal */
+  async _unpublishAsSFU(target: string | RoomPublication) {
+    const publicationId = typeof target === 'string' ? target : target.id;
+    const publication = this.room._getPublication(publicationId);
+    const origin = publication._publication.origin;
+    if (!origin) {
+      throw [errors.publicationNotHasOrigin];
+    }
+
+    this._local.unpublish(origin.id).catch((error) => {
+      log.error('_unpublishAsSFU error', error, { target }, this.toJSON());
+    });
+    await this.room.onStreamUnpublished
+      .watch(
+        (e) => e.publication.id === publicationId,
+        this._context.config.rtcApi.timeout
+      )
+      .catch((error) => {
+        throw [{ ...errors.timeout, detail: 'onStreamUnpublished' }, error];
+      });
+
+    this.onStreamUnpublished.emit({ publication });
+  }
+
+  async subscribe<
     T extends RemoteVideoStream | RemoteAudioStream | RemoteDataStream
   >(
-    publicationId: string | RoomPublication
-  ): Promise<{ subscription: RoomSubscription<T>; stream: T }>;
-  abstract unsubscribe(
-    subscriptionId: string | RoomSubscription
-  ): Promise<void>;
+    target: string | RoomPublication,
+    options?: SubscriptionOptions
+  ): Promise<{ subscription: RoomSubscription<T>; stream: T }> {
+    const publicationId = typeof target === 'string' ? target : target.id;
+    const { subscription, stream } = await this._local.subscribe(
+      publicationId,
+      options
+    );
 
-  abstract _updateRoom(room: Room): void;
+    const roomSubscription = this.room._addSubscription(
+      subscription as SubscriptionImpl
+    );
+
+    return {
+      subscription: roomSubscription as RoomSubscription<T>,
+      stream: stream as T,
+    };
+  }
+
+  async unsubscribe(target: string | RoomSubscription) {
+    const subscriptionId = typeof target === 'string' ? target : target.id;
+    this._local.unsubscribe(subscriptionId).catch((error) => {
+      log.error('unsubscribe error', error, { target }, this.toJSON());
+    });
+    await this.room.onPublicationUnsubscribed
+      .watch(
+        (e) => e.subscription.id === subscriptionId,
+        this._context.config.rtcApi.timeout
+      )
+      .catch((error) => {
+        throw [
+          { ...errors.timeout, detail: 'onPublicationUnsubscribed' },
+          error,
+        ];
+      });
+  }
 }
 
-export type RoomPublicationOptions = PublicationOptions & {
-  /**sfu only */
+export type SFURoomPublicationOptions = {
+  /** only for sfu publish */
   maxSubscribers?: number;
 };
+
+export type RoomPublicationOptions = PublicationOptions &
+  SFURoomPublicationOptions;

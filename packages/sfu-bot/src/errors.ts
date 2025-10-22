@@ -7,8 +7,8 @@ export const errors = {
   internal: { name: 'internal', detail: '', solution: '' },
   sfuBotNotInChannel: {
     name: 'sfuBotNotInChannel',
-    detail: 'SfuBotがChannelに存在しません',
-    solution: '操作しようとしているSfuBotが正しいか確かめてください',
+    detail: 'SFUBotがChannelに存在しません',
+    solution: '操作しようとしているSFUBotが正しいか確かめてください',
   },
   remotePublisherId: {
     name: 'remotePublisherId',

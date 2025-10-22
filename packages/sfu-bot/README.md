@@ -12,9 +12,9 @@ npm i @skyway-sdk/sfu-bot
 
 # SFU Bot の仕組み
 
-P2P Channel では、各 Person が通信相手すべてに対して映像/音声/データの配信を行います。そのため、 Person の数が多い場合、上りトラフィックの量と、クライアントの音声/映像エンコードにかかる処理負荷が大きくなります。
+P2P Channel では、各 Person が通信相手すべてに対して映像/音声/データの配信を行います。そのため、 Person の数が多い場合、上りトラフィックの量と、端末の音声/映像エンコードにかかる処理負荷が大きくなります。
 
-SFU Bot は、 各 Person から一本の上りトラフィックを受信し、他の Person に対して配信します。これにより、クライアントの負荷は軽減し、大規模な双方向通信が可能となります。
+SFU Bot は、 各 Person から一本の上りトラフィックを受信し、他の Person に対して配信します。これにより、端末の負荷は軽減し、大規模な双方向通信が可能となります。
 
 # 利用方法
 
@@ -24,10 +24,10 @@ Core ライブラリ にて SFU 機能を有効化するため、Plugin を Core
 
 ```ts
 import { SkyWayContext } from '@skyway-sdk/core';
-import { SfuBotPlugin } from '@skyway-sdk/sfu-bot';
+import { SFUBotPlugin } from '@skyway-sdk/sfu-bot';
 
 const context = await SkyWayContext.Create(tokenString);
-const plugin = new SfuBotPlugin();
+const plugin = new SFUBotPlugin();
 context.registerPlugin(plugin);
 ```
 
@@ -37,7 +37,7 @@ Channel で SFU Bot を利用するため、対象の Channel 内に SFU Bot を
 
 ```ts
 const context = await SkyWayContext.Create(tokenString);
-const plugin = new SfuBotPlugin();
+const plugin = new SFUBotPlugin();
 context.registerPlugin(plugin);
 
 const channel = await Channel.FindOrCreate(context);
@@ -82,9 +82,9 @@ channel.onStreamPublished.add(({ publication }) => {
 });
 ```
 
-## Simulcast 機能の利用方法
+## サイマルキャスト機能の利用方法
 
-VideoStream を Publish する際に複数のエンコード設定を指定することで、受信側クライアントデバイスが通信品質に合わせて自動的に最適なエンコード設定の映像を受け取る機能を利用できます。
+VideoStream を Publish する際に複数のエンコード設定を指定することで、受信側端末が通信品質に合わせて自動的に最適なエンコード設定の映像を受け取る機能を利用できます。
 
 ```ts
 const video = await SkyWayStreamFactory.createCameraVideoStream();
@@ -123,7 +123,7 @@ await localPerson.subscribe(publication.id, { preferredEncodingId: 'b' });
 `preferredEncodingId`に受信する映像品質設定の ID を指定することができます。
 映像を受信開始した時点で指定された品質の映像が SFU から送信されます。
 
-クライアント端末の通信帯域が輻輳を起こしている場合、高い品質の映像設定を指定していても SFU からは輻輳を解消するために低い品質の映像が送信されます。
+端末の通信帯域が輻輳を起こしている場合、高い品質の映像設定を指定していても SFU からは輻輳を解消するために低い品質の映像が送信されます。
 
 #### subscribe した映像の映像品質設定を変更する
 
@@ -133,4 +133,4 @@ subscription.changePreferredEncoding(id);
 
 Publication を subscribe して subscription を入手し、映像の受信を開始した後に任意のタイミングで受信する映像品質設定を変更することができます。
 
-クライアント端末の通信帯域が輻輳を起こしている場合、高い品質の映像設定を指定しても SFU からは低い品質の映像が送信されます。
+端末の通信帯域が輻輳を起こしている場合、高い品質の映像設定を指定しても SFU からは低い品質の映像が送信されます。

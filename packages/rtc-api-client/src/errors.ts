@@ -104,6 +104,11 @@ export const errors = {
     detail: 'サービス側の問題です',
     solution: 'しばらく時間を置いて再試行してください',
   },
+  invalidPublicationType: {
+    name: 'invalidPublicationType',
+    detail: 'Publicationのtypeが正しくありません',
+    solution: 'typeを正しい値に設定してください。 "p2p" または "sfu" のいずれかを指定できます。',
+  },
 } as const;
 
 export type ErrorName = keyof typeof errors;

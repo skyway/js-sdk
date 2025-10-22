@@ -26,7 +26,7 @@ export function getBitrateFromPeerConnection(
 ) {
   let preBytes = 0;
   const id = setInterval(async () => {
-    const stats = await stream.getStats(selector);
+    const stats = await stream._getStats(selector);
     const stat = stats.find((v) => {
       if (direction === 'inbound') {
         return (
@@ -122,7 +122,7 @@ export async function createLogPayload({
         };
         subscription['callType'] = s.publication.publisher.subtype;
         if (s.stream) {
-          const stats = await s.stream.getStats();
+          const stats = await s.stream._getStats();
           subscription.stats = stats.find((s) =>
             s.type.includes('inbound-rtp')
           );
@@ -133,7 +133,7 @@ export async function createLogPayload({
           subscription['relayProtocol'] = iceCandidate?.relayProtocol;
         }
         if (s.stream) {
-          subscription['connectionState'] = s.stream.getConnectionState();
+          subscription['connectionState'] = s.stream._getConnectionState();
         }
         return subscription;
       })

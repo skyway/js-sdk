@@ -13,10 +13,10 @@ import {
   Subscription,
   SubscriptionImpl,
 } from '@skyway-sdk/core';
-import { SfuRestApiClient } from '@skyway-sdk/sfu-api-client';
+import { SFURestApiClient } from '@skyway-sdk/sfu-api-client';
 
 import { errors } from '../errors';
-import { SfuBotMember } from '../member';
+import { SFUBotMember } from '../member';
 import { getLayerFromEncodings } from '../util';
 import { Receiver } from './receiver';
 import { Sender } from './sender';
@@ -42,10 +42,10 @@ export class SFUConnection implements SkyWayConnection {
 
   /**@internal */
   constructor(
-    private readonly _api: SfuRestApiClient,
+    private readonly _api: SFURestApiClient,
     readonly channel: SkyWayChannelImpl,
     readonly localPerson: LocalPersonImpl,
-    readonly remoteMember: SfuBotMember,
+    readonly remoteMember: SFUBotMember,
     private _transportRepository: TransportRepository,
     private _context: SkyWayContext
   ) {}

@@ -1,9 +1,9 @@
 import { Event } from '@skyway-sdk/common';
-import { Member, MemberState } from '@skyway-sdk/core';
+import { Member, MemberSide, MemberState } from '@skyway-sdk/core';
 
 import { RoomPublication } from '../publication';
 import { RoomType } from '../room';
-import { RoomImpl } from '../room/base';
+import { Room } from '../room/default';
 import { RoomSubscription } from '../subscription';
 
 export interface RoomMember {
@@ -13,6 +13,7 @@ export interface RoomMember {
   readonly roomName?: string;
   readonly roomType: RoomType;
   readonly metadata?: string;
+  readonly side: MemberSide;
   state: RoomMemberState;
   /**@description [japanese] Memberが Publish した Publication のリスト */
   readonly publications: RoomPublication[];
@@ -34,6 +35,7 @@ export interface RoomMember {
 export abstract class RoomMemberImpl implements RoomMember {
   readonly onLeft = new Event<void>();
   readonly onMetadataUpdated: Event<string>;
+  abstract readonly side: MemberSide;
 
   get id() {
     return this.member.id;
@@ -59,7 +61,7 @@ export abstract class RoomMemberImpl implements RoomMember {
     return this.member.metadata;
   }
 
-  constructor(protected member: Member, public room: RoomImpl) {
+  constructor(protected member: Member, public room: Room) {
     const { removeListener } = room.onMemberLeft.add((e) => {
       if (e.member.id === this.member.id) {
         removeListener();

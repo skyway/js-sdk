@@ -104,9 +104,9 @@ export class SkyWayContext {
   readonly _api: RtcApiClient;
   private _authTokenString: string;
   /**seconds */
-  private _reminderSec = this.config.token.updateReminderSec;
-  private tokenUpdateReminderTimer: any;
-  private tokenExpiredTimer: any;
+  private _remindSec = this.config.token.updateRemindSec;
+  private _tokenUpdateRemindTimer: any;
+  private _tokenExpiredTimer: any;
 
   private _events = new Events();
   /**
@@ -180,33 +180,33 @@ export class SkyWayContext {
       });
     }
 
-    if (this.tokenUpdateReminderTimer) {
-      clearTimeout(this.tokenUpdateReminderTimer);
+    if (this._tokenUpdateRemindTimer) {
+      clearTimeout(this._tokenUpdateRemindTimer);
     }
-    const tokenExpireReminderTimeSec = expiresInSec - this._reminderSec;
-    if (tokenExpireReminderTimeSec < 0) {
+    const tokenExpireRemindTimeSec = expiresInSec - this._remindSec;
+    if (tokenExpireRemindTimeSec < 0) {
       throw createError({
         operationName: 'SkyWayContext._setTokenExpireTimer',
         context: this,
         info: errors.invalidRemindExpireTokenValue,
         path: log.prefix,
-        payload: { expiresInSec, reminderSec: this._reminderSec },
+        payload: { expiresInSec, remindSec: this._remindSec },
       });
     }
     log.debug('_setTokenExpireTimer', {
       expiresInSec,
-      tokenExpireReminderTimeSec,
+      tokenExpireReminderTimeSec: tokenExpireRemindTimeSec,
     });
 
-    this.tokenUpdateReminderTimer = setTimeout(() => {
+    this._tokenUpdateRemindTimer = setTimeout(() => {
       log.debug('tokenUpdateReminder', { appid: this.appId });
       this.onTokenUpdateReminder.emit();
-    }, tokenExpireReminderTimeSec * 1000);
+    }, tokenExpireRemindTimeSec * 1000);
 
-    if (this.tokenExpiredTimer) {
-      clearTimeout(this.tokenExpiredTimer);
+    if (this._tokenExpiredTimer) {
+      clearTimeout(this._tokenExpiredTimer);
     }
-    this.tokenExpiredTimer = setTimeout(() => {
+    this._tokenExpiredTimer = setTimeout(() => {
       log.debug('tokenExpired', { appid: this.appId });
       this.onTokenExpired.emit();
     }, expiresInSec * 1000);
@@ -247,7 +247,7 @@ export class SkyWayContext {
         e.info?.name === 'projectUsageLimitExceeded'
       ) {
         this.dispose();
-        clearTimeout(this.tokenExpiredTimer);
+        clearTimeout(this._tokenExpiredTimer);
       }
 
       throw e;
@@ -270,11 +270,6 @@ export class SkyWayContext {
     channel: SkyWayChannelImpl,
     memberDto: model.Member
   ): RemoteMemberImplInterface {
-    const exist = channel._getMember(memberDto.id);
-    if (exist) {
-      return exist;
-    }
-
     log.debug('createRemoteMember', { memberDto });
 
     memberDto.type = memberDto.type.toLowerCase() as MemberType;
@@ -302,7 +297,7 @@ export class SkyWayContext {
 
     log.debug('disposed', { appid: this.appId });
 
-    clearTimeout(this.tokenUpdateReminderTimer);
+    clearTimeout(this._tokenUpdateRemindTimer);
 
     this._onDisposed.emit();
     this._events.dispose();

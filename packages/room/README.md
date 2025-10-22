@@ -1,7 +1,7 @@
 # Room
 
 複数人で通信をするアプリケーションを作るための ライブラリ です。
-通信方式を P2P と SFU の 2 種類から選択できます。
+メディアの通信方式を P2P と SFU の 2 種類から選択できます。
 
 # インストール方法
 
@@ -11,7 +11,7 @@ npm i @skyway-sdk/room
 
 # 概要
 
-クライアントアプリケーションは通信を開始するまでに以下のフローをたどります。
+アプリケーションは通信を開始するまでに以下のフローをたどります。
 
 **1. SkyWay Auth Token を取得（生成）する**
 
@@ -22,13 +22,13 @@ npm i @skyway-sdk/room
 メディア通信を行うグループの単位を Room と呼びます。
 メディア通信を開始するにはまず Room を作る権限を持った SkyWay Auth Token を用いて Room を作成する必要があります。
 
-**3. クライアントが Room に Join して Room の Member となる**
+**3. RoomMember として Room に Join する**
 
 **4. Stream を Room 内に Publish および Subscribe する**
 
-Member が Stream を Publish すると Room 上に Stream の情報である Publication というリソースが生成されます。
+RoomMember が Stream を Publish すると Room 上に Stream の情報である Publication というリソースが生成されます。
 
-他の Member はこの Publication を Subscribe すると Subscription というリソースが Room 上に生成され、Subscription に対応する Stream を受信し、通信を開始できます。
+他の RoomMember はこの Publication を Subscribe すると Subscription というリソースが Room 上に生成され、Subscription に対応する Stream を受信し、通信を開始できます。
 
 # 用語解説
 
@@ -36,33 +36,31 @@ Room ライブラリ の用語、仕様について説明します。
 
 ## Room
 
-複数の Member が通信するグループの単位です。
+複数の RoomMember が通信するグループの単位です。
 
-それぞれの Member は Room 内にいる他の Member と映像/音声/データの送受信が出来ます。（なお、SFU Room の場合はデータの送受信ができません。）
-
-通信方式を P2P と SFU の 2 種類から選択可能です。
+それぞれの RoomMember は Room 内にいる他の RoomMember と映像/音声/データの送受信が出来ます。
 
 Room は 一意な識別子である ID と、オプショナルな値である Name を持ちます。
 
-ID は Room 作成時に自動的に払い出される値であり、Name はユーザが Channel を作成する際に指定することができる任意の値です。
+ID は Room 作成時に自動的に払い出される値であり、Name はユーザが Room を作成する際に指定することができる任意の値です。
 
 また、アプリケーション内で重複した Name を指定することはできません。
 
-## Member
+## RoomMember
 
-Member は他のクライアントとの通信を管理するエージェントです。
+RoomMember は他の端末との通信を管理するエージェントです。
 
 映像や音声を送信したり、受信したりすることが出来ます。
 
-Member は 一意な識別子である ID と、オプショナルな値である Name を持ちます。
+RoomMember は 一意な識別子である ID と、オプショナルな値である Name を持ちます。
 
-ID は Member 作成時に自動的に払い出される値であり、Name はクライアントが Channel に Join する際に指定することができる任意の値です。
+ID は RoomMember 作成時に自動的に払い出される値であり、Name は RoomMember が Room に Join する際に指定することができる任意の値です。
 
-Room 内で重複した Name を指定することはできません。
+同一 Room 内に、重複した Name を持つ複数の Member を作成することはできません。
 
 ## Stream
 
-Room 内で Member が通信する映像/音声/データを Stream と呼びます。
+Room 内で RoomMember が通信する映像/音声/データを Stream と呼びます。
 
 三種類の Stream が存在します。
 
@@ -72,19 +70,19 @@ Room 内で Member が通信する映像/音声/データを Stream と呼びま
 
 ## Publication
 
-あるクライアントが用意した Stream を他の Member が受信可能にするために Room 内に公開する操作のことを Publish と呼びます。Stream を Publish すると Room 内に Publication というリソースが生成されます。
+ある RoomMember が用意した Stream を他の RoomMember が受信可能にするために Room 内に公開する操作のことを Publish と呼びます。Stream を Publish すると Room 内に Publication というリソースが生成されます。
 
-他の Member は Publication を Subscribe することで Subscription というリソースを得られて、Stream の受信が開始されます。
+他の RoomMember は Publication を Subscribe することで Subscription というリソースを得られて、Stream の受信が開始されます。
 
 Publication を Unpublish すると SkyWay サービス側で関連する Subscription を Unsubscribe して削除します。
 
 ## Subscription
 
-あるクライアントが Room に存在する Publication を Subscribe した時に得られるリソースです。Subscription には Stream が含まれており、映像・音声・データの受信が可能です。
+ある RoomMember が Room に存在する Publication を Subscribe した時に得られるリソースです。Subscription には Stream が含まれており、Subscribe を実行した RoomMember は映像・音声・データの受信が可能になります。
 
-Room 内の Subscription のプロパティを確認することで、どの Member がどの Publication を Subscribe しているかを把握することができます。
+Room 内の Subscription のプロパティを確認することで、どの RoomMember がどの Publication を Subscribe しているかを把握することができます。
 
-クライアントの Member が Subscribe していない Subscription の Stream を参照することはできません。Member が Stream を受信するためには必ずその Member が Publication を Subscribe して Subscription を作る必要があります。
+RoomMember が Subscribe していない Subscription の Stream を参照することはできません。RoomMember が Stream を受信するためには必ずその RoomMember が Publication を Subscribe して Subscription を作る必要があります。
 
 Subscription と紐ついている Publication が Unpublish されると Subscription は自動的に Unsubscribe されます。
 
@@ -92,9 +90,7 @@ Subscription と紐ついている Publication が Unpublish されると Subscr
 
 - SkyWayContext
 - Room
-  - P2PRoom
-  - SfuRoom
-- Member
+- RoomMember
   - LocalRoomMember
   - RemoteRoomMember
 - SkyWayStreamFactory
@@ -139,7 +135,7 @@ context.onTokenUpdateReminder.add(() => {
 
 ## Room
 
-Member の参加する Room の作成/取得を行います。
+RoomMember の参加する Room の作成/取得を行います。
 
 ### 作成
 
@@ -149,16 +145,10 @@ Member の参加する Room の作成/取得を行います。
 import { SkyWayContext, SkyWayRoom } from '@skyway-sdk/room';
 
 const context = await SkyWayContext.Create(tokenString);
-const room = await SkyWayRoom.Create(context, {
-  type: 'p2p',
+const room: Room = await SkyWayRoom.Create(context, {
   name: 'something',
 });
 ```
-
-Room 作成時に、RoomType を指定する必要があります。
-
-- type
-  - `p2p` もしくは `sfu`
 
 Room 作成時に、任意の RoomName を指定することができます。
 
@@ -171,9 +161,9 @@ import { SkyWayContext, SkyWayRoom } from '@skyway-sdk/room';
 
 const context = await SkyWayContext.Create(tokenString);
 
-const room = await SkyWayRoom.Find(context, { id: 'roomId' }, roomType);
+const room: Room = await SkyWayRoom.Find(context, { id: 'roomId' });
 // or
-const room = await SkyWayRoom.Find(context, { name: 'roomName' }, roomType);
+const room: Room = await SkyWayRoom.Find(context, { name: 'roomName' });
 ```
 
 id か name を使って Room を探すことができます。
@@ -186,18 +176,12 @@ id か name を使って Room を探すことができます。
 import { SkyWayContext, SkyWayRoom } from '@skyway-sdk/room';
 
 const context = await SkyWayContext.Create(tokenString);
-const room = await SkyWayRoom.FindOrCreate(context, {
-  type: 'sfu',
-  name: 'channelName',
+const room: Room = await SkyWayRoom.FindOrCreate(context, {
+  name: 'roomName',
 });
 ```
 
-## P2PRoom / SfuRoom
-
-Room には P2PRoom と SfuRoom の 2 種類が存在します。
-API は P2PRoom と SfuRoom で共通しています。
-
-### Member の Room への参加
+### RoomMember の Room への参加
 
 ```ts
 const member: LocalRoomMember = await room.join({
@@ -210,7 +194,7 @@ Room に参加すると LocalRoomMember インスタンスを取得できます�
 
 追加時に`name`と`metadata`の設定が可能です。(optional)
 
-`name`は Room 内の他の Member と重複することはできません。
+`name`は Room 内の他の RoomMember と重複することはできません。
 
 一つの Room で join を複数回実行して複数の LocalRoomMember を取得することはできません。
 
@@ -256,15 +240,17 @@ import { SkyWayStreamFactory } from '@skyway-sdk/room';
 ...
 
 const video = await SkyWayStreamFactory.createCameraVideoStream();
-const publication = await member.publish(video,options);
+const publication = await member.publish(video, options);
 ```
 
-Room の種類によって Publish 時に指定できる Option が異なります。
+Option でメディアの通信方式を P2P と SFU の2種類から選択します。
+指定しなかった場合は P2P が選択されます。
 
 #### P2P
 
 ```ts
 interface Option {
+  type?: 'p2p';
   metadata?: string | undefined;
   codecCapabilities?: Codec[];
   encodings?: EncodingParameters[];
@@ -275,6 +261,7 @@ interface Option {
 
 ```ts
 interface Option {
+  type: 'sfu';
   metadata?: string | undefined;
   codecCapabilities?: Codec[];
   encodings?: EncodingParameters[];
@@ -285,13 +272,14 @@ interface Option {
 maxSubscribers では Publish した Stream を Subscribe できる数の上限値を指定できます。指定しない場合、maxSubscribers には 10 がセットされます。
 maxSubscribers の最大値は 99 です。
 
-##### Simulcast 機能の利用方法
+##### サイマルキャスト機能の利用方法
 
-VideoStream を Publish する際に複数のエンコード設定を指定することで、受信側クライアントデバイスが通信品質に合わせて自動的に最適なエンコード設定の映像を受け取る機能を利用できます。
+VideoStream を Publish する際に複数のエンコード設定を指定することで、受信側端末が通信品質に合わせて自動的に最適なエンコード設定の映像を受け取る機能を利用できます。
 
 ```ts
 const video = await SkyWayStreamFactory.createCameraVideoStream();
 const publication = await member.publish(video, {
+  type: 'sfu',
   encodings: [
     // 複数のパラメータをセットする
     { maxBitrate: 10_000, scaleResolutionDownBy: 8 },
@@ -304,6 +292,7 @@ const publication = await member.publish(video, {
 
 ```ts
 await member.publish(stream, {
+  type: 'sfu',
   encodings: [
     { maxBitrate: 2000_000, id: 'a' },
     { maxBitrate: 10_000, id: 'b' },
@@ -322,20 +311,22 @@ await member.publish(stream, {
 ```ts
 const video = await SkyWayStreamFactory.createCameraVideoStream();
 await localMember.publish(video, {
+  type: 'p2p',
   codecCapabilities: [{ mimeType: 'video/av1' }, { mimeType: 'video/h264' }],
 });
 
 const audio = await SkyWayStreamFactory.createMicrophoneAudioStream();
 await localMember.publish(audio, {
+  type: 'p2p',
   codecCapabilities: [{ mimeType: 'audio/red' }],
 });
 ```
 
 codecCapabilities 配列の先頭のコーデックを優先して利用します。
-デバイスが先頭のコーデックに対応していない場合は後ろのコーデックを利用します。
-どのコーデックにも対応していない場合はデバイスが対応している他のコーデックを自動的に利用します。
+端末が先頭のコーデックに対応していない場合は後ろのコーデックを利用します。
+どのコーデックにも対応していない場合は端末が対応している他のコーデックを自動的に利用します。
 
-SFURoom を利用する際にコーデックを指定する場合はアプリケーションがサポートする対象のデバイスすべてで使えるコーデックを指定する必要があります。
+SFU 通信を利用する際にコーデックを指定する場合はアプリケーションがサポートする対象の端末すべてで使えるコーデックを指定する必要があります。
 
 ### Stream の Unpublish
 
@@ -356,7 +347,7 @@ const { subscription, stream } = await member.subscribe(publication.id);
 
 #### subscribe する際に映像品質設定を指定する
 
-※ SFU Room で Publication が Simulcast の設定を行っている場合にこの機能を利用できます。
+※ SFU 通信で Publication がサイマルキャストの設定を行っている場合にこの機能を利用できます。
 
 ```ts
 await member.subscribe(publication.id, { preferredEncodingId: 'b' });
@@ -365,7 +356,7 @@ await member.subscribe(publication.id, { preferredEncodingId: 'b' });
 `preferredEncodingId`に受信する映像品質設定の ID を指定することができます。
 映像を受信開始した時点で指定された品質の映像が SFU から送信されます。
 
-クライアント端末の通信帯域が輻輳を起こしている場合、高い品質の映像設定を指定していても SFU からは輻輳を解消するために低い品質の映像が送信されます。
+端末の通信帯域が輻輳を起こしている場合、高い品質の映像設定を指定していても SFU からは輻輳を解消するために低い品質の映像が送信されます。
 
 ### Stream の Unsubscribe
 
@@ -377,7 +368,7 @@ await member.unsubscribe(subscription.id);
 
 ### Metadata の更新
 
-Member に紐付いた Metadata を更新することができます
+RoomMember に紐付いた Metadata を更新することができます
 
 ```ts
 await member.updateMetadata('metadata');
@@ -387,7 +378,7 @@ await member.updateMetadata('metadata');
 
 LocalStream と RemoteStream の２種類の Stream が存在します。
 
-LocalStream は SkyWayStreamFactory で取得でき、Channel に Publish することができます。
+LocalStream は SkyWayStreamFactory で取得でき、Room に Publish することができます。
 
 RemoteStream は Publication を Subscribe することで取得できます。
 
@@ -440,7 +431,7 @@ const video = await SkyWayStreamFactory.createCameraVideoStream(options);
 
 ### DataChannel
 
-※SFU Room では使用できません。
+※SFU 通信では使用できません。
 
 ```ts
 const data = await SkyWayStreamFactory.createDataStream();
@@ -495,7 +486,7 @@ const stream = new MediaStream([
 
 ### DataStream の使い方
 
-※SFU Room では使用できません。
+※SFU 通信では使用できません。
 
 任意のデータの送受信ができます
 
@@ -565,7 +556,7 @@ if (stream.contentType === 'data') {
 
 #### subscribe した映像の映像品質設定を変更する
 
-※ SFU Room で Publication が Simulcast の設定を行っている場合にこの機能を利用できます。
+※ SFU 通信で Publication がサイマルキャストの設定を行っている場合にこの機能を利用できます。
 
 ```ts
 subscription.changePreferredEncoding(id);
@@ -573,13 +564,13 @@ subscription.changePreferredEncoding(id);
 
 Publication を subscribe して subscription を入手し、映像の受信を開始した後に任意のタイミングで受信する映像品質設定を変更することができます。
 
-クライアント端末の通信帯域が輻輳を起こしている場合、高い品質の映像設定を指定しても SFU からは低い品質の映像が送信されます。
+端末の通信帯域が輻輳を起こしている場合、高い品質の映像設定を指定しても SFU からは低い品質の映像が送信されます。
 
 # Tips
 
-## リモートの Member に Publication を Subscribe させる
+## リモートの RoomMember に Publication を Subscribe させる
 
-Token の members scope を次のように設定することで、リモートの Member に任意の Publication を Subscribe させたり Unsubscribe させることができます。
+Token の members scope を次のように設定することで、リモートの RoomMember に任意の Publication を Subscribe させたり Unsubscribe させることができます。
 
 ```ts
 const members = [
@@ -605,10 +596,57 @@ const members = [
 const localMember: LocalRoomMember = await room.join({ name: 'alice' });
 
 const video = await SkyWayStreamFactory.createCameraVideoStream();
-const publication = await localMember.publish(video);
+const publication = await localMember.publish(video, { type: 'p2p' });
 
 const remoteMember = room.members.find((member) => member.name === 'bob');
 const remoteSubscription = await remoteMember.subscribe(publication);
 ```
 
 リモートのメンバーの Subscription の stream を参照することはできません（stream プロパティの中身は常に undefined になります）
+
+## Room 単位でメディアの通信方式を指定する
+
+P2PRoom もしくは SFURoom を使用することであらかじめメディアの通信方式を指定できます。
+Create / FindOrCreate / Find の引数の type に 'p2p' を指定することで P2PRoom として、'sfu' を指定することで SFURoom として取得できます。
+
+それぞれの API は Room と共通しています。
+
+**サンプルコード**
+
+```ts
+import { SkyWayContext, SkyWayRoom, SkyWayStreamFactory } from '@skyway-sdk/room';
+
+const context = await SkyWayContext.Create(tokenString);
+const p2pRoom: P2PRoom = await SkyWayRoom.FindOrCreate(context, {
+  type: 'p2p',
+  name: 'roomName',
+});
+
+const member: LocalRoomMember = await p2pRoom.join({
+  name: 'something',
+  metadata: 'something',
+});
+
+const video = await SkyWayStreamFactory.createCameraVideoStream();
+const publication = await member.publish(video);  // P2P 通信
+```
+
+```ts
+import { SkyWayContext, SkyWayRoom, SkyWayStreamFactory } from '@skyway-sdk/room';
+
+const context = await SkyWayContext.Create(tokenString);
+const sfuRoom: SFURoom = await SkyWayRoom.FindOrCreate(context, {
+  type: 'sfu',
+  name: 'roomName',
+});
+
+const member: LocalRoomMember = await sfuRoom.join({
+  name: 'something',
+  metadata: 'something',
+});
+
+const video = await SkyWayStreamFactory.createCameraVideoStream();
+const publication = await member.publish(video);  // SFU 通信
+```
+
+なお、P2PRoom における SFU 通信の利用、SFURoom における P2P 通信の利用はできません。

@@ -5,7 +5,7 @@ import {
   SkyWayContext,
   Subscription,
 } from '@skyway-sdk/core';
-import { SfuRestApiClient } from '@skyway-sdk/sfu-api-client';
+import { SFURestApiClient } from '@skyway-sdk/sfu-api-client';
 
 import { errors } from './errors';
 
@@ -18,7 +18,7 @@ export class Forwarding {
   relayingPublication: Publication = this.props.relayingPublication;
 
   private _identifierKey: string = this.props.identifierKey;
-  private _api: SfuRestApiClient = this.props.api;
+  private _api: SFURestApiClient = this.props.api;
   private _context: SkyWayContext = this.props.context;
 
   /** @description [japanese] forwardingが終了された時に発火するイベント */
@@ -30,7 +30,7 @@ export class Forwarding {
       configure: ForwardingConfigure;
       originPublication: Publication;
       relayingPublication: Publication;
-      api: SfuRestApiClient;
+      api: SFURestApiClient;
       context: SkyWayContext;
       identifierKey: string;
     }
@@ -63,9 +63,7 @@ export class Forwarding {
     };
   }
 
-  /**
-   * @deprecated
-   */
+  /** @private */
   async confirmSubscription(subscription: Subscription) {
     log.debug('[start] Forwarding confirmSubscription');
     const { message } = await this._api

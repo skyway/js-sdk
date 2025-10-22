@@ -17,7 +17,7 @@ export class RemoteDataStream extends RemoteStreamBase {
     super(id, 'data');
 
     _datachannel.onmessage = ({ data }) => {
-      if (!this.isEnabled) {
+      if (!this._isEnabled) {
         return;
       }
 
@@ -26,11 +26,6 @@ export class RemoteDataStream extends RemoteStreamBase {
       }
       this.onData.emit(data);
     };
-  }
-
-  /**@internal */
-  get isEnabled() {
-    return this._isEnabled;
   }
 
   /**@internal */

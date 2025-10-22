@@ -17,7 +17,6 @@ export type SkyWayConfigOptions = {
   /**@internal */
   analyticsService: { domain?: string; secure?: boolean };
   rtcConfig: {
-    encodedInsertableStreams?: boolean;
     /**
      * @internal
      * @description ms
@@ -31,7 +30,7 @@ export type SkyWayConfigOptions = {
      * */
     iceDisconnectBufferTimeout?: number;
   };
-  token: { updateReminderSec?: number };
+  token: { updateRemindSec?: number };
   log: Partial<{ level: LogLevel; format: LogFormat }>;
   /**@internal */
   internal: { disableDPlane?: boolean };
@@ -39,27 +38,20 @@ export type SkyWayConfigOptions = {
 };
 
 /**
- * @deprecated [japanese] LocalMemberConfigを使用してください
- * @description [japanese] MemberのChannelとのKeepAliveに関する設定
+ * @description [japanese] LocalMemberに関する設定
  * @description [japanese]
- * Memberはブラウザのタブを閉じるとChannelから削除される。
- * iOS safariのようなbeforeunloadイベントに対応していないブラウザは、
- * タブを閉じたあと keepaliveIntervalSec + keepaliveIntervalGapSec 秒後に
- * Channelから削除される。
+ * MemberはpreventAutoLeaveOnBeforeUnloadがfalseもしくは未指定の場合、ブラウザのタブを閉じるとChannelから削除される。
+ * preventAutoLeaveOnBeforeUnloadがtrueの場合、
+ * もしくはiOS safariのようなbeforeunloadイベントに対応していないブラウザを使用している場合は、
+ * タブを閉じたあと最長でkeepaliveIntervalSec + keepaliveIntervalGapSec秒後にChannelから削除される。
  */
-export type MemberKeepAliveConfig = {
+export type LocalMemberConfig = {
+  /**@description [japanese] trueの場合、beforeunloadイベントで自動的にleaveしない。デフォルトはfalse */
+  preventAutoLeaveOnBeforeUnload: boolean;
   /**@description [japanese] KeepAliveを行う周期 */
   keepaliveIntervalSec: number;
   /**@description [japanese] KeepAliveの周期を超えてChannelからMemberが削除されるまでの時間 */
   keepaliveIntervalGapSec: number;
-};
-
-/**
- * @description [japanese] LocalMemberに関する設定
- */
-export type LocalMemberConfig = MemberKeepAliveConfig & {
-  /**@description [japanese] trueの場合、beforeunloadイベントで自動的にleaveしない。デフォルトはfalse */
-  preventAutoLeaveOnBeforeUnload: boolean;
 };
 
 /**@internal */
@@ -101,11 +93,10 @@ export class ContextConfig implements SkyWayConfigOptions {
     timeout: 30_000,
     turnPolicy: 'enable',
     turnProtocol: 'all',
-    encodedInsertableStreams: false,
     iceDisconnectBufferTimeout: 5000,
   };
   token: Required<SkyWayConfigOptions['token']> = {
-    updateReminderSec: 30,
+    updateRemindSec: 30,
   };
   log: Required<SkyWayConfigOptions['log']> = {
     level: 'error',

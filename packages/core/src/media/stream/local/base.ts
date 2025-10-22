@@ -8,15 +8,6 @@ import { ContentType, Stream, WebRTCStats } from '../base';
 
 export abstract class LocalStreamBase implements Stream {
   readonly side = 'local';
-  /**
-   * @deprecated
-   * @use Publication.onConnectionStateChanged
-   * @description [japanese] メディア通信の状態が変化した時に発火するイベント
-   */
-  readonly onConnectionStateChanged = new Event<{
-    remoteMember: RemoteMember;
-    state: TransportConnectionState;
-  }>();
   /**@internal */
   readonly _onConnectionStateChanged = new Event<{
     remoteMember: RemoteMember;
@@ -40,9 +31,7 @@ export abstract class LocalStreamBase implements Stream {
   } = {};
 
   /**@internal */
-  constructor(readonly contentType: ContentType) {
-    this._onConnectionStateChanged.pipe(this.onConnectionStateChanged);
-  }
+  constructor(readonly contentType: ContentType) {}
 
   /**@internal */
   _setLabel(label: string) {
@@ -72,14 +61,6 @@ export abstract class LocalStreamBase implements Stream {
     this._onConnectionStateChanged.emit({ remoteMember, state });
   }
 
-  /**
-   * @deprecated
-   * @use Publication.getStats
-   */
-  getStats(selector: Member | string): Promise<WebRTCStats> {
-    return this._getStats(selector);
-  }
-
   /**@internal */
   _getStats(selector: Member | string): Promise<WebRTCStats> {
     const id = typeof selector === 'string' ? selector : selector.id;
@@ -96,29 +77,11 @@ export abstract class LocalStreamBase implements Stream {
     );
   }
 
-  /**
-   * @deprecated
-   * @use Publication.getRTCPeerConnection
-   */
-  getRTCPeerConnection(
-    selector: Member | string
-  ): RTCPeerConnection | undefined {
-    return this._getRTCPeerConnection(selector);
-  }
-
   /**@internal */
   _getRTCPeerConnection(
     selector: Member | string
   ): RTCPeerConnection | undefined {
     return this._getTransport(selector)?.rtcPeerConnection;
-  }
-
-  /**
-   * @deprecated
-   * @use Publication.getConnectionState
-   */
-  getConnectionState(selector: Member | string): TransportConnectionState {
-    return this._getConnectionState(selector);
   }
 
   /**@internal */

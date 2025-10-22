@@ -10,10 +10,8 @@ import { RemoteStream } from '../media/stream/remote';
 import { RemoteAudioStream } from '../media/stream/remote/audio';
 import { RemoteDataStream } from '../media/stream/remote/data';
 import { RemoteVideoStream } from '../media/stream/remote/video';
-import {
-  RemoteMember,
-  RemoteMemberImplInterface,
-} from '../member/remoteMember';
+import { Member } from '../member';
+import { RemoteMemberImplInterface } from '../member/remoteMember';
 import { TransportConnectionState } from '../plugin/interface';
 import { Publication, PublicationImpl } from '../publication';
 import { createError } from '../util';
@@ -31,14 +29,8 @@ export interface Subscription<
   id: string;
   contentType: ContentType;
   publication: Publication;
-  subscriber: RemoteMember;
+  subscriber: Member;
   state: SubscriptionState;
-  /**
-   * @deprecated
-   * @use {@link LocalPerson.onPublicationUnsubscribed} or {@link Channel.onPublicationUnsubscribed}
-   * @description [japanese] unsubscribeした時に発火するイベント
-   */
-  onCanceled: Event<void>;
   /** @description [japanese] SubscriptionにStreamが紐つけられた時に発火するイベント */
   onStreamAttached: Event<void>;
   /**
@@ -58,12 +50,6 @@ export interface Subscription<
    * @description [japanese] 現在の優先エンコーディング設定
    */
   preferredEncoding?: string;
-  /**
-   * @deprecated
-   * @use {@link LocalPerson.unsubscribe}
-   * @description [japanese] unsubscribeする
-   */
-  cancel: () => Promise<void>;
   /** @description [japanese] Streamで優先して受信するエンコード設定の変更 */
   changePreferredEncoding: (id: string) => void;
   /**
@@ -78,7 +64,7 @@ export interface Subscription<
    */
   getRTCPeerConnection(): RTCPeerConnection | undefined;
   /**
-   * @description [japanese] メディア通信の状態を取得
+   * @description [japanese] メディア通信の状態を取得する
    */
   getConnectionState(): TransportConnectionState;
 }
@@ -106,7 +92,6 @@ export class SubscriptionImpl<
   codec?: Codec;
   preferredEncoding?: string;
   private _stream?: T;
-  readonly onCanceled = new Event<void>();
   readonly onStreamAttached = new Event<void>();
   readonly onConnectionStateChanged = new Event<TransportConnectionState>();
 
@@ -183,25 +168,9 @@ export class SubscriptionImpl<
   /**@private */
   _canceled() {
     this._state = 'canceled';
-    this.onCanceled.emit();
 
     this._disposer.dispose();
   }
-
-  cancel = () =>
-    new Promise<void>((r, f) => {
-      let failed = false;
-      this._channel._unsubscribe(this.id).catch((e) => {
-        failed = true;
-        f(e);
-      });
-      this.onCanceled
-        .asPromise(this._context.config.rtcApi.timeout)
-        .then(() => r())
-        .catch((e) => {
-          if (!failed) f(e);
-        });
-    });
 
   changePreferredEncoding(id: string) {
     if (!this.stream) {

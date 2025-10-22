@@ -14,9 +14,9 @@ import {
 } from '@skyway-sdk/core';
 
 import { errors } from '../errors';
-import { RemoteRoomMember } from '../member/remote/base';
+import { RoomMember } from '../member';
 import { RoomPublication } from '../publication';
-import { RoomImpl } from '../room/base';
+import { Room } from '../room/default';
 import { createError } from '../util';
 
 const log = new Logger('packages/room/src/subscription/index.ts');
@@ -33,16 +33,10 @@ export interface RoomSubscription<
   /**@description [japanese] このSubscriptionにStreamが紐つけられた時に発火する */
   readonly onStreamAttached: Event<void>;
   /**
-   * @deprecated
-   * @use {@link LocalPerson.onPublicationUnsubscribed} or {@link Channel.onPublicationUnsubscribed}
-   * @description [japanese] このSubscriptionがUnsubscribeされた時に発火する
-   */
-  readonly onCanceled: Event<void>;
-  /**
    * @description [japanese] メディア通信の状態が変化した時に発火するイベント
    */
   onConnectionStateChanged: Event<TransportConnectionState>;
-  readonly subscriber: RemoteRoomMember;
+  readonly subscriber: RoomMember;
   /**
    * @description [japanese] subscribeしているStreamの実体。
    * ローカルでSubscribeしているSubscriptionでなければundefinedとなる
@@ -54,12 +48,6 @@ export interface RoomSubscription<
    */
   preferredEncoding?: string;
   state: RoomSubscriptionState;
-  /**
-   * @deprecated
-   * @use {@link LocalPerson.unsubscribe}
-   * @description [japanese] unsubscribeする
-   */
-  cancel: () => Promise<void>;
   /**@description [japanese] 優先して受信するエンコード設定を変更する */
   changePreferredEncoding: (id: string) => void;
   /**
@@ -90,17 +78,16 @@ export class RoomSubscriptionImpl<
   readonly id: string;
   readonly contentType: ContentType;
   readonly publication: RoomPublication;
-  readonly subscriber: RemoteRoomMember;
+  readonly subscriber: RoomMember;
   readonly _context = this._room._context;
 
   readonly onStreamAttached = new Event<void>();
-  readonly onCanceled = new Event<void>();
   readonly onConnectionStateChanged = new Event<TransportConnectionState>();
 
   constructor(
     /**@private */
     public _subscription: SubscriptionImpl<T>,
-    private _room: RoomImpl
+    private _room: Room
   ) {
     this.id = _subscription.id;
     this.contentType = _subscription.contentType;
@@ -108,7 +95,6 @@ export class RoomSubscriptionImpl<
     this.subscriber = this._room._getMember(_subscription.subscriber.id);
 
     _subscription.onStreamAttached.pipe(this.onStreamAttached);
-    _subscription.onCanceled.pipe(this.onCanceled);
     _subscription.onConnectionStateChanged.add((state) => {
       log.debug('_subscription.onConnectionStateChanged', this.id, state);
       this.onConnectionStateChanged.emit(state);
@@ -133,27 +119,6 @@ export class RoomSubscriptionImpl<
 
   changePreferredEncoding(id: string) {
     this._subscription.changePreferredEncoding(id);
-  }
-
-  async cancel() {
-    this._subscription.cancel().catch((error) => {
-      log.error('subscription.cancel', error, this.toJSON());
-    });
-    await this._room.onPublicationUnsubscribed
-      .watch(
-        (e) => e.subscription.id === this.id,
-        this._context.config.rtcApi.timeout
-      )
-      .catch((error) => {
-        throw createError({
-          operationName: 'RoomSubscriptionImpl.cancel',
-          context: this._context,
-          room: this._room,
-          info: { ...errors.timeout, detail: 'onPublicationUnsubscribed' },
-          error,
-          path: log.prefix,
-        });
-      });
   }
 
   toJSON() {

@@ -1,16 +1,16 @@
 import {
-  defaultSfuApiOptions,
-  SfuApiOptions,
+  defaultSFUApiOptions,
+  SFUApiOptions,
 } from '@skyway-sdk/sfu-api-client';
 
-export type SfuBotPluginOptions = Omit<SfuApiOptions, 'log'> & {
+export type SFUBotPluginOptions = Omit<SFUApiOptions, 'log'> & {
   endpointTimeout: number;
   ackTimeout: number;
   disableRestartIce: boolean;
 };
 
-export const defaultSfuBotPluginOptions: SfuBotPluginOptions = {
-  ...defaultSfuApiOptions,
+export const defaultSFUBotPluginOptions: SFUBotPluginOptions = {
+  ...defaultSFUApiOptions,
   endpointTimeout: 30_000,
   ackTimeout: 10_000,
   disableRestartIce: false,

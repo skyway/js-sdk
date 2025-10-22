@@ -39,6 +39,7 @@ export interface Publication<T extends LocalStream = LocalStream> {
   readonly origin?: Publication;
   readonly codecCapabilities: Codec[];
   readonly encodings: Encoding[];
+  readonly type: PublicationType;
   /**
    * @description [japanese] publishしたstreamの実体。
    * ローカルで作られたPublicationでなければundefinedとなる
@@ -48,12 +49,6 @@ export interface Publication<T extends LocalStream = LocalStream> {
 
   //--------------------
 
-  /**
-   * @deprecated
-   * @use {@link LocalPerson.onStreamUnpublished} or {@link Channel.onStreamUnpublished}
-   * @description [japanese] Unpublishされた時に発火するイベント
-   */
-  onCanceled: Event<void>;
   /** @description [japanese] Subscribeされた時に発火するイベント */
   onSubscribed: Event<StreamSubscribedEvent>;
   /** @description [japanese] このPublicationをSubscribeしたSubscriptionがUnsubscribeされた時に発火するイベント */
@@ -83,12 +78,6 @@ export interface Publication<T extends LocalStream = LocalStream> {
    */
   updateMetadata: (metadata: string) => Promise<void>;
   /**
-   * @deprecated
-   * @use {@link LocalPerson.unpublish}
-   * @description [japanese] unpublishする
-   */
-  cancel: () => Promise<void>;
-  /**
    * @description [japanese] Video|Audio Streamの場合、encoding設定を更新する
    */
   updateEncodings: (encodings: EncodingParameters[]) => void;
@@ -110,12 +99,14 @@ export interface Publication<T extends LocalStream = LocalStream> {
    * @experimental
    * @description [japanese] 試験的なAPIです。今後インターフェースや仕様が変更される可能性があります
    * @description [japanese] StreamをSubscribeしているMemberとの通信の統計情報を取得する
+   * @param selector [japanese] 接続相手
    */
   getStats(selector: Member | string): Promise<WebRTCStats>;
   /**
    * @experimental
    * @description [japanese] 試験的なAPIです。今後インターフェースや仕様が変更される可能性があります
    * @description [japanese] 対象のMemberとのRTCPeerConnectionを取得する。RTCPeerConnectionを直接操作すると SDK は正しく動作しなくなる可能性があります。
+   * @param selector [japanese] 接続相手
    */
   getRTCPeerConnection(
     selector: Member | string
@@ -192,7 +183,6 @@ export class PublicationImpl<T extends LocalStream = LocalStream>
   }
 
   private readonly _events = new Events();
-  readonly onCanceled = this._events.make<void>();
   readonly onSubscribed = this._events.make<StreamSubscribedEvent>();
   readonly onUnsubscribed = this._events.make<StreamUnsubscribedEvent>();
   readonly onSubscriptionListChanged = this._events.make<void>();
@@ -215,6 +205,7 @@ export class PublicationImpl<T extends LocalStream = LocalStream>
   private streamEventDisposer = new EventDisposer();
   /**@private */
   readonly _analytics?: AnalyticsSession;
+  readonly type: PublicationType;
 
   private _context: SkyWayContext;
 
@@ -229,6 +220,7 @@ export class PublicationImpl<T extends LocalStream = LocalStream>
     encodings?: EncodingParameters[];
     stream?: T;
     isEnabled: boolean;
+    type: PublicationType;
   }) {
     this.id = args.id;
     this._channel = args.channel;
@@ -244,6 +236,7 @@ export class PublicationImpl<T extends LocalStream = LocalStream>
       this._setStream(args.stream);
     }
     this._analytics = this._channel.localPerson?._analytics;
+    this.type = args.type;
 
     log.debug('publication spawned', this.toJSON());
   }
@@ -287,7 +280,6 @@ export class PublicationImpl<T extends LocalStream = LocalStream>
       this.stream._unpublished();
     }
 
-    this.onCanceled.emit();
     this.onStateChanged.emit();
 
     this._dispose();
@@ -304,28 +296,6 @@ export class PublicationImpl<T extends LocalStream = LocalStream>
     this.onUnsubscribed.emit({ subscription });
     this.onSubscriptionListChanged.emit();
   }
-
-  /**
-   * @deprecated
-   * @use {@link LocalPerson.unpublish}
-   */
-  cancel = () =>
-    new Promise<void>((r, f) => {
-      let failed = false;
-      this._channel._unpublish(this.id).catch((e) => {
-        failed = true;
-        f(e);
-      });
-      this._setStream(undefined);
-      this.onCanceled
-        .asPromise(this._context.config.rtcApi.timeout)
-        .then(() => r())
-        .catch((e) => {
-          if (!failed) {
-            f(e);
-          }
-        });
-    });
 
   updateMetadata = (metadata: string) =>
     new Promise<void>(async (r, f) => {
@@ -601,7 +571,7 @@ export class PublicationImpl<T extends LocalStream = LocalStream>
       .then((res) => log.debug(res, { old: this.stream, new: stream }))
       .catch((e) => e);
 
-    stream.setEnabled(this.stream.isEnabled).catch((e) => {
+    stream.setEnabled(this._state === 'enabled').catch((e) => {
       log.error('replaceStream stream.setEnabled', e, this.toJSON());
     });
     const oldStream = this._stream as LocalMediaStreamBase;
@@ -671,6 +641,7 @@ export class PublicationImpl<T extends LocalStream = LocalStream>
       encodings: this.encodings,
       state: this.state,
       stream: this.stream,
+      type: this.type,
     };
   }
 
@@ -719,3 +690,5 @@ export type ReplaceStreamOptions = {
   /**@description [japanese] 入れ替え前のstreamを開放する。デフォルトで有効 */
   releaseOldStream?: boolean;
 };
+
+export type PublicationType = 'p2p' | 'sfu';

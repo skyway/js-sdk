@@ -1,7 +1,7 @@
 import { ErrorInfo, SkyWayError } from '@skyway-sdk/common';
 import { SkyWayContext } from '@skyway-sdk/core';
 
-import { RoomImpl } from './room/base';
+import { Room } from './room/default';
 
 export function createError({
   operationName,
@@ -16,7 +16,7 @@ export function createError({
   path: string;
   info: ErrorInfo;
   context?: SkyWayContext;
-  room?: RoomImpl;
+  room?: Room;
   error?: Error;
   payload?: any;
 }) {

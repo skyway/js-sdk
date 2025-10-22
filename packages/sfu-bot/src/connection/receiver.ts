@@ -10,20 +10,20 @@ import {
   uuidV4,
 } from '@skyway-sdk/core';
 import { createRemoteStream } from '@skyway-sdk/core';
-import { SfuRestApiClient } from '@skyway-sdk/sfu-api-client';
-import { Consumer } from '@skyway-sdk/mediasoup-client/lib/Consumer';
+import { SFURestApiClient } from '@skyway-sdk/sfu-api-client';
+import { Consumer } from 'mediasoup-client/lib/Consumer';
 
 import { errors } from '../errors';
-import { SfuBotMember } from '../member';
+import { SFUBotMember } from '../member';
 import { getLayerFromEncodings } from '../util';
-import { SfuTransport } from './transport/transport';
+import { SFUTransport } from './transport/transport';
 import { TransportRepository } from './transport/transportRepository';
 
 const log = new Logger('packages/sfu-bot/src/connection/receiver.ts');
 
 export class Receiver {
   consumer?: Consumer;
-  transport?: SfuTransport;
+  transport?: SFUTransport;
 
   private _disposer = new EventDisposer();
   private sendSubscriptionStatsReportTimer: ReturnType<
@@ -33,10 +33,10 @@ export class Receiver {
 
   constructor(
     readonly subscription: SubscriptionImpl,
-    private readonly _api: SfuRestApiClient,
+    private readonly _api: SFURestApiClient,
     private readonly _transportRepository: TransportRepository,
     private _localPerson: LocalPersonImpl,
-    private _bot: SfuBotMember,
+    private _bot: SFUBotMember,
     private _iceManager: IceManager,
     private _context: SkyWayContext
   ) {

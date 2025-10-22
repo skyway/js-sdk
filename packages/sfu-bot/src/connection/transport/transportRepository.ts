@@ -6,14 +6,14 @@ import {
   IceManager,
   SkyWayContext,
 } from '@skyway-sdk/core';
-import { SfuRestApiClient } from '@skyway-sdk/sfu-api-client';
-import { Device } from '@skyway-sdk/mediasoup-client';
-import { RtpCapabilities } from '@skyway-sdk/mediasoup-client/lib/RtpParameters';
-import { TransportOptions } from '@skyway-sdk/mediasoup-client/lib/Transport';
+import { SFURestApiClient } from '@skyway-sdk/sfu-api-client';
+import { Device } from 'mediasoup-client';
+import { RtpCapabilities } from 'mediasoup-client/lib/RtpParameters';
+import { TransportOptions } from 'mediasoup-client/lib/Transport';
 
 import { errors } from '../../errors';
-import { SfuBotMember } from '../../member';
-import { SfuTransport } from './transport';
+import { SFUBotMember } from '../../member';
+import { SFUTransport } from './transport';
 
 const log = new Logger(
   'packages/sfu-bot/src/connection/transport/transportRepository.ts'
@@ -24,7 +24,7 @@ export class TransportRepository {
 
   private readonly _device: Device;
   /**@private */
-  _transports: { [id: string]: SfuTransport } = {};
+  _transports: { [id: string]: SFUTransport } = {};
 
   get rtpCapabilities() {
     if (!this._device.loaded) {
@@ -35,7 +35,7 @@ export class TransportRepository {
 
   constructor(
     private _context: SkyWayContext,
-    private readonly _api: SfuRestApiClient
+    private readonly _api: SFURestApiClient
   ) {
     const { browserName, browserVersion } = getRuntimeInfo();
     log.debug('runtime info', { browserName, browserVersion });
@@ -73,7 +73,7 @@ export class TransportRepository {
   /**worker内にmemberIdに紐つくTransportが無ければ新しいTransportが作られる */
   createTransport(
     personId: string,
-    bot: SfuBotMember,
+    bot: SFUBotMember,
     transportOptions: TransportOptions,
     direction: 'send' | 'recv',
     iceManager: IceManager,
@@ -91,10 +91,9 @@ export class TransportRepository {
         this._context.config.rtcConfig.turnPolicy === 'turnOnly'
           ? 'relay'
           : undefined,
-      additionalSettings: this._context.config.rtcConfig,
     });
 
-    const transport = new SfuTransport(
+    const transport = new SFUTransport(
       msTransport,
       bot,
       iceManager,

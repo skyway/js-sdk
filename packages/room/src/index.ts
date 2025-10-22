@@ -1,12 +1,14 @@
 export { errors } from './errors';
 export * from './member';
 export * from './member/local/base';
+export * from './member/local/default';
 export * from './member/local/p2p';
 export * from './member/local/sfu';
 export * from './member/remote/base';
 export * from './publication';
 export * from './room';
 export * from './room/base';
+export * from './room/default';
 export * from './room/event';
 export * from './room/p2p';
 export * from './room/sfu';
@@ -16,8 +18,8 @@ export * from '@skyway-sdk/common';
 export {
   AnalyticsSession,
   type AudioMediaTrackConstraints,
-  type ChannelState,
   type ChannelQuery,
+  type ChannelState,
   type Codec,
   type CodecParameters,
   type ContentType,
@@ -44,7 +46,6 @@ export {
   LocalStreamBase,
   LocalVideoStream,
   MediaDevice,
-  type MemberKeepAliveConfig,
   type MemberSide,
   type MemberState,
   type MemberType,

@@ -1,6 +1,5 @@
 import { Logger } from '@skyway-sdk/common';
 import model from '@skyway-sdk/model';
-import { SkyWayAuthToken } from '@skyway-sdk/token';
 
 import { PersonInit, SkyWayChannelImpl } from '../../channel';
 import { MaxIceParamServerTTL } from '../../const';

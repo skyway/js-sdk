@@ -22,7 +22,7 @@ const App: FC = () => {
     const room = await SkyWayRoom.FindOrCreate(context, {
       name: roomName,
       type: 'sfu',
-      options: sfuOptions,
+      sfuOptions,
     });
     const member = await room.join();
 
@@ -46,8 +46,10 @@ const App: FC = () => {
         audio.srcObject = new MediaStream([e.stream.track]);
         audio.play();
         container.appendChild(audio);
-        e.subscription.onCanceled.once(() => {
-          container.removeChild(audio);
+        member.onPublicationUnsubscribed.add((ev) => {
+          if (e.subscription.id === ev.subscription.id) {
+            container.removeChild(audio);
+          }
         });
       }
     });

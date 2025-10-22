@@ -2,7 +2,8 @@ import model, { ContentType } from '@skyway-sdk/model';
 
 import { SkyWayChannelImpl } from '../channel';
 import { LocalStream } from '../media/stream/local';
-import { PublicationImpl } from '.';
+import { RemoteMemberImplInterface } from '../member/remoteMember';
+import { PublicationImpl, PublicationType } from '.';
 
 /**@internal */
 export function createPublication<T extends LocalStream>(
@@ -17,6 +18,7 @@ export function createPublication<T extends LocalStream>(
     contentType,
     id,
     isEnabled,
+    type,
   }: model.Publication & { stream?: T }
 ): PublicationImpl<T> {
   const exist = channel._getPublication(id);
@@ -38,10 +40,17 @@ export function createPublication<T extends LocalStream>(
     }
   }
 
+  const publisher = channel._getMember(
+    publisherId
+  ) as RemoteMemberImplInterface;
+
+  // typeがnullの場合はv2.0.0よりも前のバージョンにおけるp2pとして解釈する
+  const publicationType: PublicationType = type ?? 'p2p';
+
   const publication = new PublicationImpl<T>({
     id,
     channel,
-    publisher: channel._getMember(publisherId),
+    publisher,
     contentType,
     metadata,
     origin: originPublication,
@@ -49,6 +58,7 @@ export function createPublication<T extends LocalStream>(
     codecCapabilities: codecCapabilities ?? [],
     encodings,
     isEnabled,
+    type: publicationType,
   });
 
   return publication;

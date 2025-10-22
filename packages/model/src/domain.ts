@@ -18,6 +18,9 @@ export interface Member {
 
 export type MemberType = 'person' | 'bot';
 
+export const PublicationType = ['p2p', 'sfu', null] as const;
+export type PublicationType = (typeof PublicationType)[number];
+
 export interface Publication {
   id: string;
   channelId: Channel['id'];
@@ -28,6 +31,7 @@ export interface Publication {
   codecCapabilities: Codec[];
   encodings: Encoding[];
   isEnabled: boolean;
+  type: PublicationType;
 }
 
 export type ContentType = 'audio' | 'video' | 'data';

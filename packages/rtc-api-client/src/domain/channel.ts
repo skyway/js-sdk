@@ -534,6 +534,22 @@ export class ChannelImpl implements model.Channel {
   /**@throws {SkyWayError} */
   async publish(init: Omit<PublicationInit, 'channel'>): Promise<Publication> {
     const ts = log.debug('[start] apiClient.publish', { init });
+
+    const allowedTypes = model.PublicationType.filter((t) => t !== null);
+    if (init.type && !allowedTypes.includes(init.type)) {
+      throw createError({
+        operationName: 'ChannelImpl.publish',
+        error: new Error('The type in PublicationOptions is invalid.'),
+        info: {
+          ...errors.invalidPublicationType,
+        },
+        path: log.prefix,
+        payload: { init },
+        appId: this.appId,
+        channelId: this.id,
+      });
+    }
+
     const channelId = this.id;
     const publicationId = await this.apiClient.publish(this.appId, {
       ...init,
@@ -550,6 +566,7 @@ export class ChannelImpl implements model.Channel {
       codecCapabilities: init.codecCapabilities ?? [],
       encodings: init.encodings ?? [],
       isEnabled: init.isEnabled ?? true,
+      type: init.type ?? 'p2p',
     };
     log.elapsed(ts, '[ongoing] apiClient.publish', { publicationDto });
 

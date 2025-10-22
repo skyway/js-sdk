@@ -32,11 +32,11 @@ export const sfuScopeSchema = z
     actions: z.array(
       // 型補完のため enum で定義しておく
       z.enum(sfuBotActions).refine((arg) => {
-        return typeof arg === 'string'; // バリデーションとしては SfuBotAction 以外の文字列も許容する
+        return typeof arg === 'string'; // バリデーションとしては SFUBotAction 以外の文字列も許容する
       })
     ),
     /**forwarding リソースに関するオブジェクトを指定（forwardingオブジェクトについては後述） */
     forwardings: z.array(forwardingScopeSchema),
   })
   .passthrough();
-export type SfuScope = z.input<typeof sfuScopeSchema>;
+export type SFUScope = z.input<typeof sfuScopeSchema>;

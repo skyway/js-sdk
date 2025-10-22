@@ -7,34 +7,34 @@ import {
   SkyWayPlugin,
 } from '@skyway-sdk/core';
 import model from '@skyway-sdk/model';
-import { SfuApiOptions, SfuRestApiClient } from '@skyway-sdk/sfu-api-client';
+import { SFUApiOptions, SFURestApiClient } from '@skyway-sdk/sfu-api-client';
 
 import { TransportRepository } from './connection/transport/transportRepository';
 import { errors } from './errors';
-import { SfuBotMember } from './member';
+import { SFUBotMember } from './member';
 import {
-  defaultSfuBotPluginOptions,
-  SfuBotPluginOptions as SfuBotPluginOptions,
+  defaultSFUBotPluginOptions,
+  SFUBotPluginOptions,
 } from './option';
 import { PACKAGE_VERSION } from './version';
 
-export type { SfuApiOptions };
+export type { SFUApiOptions };
 
 const log = new Logger('packages/sfu-bot/src/plugin.ts');
 
-export class SfuBotPlugin extends SkyWayPlugin {
-  static readonly subtype = SfuBotMember.subtype;
-  readonly subtype = SfuBotPlugin.subtype;
-  readonly options: SfuBotPluginOptions;
-  private _api!: SfuRestApiClient;
+export class SFUBotPlugin extends SkyWayPlugin {
+  static readonly subtype = SFUBotMember.subtype;
+  readonly subtype = SFUBotPlugin.subtype;
+  readonly options: SFUBotPluginOptions;
+  private _api!: SFURestApiClient;
   /**@private */
   _transportRepository!: TransportRepository;
 
-  constructor(_options: Partial<SfuBotPluginOptions> = {}) {
+  constructor(_options: Partial<SFUBotPluginOptions> = {}) {
     super();
 
     this.options = {
-      ...defaultSfuBotPluginOptions,
+      ...defaultSFUBotPluginOptions,
       ..._options,
     };
 
@@ -42,15 +42,15 @@ export class SfuBotPlugin extends SkyWayPlugin {
       Logger.level = context.config.log.level;
       Logger.format = context.config.log.format;
 
-      log.info('SfuBotPlugin spawned', {
-        operationName: 'SfuBotPlugin.constructor',
+      log.info('SFUBotPlugin spawned', {
+        operationName: 'SFUBotPlugin.constructor',
         endpoint: { sfu: this.options.domain },
         options: this.options,
         sdkName: 'sfu-bot',
         sdkVersion: PACKAGE_VERSION,
       });
 
-      this._api = new SfuRestApiClient(context.authTokenString, {
+      this._api = new SFURestApiClient(context.authTokenString, {
         ...this.options,
         log: context.config.log,
       });
@@ -67,7 +67,7 @@ export class SfuBotPlugin extends SkyWayPlugin {
 
   /**@private */
   _createRemoteMember = (channel: SkyWayChannelImpl, sfuBot: model.Member) => {
-    const member = new SfuBotMember({
+    const member = new SFUBotMember({
       ...this._context!,
       channel,
       id: sfuBot.id,
@@ -89,7 +89,7 @@ export class SfuBotPlugin extends SkyWayPlugin {
     const timestamp = log.info(
       '[start] createBot',
       await createLogPayload({
-        operationName: 'SfuBotPlugin.createBot',
+        operationName: 'SFUBotPlugin.createBot',
         channel: channel as SkyWayChannelImpl,
       })
     );
@@ -108,7 +108,7 @@ export class SfuBotPlugin extends SkyWayPlugin {
           )
           .catch((error) => {
             throw createError({
-              operationName: 'SfuBotPlugin.createBot',
+              operationName: 'SFUBotPlugin.createBot',
               info: { ...errors.timeout, detail: 'onMemberJoined' },
               path: log.prefix,
               error,
@@ -121,12 +121,12 @@ export class SfuBotPlugin extends SkyWayPlugin {
       timestamp,
       '[end] createBot',
       await createLogPayload({
-        operationName: 'SfuBotPlugin.createBot',
+        operationName: 'SFUBotPlugin.createBot',
         channel,
       })
     );
 
-    return member as SfuBotMember;
+    return member as SFUBotMember;
   };
 
   /**
@@ -138,7 +138,7 @@ export class SfuBotPlugin extends SkyWayPlugin {
       const timestamp = log.info(
         '[start] deleteBot',
         await createLogPayload({
-          operationName: 'SfuBotPlugin.deleteBot',
+          operationName: 'SFUBotPlugin.deleteBot',
           channel,
         })
       );
@@ -159,7 +159,7 @@ export class SfuBotPlugin extends SkyWayPlugin {
             timestamp,
             '[end] deleteBot',
             await createLogPayload({
-              operationName: 'SfuBotPlugin.deleteBot',
+              operationName: 'SFUBotPlugin.deleteBot',
               channel,
             })
           );
@@ -169,7 +169,7 @@ export class SfuBotPlugin extends SkyWayPlugin {
           if (!failed)
             f(
               createError({
-                operationName: 'SfuBotPlugin.deleteBot',
+                operationName: 'SFUBotPlugin.deleteBot',
                 info: { ...errors.timeout, detail: 'onMemberLeft' },
                 path: log.prefix,
                 channel,

@@ -1,6 +1,6 @@
 import {
   nowInSec,
-  SfuRoomOptions,
+  SFUFindOptions,
   SkyWayAuthToken,
   SkyWayConfigOptions,
   uuidV4,
@@ -37,4 +37,4 @@ export const tokenString = testToken.encode(secret);
 export const contextOptions: Partial<SkyWayConfigOptions> = {
   log: { level: 'debug' },
 };
-export const sfuOptions: Partial<SfuRoomOptions> = {};
+export const sfuOptions: Partial<SFUFindOptions> = {};

@@ -1,11 +1,12 @@
 import {
   nowInSec,
+
   SkyWayAuthToken,
   SkyWayContext,
   SkyWayRoom,
   SkyWayStreamFactory,
-  uuidV4
-} from '@skyway-sdk/room';
+  uuidV4 } from
+'@skyway-sdk/room';
 
 import { appId, secret } from '../../../env';
 
@@ -25,6 +26,7 @@ const token = new SkyWayAuthToken({
         methods: ["publish", "subscribe", "updateMetadata"]
       }
     }],
+
     turn: {
       enabled: true
     }
@@ -52,15 +54,14 @@ void (async () => {
 
     const context = await SkyWayContext.Create(token);
     const room = await SkyWayRoom.FindOrCreate(context, {
-      type: 'p2p',
       name: roomNameInput.value
     });
     const me = await room.join();
 
     myId.textContent = me.id;
 
-    await me.publish(audio);
-    await me.publish(video);
+    await me.publish(audio, { type: 'p2p' });
+    await me.publish(video, { type: 'p2p' });
 
     const subscribeAndAttach = (publication) => {
       if (publication.publisher.id === me.id) return;

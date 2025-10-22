@@ -1,9 +1,15 @@
 import { Event, EventDisposer, Logger } from '@skyway-sdk/common';
-import { Member, RemotePersonImpl } from '@skyway-sdk/core';
+import {
+  Member,
+  RemoteAudioStream,
+  RemoteDataStream,
+  RemotePersonImpl,
+  RemoteVideoStream,
+} from '@skyway-sdk/core';
 
 import { errors } from '../../errors';
 import { RoomMember, RoomMemberImpl } from '../../member';
-import { RoomImpl } from '../../room/base';
+import { Room } from '../../room/default';
 import { RoomSubscription } from '../../subscription';
 import { createError } from '../../util';
 
@@ -45,7 +51,7 @@ export class RemoteRoomMemberImpl
 
   private _disposer = new EventDisposer();
 
-  constructor(member: Member, room: RoomImpl) {
+  constructor(member: Member, room: Room) {
     super(member, room);
 
     room.onPublicationSubscribed
@@ -79,8 +85,12 @@ export class RemoteRoomMemberImpl
     }
   }
 
-  subscribe = (publicationId: string) =>
-    new Promise<{ subscription: RoomSubscription }>((r, f) => {
+  subscribe = <
+    T extends RemoteVideoStream | RemoteAudioStream | RemoteDataStream
+  >(
+    publicationId: string
+  ) =>
+    new Promise<{ subscription: RoomSubscription<T> }>((r, f) => {
       if (!(this.member instanceof RemotePersonImpl)) {
         f(
           createError({
@@ -102,7 +112,7 @@ export class RemoteRoomMemberImpl
 
       this.onPublicationSubscribed
         .watch((e) => e.subscription.publication.id === publicationId)
-        .then((e) => r(e))
+        .then((e) => r(e as { subscription: RoomSubscription<T> }))
         .catch((e) => {
           if (!failed) f(e);
         });

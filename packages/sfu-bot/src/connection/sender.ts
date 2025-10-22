@@ -19,20 +19,20 @@ import {
   uuidV4,
   waitForLocalStats,
 } from '@skyway-sdk/core';
-import { SfuRestApiClient } from '@skyway-sdk/sfu-api-client';
+import { SFURestApiClient } from '@skyway-sdk/sfu-api-client';
 import isEqual from 'lodash/isEqual';
-import { Producer, ProducerOptions } from '@skyway-sdk/mediasoup-client/lib/Producer';
+import { Producer, ProducerOptions } from 'mediasoup-client/lib/Producer';
 import {
   RtpCodecCapability,
   RtpCodecParameters,
   RtpParameters,
-} from '@skyway-sdk/mediasoup-client/lib/RtpParameters';
+} from 'mediasoup-client/lib/RtpParameters';
 
 import { errors } from '../errors';
 import { Forwarding, ForwardingConfigure } from '../forwarding';
-import { SfuBotMember } from '../member';
+import { SFUBotMember } from '../member';
 import { createWarnPayload } from '../util';
-import { SfuTransport } from './transport/transport';
+import { SFUTransport } from './transport/transport';
 import { TransportRepository } from './transport/transportRepository';
 
 const log = new Logger('packages/sfu-bot/src/connection/sender.ts');
@@ -42,7 +42,7 @@ export class Sender {
   forwardingId?: string;
   private _producer?: Producer;
   /**@private */
-  _broadcasterTransport?: SfuTransport;
+  _broadcasterTransport?: SFUTransport;
   private _disposer = new EventDisposer();
   private _unsubscribeStreamEnableChange?: () => void;
   private _cleanupStreamCallbacks?: () => void;
@@ -60,10 +60,10 @@ export class Sender {
       LocalAudioStream | LocalVideoStream | LocalCustomVideoStream
     >,
     readonly channel: SkyWayChannelImpl,
-    private readonly _api: SfuRestApiClient,
+    private readonly _api: SFURestApiClient,
     private _transportRepository: TransportRepository,
     private _localPerson: LocalPersonImpl,
-    private _bot: SfuBotMember,
+    private _bot: SFUBotMember,
     private _iceManager: IceManager,
     private _context: SkyWayContext
   ) {
@@ -235,7 +235,7 @@ export class Sender {
               context: this._context,
               info: {
                 ...errors.timeout,
-                detail: 'SfuBotMember onStreamPublished',
+                detail: 'SFUBotMember onStreamPublished',
               },
               path: log.prefix,
               channel: this.channel,
@@ -347,7 +347,7 @@ export class Sender {
 
   private async _produce(
     stream: LocalAudioStream | LocalVideoStream | LocalCustomVideoStream,
-    transport: SfuTransport
+    transport: SFUTransport
   ) {
     this.publication._onReplaceStream
       .add(async ({ newStream }) => {
@@ -608,7 +608,7 @@ export class Sender {
 
   private _setupTransportAccessForStream(
     stream: LocalStream,
-    transport: SfuTransport,
+    transport: SFUTransport,
     producer: Producer
   ) {
     stream._getTransportCallbacks[this._bot.id] = () => ({

@@ -1,6 +1,6 @@
 {
   "name": "@skyway-sdk/token",
-  "version": "1.7.4",
+  "version": "2.0.0",
   "description": "The official Next Generation JavaScript SDK for SkyWay",
   "homepage": "https://skyway.ntt.com/",
   "repository": {

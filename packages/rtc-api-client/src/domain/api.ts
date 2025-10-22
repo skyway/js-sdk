@@ -115,6 +115,7 @@ export type PublicationInit = {
   codecCapabilities?: model.Codec[];
   encodings?: model.Encoding[];
   isEnabled?: boolean;
+  type?: model.PublicationType;
 };
 
 export type SubscriptionInit = {

@@ -158,7 +158,7 @@ const channelScopeSchema = z.intersection(
 
 export type ChannelScope = z.input<typeof channelScopeSchema>;
 
-const appActions = ['listChannels', 'read', 'write'] as const;
+const appActions = ['read'] as const;
 /**@internal */
 export const appScopeSchema = z
   .object({

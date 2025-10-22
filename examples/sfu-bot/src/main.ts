@@ -7,7 +7,7 @@ import {
   SkyWayStreamFactory,
   uuidV4,
 } from '@skyway-sdk/core';
-import { SfuBotMember, SfuBotPlugin } from '@skyway-sdk/sfu-bot';
+import { SFUBotMember, SFUBotPlugin } from '@skyway-sdk/sfu-bot';
 
 import { appId, secret } from '../../../env';
 
@@ -55,7 +55,7 @@ void (async () => {
   joinButton.onclick = async () => {
     if (channelNameInput.value === '') return;
 
-    const plugin = new SfuBotPlugin();
+    const plugin = new SFUBotPlugin();
     const context = await SkyWayContext.Create(token);
     context.registerPlugin(plugin);
     const channel = await SkyWayChannel.FindOrCreate(context, {
@@ -66,7 +66,7 @@ void (async () => {
     }
 
     const bot = (channel.bots[0] ??
-      (await plugin.createBot(channel))) as SfuBotMember;
+      (await plugin.createBot(channel))) as SFUBotMember;
 
     const me = await channel.join();
 
@@ -88,7 +88,7 @@ void (async () => {
 
     const createSubscribeButton = (publication: Publication) => {
       if (
-        publication.publisher.subtype !== SfuBotMember.subtype ||
+        publication.publisher.subtype !== SFUBotMember.subtype ||
         publication.origin.publisher.id === me.id
       ) {
         return;

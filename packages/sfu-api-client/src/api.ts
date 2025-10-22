@@ -6,32 +6,32 @@ import {
   Logger,
   LogLevel,
 } from '@skyway-sdk/common';
-import { ConsumerOptions } from '@skyway-sdk/mediasoup-client/lib/Consumer';
-import { DataConsumerOptions } from '@skyway-sdk/mediasoup-client/lib/DataConsumer';
-import { RtpCapabilities } from '@skyway-sdk/mediasoup-client/lib/RtpParameters';
+import { ConsumerOptions } from 'mediasoup-client/lib/Consumer';
+import { DataConsumerOptions } from 'mediasoup-client/lib/DataConsumer';
+import { RtpCapabilities } from 'mediasoup-client/lib/RtpParameters';
 import {
   IceParameters,
   TransportOptions,
-} from '@skyway-sdk/mediasoup-client/lib/Transport';
+} from 'mediasoup-client/lib/Transport';
 
-import { defaultSfuApiOptions } from './const';
+import { defaultSFUApiOptions } from './const';
 import { errors } from './errors';
 import { createError, createWarnPayload } from './util';
 
 const log = new Logger('packages/sfu-api-client/src/api.ts');
 
-export class SfuRestApiClient {
-  readonly options: SfuApiOptions;
+export class SFURestApiClient {
+  readonly options: SFUApiOptions;
   readonly endpoint: string;
   readonly http: HttpClient;
   private readonly _headers = { authorization: `Bearer ${this._token}` };
 
   constructor(
     private _token: string,
-    _options: Partial<SfuApiOptions> & Pick<SfuApiOptions, 'log'>
+    _options: Partial<SFUApiOptions> & Pick<SFUApiOptions, 'log'>
   ) {
     this.options = {
-      ...defaultSfuApiOptions,
+      ...defaultSFUApiOptions,
       ..._options,
     };
 
@@ -43,7 +43,7 @@ export class SfuRestApiClient {
     Logger.level = this.options.log.level;
     Logger.format = this.options.log.format;
 
-    log.debug('SfuRestApiClient spawned', { endpoint: this.endpoint });
+    log.debug('SFURestApiClient spawned', { endpoint: this.endpoint });
   }
 
   updateToken(token: string) {
@@ -107,7 +107,7 @@ export class SfuRestApiClient {
         { headers: { authorization: `Bearer ${this._token}` } }
       )
       .catch((e: HttpResponse) => {
-        throw this._commonErrorHandler(e, 'SfuRestApiClient.createBot');
+        throw this._commonErrorHandler(e, 'SFURestApiClient.createBot');
       });
 
     return res.id;
@@ -119,7 +119,7 @@ export class SfuRestApiClient {
         headers: { authorization: `Bearer ${this._token}` },
       })
       .catch((e: HttpResponse) => {
-        throw this._commonErrorHandler(e, 'SfuRestApiClient.deleteBot');
+        throw this._commonErrorHandler(e, 'SFURestApiClient.deleteBot');
       });
   }
 
@@ -162,14 +162,14 @@ export class SfuRestApiClient {
         },
       })
       .catch((e: HttpResponse) => {
-        throw this._commonErrorHandler(e, 'SfuRestApiClient.startForwarding');
+        throw this._commonErrorHandler(e, 'SFURestApiClient.startForwarding');
       });
 
     if (backOff.count > 0) {
       log.warn(
         'success to retry startForwarding',
         createWarnPayload({
-          operationName: 'SfuRestApiClient.startForwarding',
+          operationName: 'SFURestApiClient.startForwarding',
           detail: 'success to retry startForwarding',
           botId,
           memberId: publisherId,
@@ -206,14 +206,14 @@ export class SfuRestApiClient {
         }
       )
       .catch((e: HttpResponse) => {
-        throw this._commonErrorHandler(e, 'SfuRestApiClient.createProducer');
+        throw this._commonErrorHandler(e, 'SFURestApiClient.createProducer');
       });
 
     if (backOff.count > 0) {
       log.warn(
         'success to retry createProducer',
         createWarnPayload({
-          operationName: 'SfuRestApiClient.createProducer',
+          operationName: 'SFURestApiClient.createProducer',
           detail: 'success to retry createProducer',
           botId,
           payload: { forwardingId, transportId, count: backOff.count },
@@ -286,20 +286,20 @@ export class SfuRestApiClient {
       .catch((e: HttpResponse) => {
         if (e.status === 429) {
           throw createError({
-            operationName: 'SfuRestApiClient.createConsumer',
+            operationName: 'SFURestApiClient.createConsumer',
             info: errors.maxSubscriberExceededError,
             path: log.prefix,
             payload: e,
           });
         } else if (e.status === 403) {
           throw createError({
-            operationName: 'SfuRestApiClient.createConsumer',
+            operationName: 'SFURestApiClient.createConsumer',
             info: errors.notAllowedConsumeError,
             path: log.prefix,
             payload: e,
           });
         } else {
-          throw this._commonErrorHandler(e, 'SfuRestApiClient.createConsumer');
+          throw this._commonErrorHandler(e, 'SFURestApiClient.createConsumer');
         }
       });
 
@@ -307,7 +307,7 @@ export class SfuRestApiClient {
       log.warn(
         'success to retry createConsumer',
         createWarnPayload({
-          operationName: 'SfuRestApiClient.createConsumer',
+          operationName: 'SFURestApiClient.createConsumer',
           detail: 'success to retry createConsumer',
           botId,
           payload: { forwardingId, count: backOff.count },
@@ -337,14 +337,14 @@ export class SfuRestApiClient {
         },
       })
       .catch((e: HttpResponse) => {
-        throw this._commonErrorHandler(e, 'SfuRestApiClient.connect');
+        throw this._commonErrorHandler(e, 'SFURestApiClient.connect');
       });
 
     if (backOff.count > 0) {
       log.warn(
         'success to retry connect',
         createWarnPayload({
-          operationName: 'SfuRestApiClient.connect',
+          operationName: 'SFURestApiClient.connect',
           detail: 'success to retry connect',
           payload: { transportId, count: backOff.count },
         })
@@ -376,7 +376,7 @@ export class SfuRestApiClient {
       .catch((e: HttpResponse) => {
         throw this._commonErrorHandler(
           e,
-          'SfuRestApiClient.changeConsumerLayer'
+          'SFURestApiClient.changeConsumerLayer'
         );
       });
 
@@ -397,7 +397,7 @@ export class SfuRestApiClient {
         headers: { authorization: `Bearer ${this._token}` },
       })
       .catch((e: HttpResponse) => {
-        throw this._commonErrorHandler(e, 'SfuRestApiClient.stopForwarding');
+        throw this._commonErrorHandler(e, 'SFURestApiClient.stopForwarding');
       })
       .then((res) => {
         fulfilled = res;
@@ -413,7 +413,7 @@ export class SfuRestApiClient {
         { headers: this._headers }
       )
       .catch((e: HttpResponse) => {
-        throw this._commonErrorHandler(e, 'SfuRestApiClient.iceRestart');
+        throw this._commonErrorHandler(e, 'SFURestApiClient.iceRestart');
       });
 
     return res.iceParameters;
@@ -445,7 +445,7 @@ export class SfuRestApiClient {
       .catch((e: HttpResponse) => {
         throw this._commonErrorHandler(
           e,
-          'SfuRestApiClient.getRtpCapabilities'
+          'SFURestApiClient.getRtpCapabilities'
         );
       });
 
@@ -453,7 +453,7 @@ export class SfuRestApiClient {
       log.warn(
         'getCapabilities to retry connect',
         createWarnPayload({
-          operationName: 'SfuRestApiClient.getRtpCapabilities',
+          operationName: 'SFURestApiClient.getRtpCapabilities',
           detail: 'getCapabilities to retry connect',
           botId,
           payload: { forwardingId, count: backOff.count },
@@ -493,7 +493,7 @@ export class SfuRestApiClient {
       .catch((e: HttpResponse) => {
         throw this._commonErrorHandler(
           e,
-          'SfuRestApiClient.confirmSubscription'
+          'SFURestApiClient.confirmSubscription'
         );
       });
     log.debug('response of confirmSubscription', res);
@@ -503,7 +503,7 @@ export class SfuRestApiClient {
 
 type ContentType = 'video' | 'audio';
 
-export type SfuApiOptions = {
+export type SFUApiOptions = {
   domain: string;
   secure: boolean;
   version: number;

@@ -10,10 +10,10 @@ import {
   PublicationInit,
 } from '@skyway-sdk/rtc-api-client';
 
-import { MemberInternalConfig, LocalMemberConfig } from '../config';
+import { LocalMemberConfig, MemberInternalConfig } from '../config';
 import { SkyWayContext } from '../context';
 import { errors } from '../errors';
-import { Member } from '../member';
+import { Member, MemberImpl } from '../member';
 import {
   createLocalPerson,
   LocalPerson,
@@ -113,7 +113,7 @@ export interface Channel {
   /**
    * @description [japanese] Channel中のMemberの一覧を取得する
    */
-  members: RemoteMember[];
+  members: Member[];
 
   /**
    * @description [japanese] Channel中のLocalPersonを取得する
@@ -151,12 +151,6 @@ export interface Channel {
   leave: (member: Member) => Promise<void>;
 
   /**
-   * @deprecated
-   * @description [japanese] 別のChannelのMemberを移動させる
-   */
-  moveChannel: (adapter: LocalPerson) => Promise<void>;
-
-  /**
    * @description [japanese] ChannelのMetadataを更新する
    */
   updateMetadata: (metadata: string) => Promise<void>;
@@ -187,21 +181,50 @@ export class SkyWayChannelImpl implements Channel {
   private readonly _api = this._context._api;
 
   private _members: {
-    [memberId: model.Channel['id']]: RemoteMemberImplInterface;
+    [memberId: model.Channel['id']]: MemberImpl;
   } = {};
   /**@private */
   _getMember = (id: string) => this._members[id];
-  private _addMember(memberDto: model.Member) {
+
+  private async _addLocalPerson(
+    member: model.Member,
+    config: PersonInit
+  ): Promise<LocalPersonImpl> {
+    const person = await createLocalPerson(this._context, this, member, config);
+    this._localPerson = person;
+    this._members[this._localPerson.id] = person as LocalPersonImpl;
+
+    return person;
+  }
+
+  private _addRemoteMember(memberDto: model.Member) {
     const exist = this._getMember(memberDto.id);
     if (exist) {
+      if (exist.side === 'local') {
+        throw createError({
+          operationName: 'SkyWayChannelImpl._addRemoteMember',
+          path: log.prefix,
+          context: this._context,
+          channel: this,
+          info: errors.internal,
+        });
+      }
       return exist;
     }
     const member = this._context._createRemoteMember(this, memberDto);
     this._members[member.id] = member as RemoteMemberImplInterface;
+
     return member;
   }
+
   private _removeMember(memberId: model.Channel['id']) {
     delete this._members[memberId];
+
+    const isLocalPerson =
+      this._localPerson && this._localPerson.id === memberId;
+    if (isLocalPerson) {
+      this._localPerson = undefined;
+    }
   }
 
   private _publications: { [publicationId: string]: PublicationImpl } = {};
@@ -324,7 +347,7 @@ export class SkyWayChannelImpl implements Channel {
 
   private _setupPropertiesFromChannel() {
     this._channelImpl.members.forEach((memberDto) => {
-      this._addMember(memberDto);
+      this._addRemoteMember(memberDto);
     });
     this._channelImpl.publications.forEach((publicationDto) => {
       this._addPublication(publicationDto);
@@ -397,7 +420,7 @@ export class SkyWayChannelImpl implements Channel {
   }
 
   private _handleOnMemberJoin(memberDto: model.Member) {
-    const member = this._addMember(memberDto);
+    const member = this._addRemoteMember(memberDto);
     this.onMemberJoined.emit({ member });
   }
 
@@ -405,11 +428,6 @@ export class SkyWayChannelImpl implements Channel {
     const member = this._getMember(memberDto.id);
     this._removeMember(member.id);
     member._left();
-
-    if (this.localPerson?.id === memberDto.id) {
-      this.localPerson._left();
-      this._localPerson = undefined;
-    }
 
     this.onMemberLeft.emit({ member });
   }
@@ -547,7 +565,7 @@ export class SkyWayChannelImpl implements Channel {
       member,
     });
 
-    const person = await this._createLocalPerson(member, options);
+    const person = await this._addLocalPerson(member, options);
     const adapter = new LocalPersonAdapter(person);
     log.elapsed(timestamp, '[end] join', { person });
 
@@ -556,70 +574,6 @@ export class SkyWayChannelImpl implements Channel {
 
   readonly leave = async (member: Member) =>
     this._channelImpl.leave(this.id, member.id);
-
-  async moveChannel(adapter: LocalPerson) {
-    if (this._localPerson) {
-      throw createError({
-        operationName: 'SkyWayChannelImpl.moveChannel',
-        path: log.prefix,
-        info: errors.alreadyLocalPersonExist,
-        channel: this,
-        context: this._context,
-      });
-    }
-
-    if (!(adapter instanceof LocalPersonAdapter)) {
-      throw createError({
-        operationName: 'SkyWayChannelImpl.moveChannel',
-        path: log.prefix,
-        info: errors.invalidArgumentValue,
-        channel: this,
-        context: this._context,
-      });
-    }
-
-    const leaveChannel = adapter.channel;
-    if (this.id === leaveChannel.id) {
-      throw createError({
-        operationName: 'SkyWayChannelImpl.moveChannel',
-        path: log.prefix,
-        info: errors.cantMoveSameIdChannel,
-        channel: this,
-        context: this._context,
-      });
-    }
-    await leaveChannel.leave(adapter);
-
-    const init: MemberInit = {
-      name: adapter.name,
-      type: adapter.type,
-      subtype: adapter.subtype,
-      metadata: adapter.metadata,
-    };
-    if (adapter.keepaliveIntervalSec != undefined) {
-      init['ttlSec'] =
-        (await this._context._api.getServerUnixtimeInSec()) +
-        adapter.keepaliveIntervalSec;
-    }
-    const member = await this._channelImpl.joinChannel(init);
-    const person = await this._createLocalPerson(member, {
-      keepaliveIntervalSec: adapter.keepaliveIntervalSec,
-      keepaliveIntervalGapSec: adapter.keepaliveIntervalGapSec,
-      disableSignaling: adapter.disableSignaling,
-      disableAnalytics: adapter.disableAnalytics,
-    });
-    adapter.apply(person);
-  }
-
-  private async _createLocalPerson(
-    member: model.Member,
-    config: PersonInit
-  ): Promise<LocalPersonImpl> {
-    const person = await createLocalPerson(this._context, this, member, config);
-    this._localPerson = person;
-
-    return person;
-  }
 
   readonly updateMetadata = (metadata: string) =>
     this._channelImpl.updateChannelMetadata(metadata);
