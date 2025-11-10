@@ -241,7 +241,7 @@ export class RtcApiImpl implements RtcApi {
     }
 
     throw createError({
-      operationName: 'RtcApiImpl.createChannel',
+      operationName: 'RtcApiImpl.getChannel',
       path: log.prefix,
       info: errors.invalidRequestParameter,
     });

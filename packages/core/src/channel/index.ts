@@ -298,7 +298,7 @@ export class SkyWayChannelImpl implements Channel {
     this._setupPropertiesFromChannel();
     this._setupListenChannelEvent();
 
-    _context._onDisposed.once(() => {
+    _context.onDisposed.once(() => {
       this.dispose();
     });
 

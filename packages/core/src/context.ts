@@ -1,4 +1,4 @@
-import { Events, Logger, RuntimeInfo, SkyWayError } from '@skyway-sdk/common';
+import { Event, Events, Logger, RuntimeInfo, SkyWayError } from '@skyway-sdk/common';
 import model, { MemberType } from '@skyway-sdk/model';
 import { RtcApiClient } from '@skyway-sdk/rtc-api-client';
 import { SkyWayAuthToken } from '@skyway-sdk/token';
@@ -17,7 +17,46 @@ import { PACKAGE_VERSION } from './version';
 
 const log = new Logger('packages/core/src/context.ts');
 
-export class SkyWayContext {
+export interface SkyWayContextInterface {
+  /**@description [japanese] コンテキストの設定 */
+  config: ContextConfig;
+  /**@description [japanese] SkyWayのアプリケーションID */
+  readonly appId: string;
+  /**@description [japanese] コンテキストが破棄済みかどうかを示すフラグ */
+  readonly disposed: boolean;
+  /**@description [japanese] トークンのエンコード済み文字列 */
+  readonly authTokenString: string;
+
+  /**@description [japanese] トークンの期限がまもなく切れることを通知するイベント */
+  readonly onTokenUpdateReminder: Event<void>;
+  /**@description [japanese] トークンの期限切れを通知するイベント。このイベントが発火された場合、トークンを更新するまでサービスを利用できない */
+  readonly onTokenExpired: Event<void>;
+  /**@description [japanese] 回復不能なエラーが発生したことを通知するイベント。インターネット接続状況を確認した上で別のインスタンスを作り直す必要がある */
+  readonly onFatalError: Event<SkyWayError>;
+  /**@description [japanese] トークンが更新されたことを通知するイベント */
+  readonly onTokenUpdated: Event<string>;
+  /**@description [japanese] コンテキストが破棄されたことを通知するイベント */
+  readonly onDisposed: Event<void>;
+  
+  /**@private @deprecated */
+  readonly _onTokenUpdated: Event<string>;
+  /**@private @deprecated */
+  readonly _onDisposed: Event<void>;
+
+  /**@description [japanese] トークンの更新 */
+  updateAuthToken(token: string): Promise<void>;
+  /**@description [japanese] プラグインの登録 */
+  registerPlugin(plugin: SkyWayPlugin): void;
+    /**
+   * @description [japanese] コンテキストの利用を終了し次のリソースを解放する
+   * - イベントリスナー
+   * - バックエンドサーバとの通信
+   * - コンテキストを参照する全Channelインスタンス
+   */
+  dispose(): void;
+}
+
+export class SkyWayContext implements SkyWayContextInterface {
   /**@internal */
   static version = PACKAGE_VERSION;
 
@@ -110,7 +149,7 @@ export class SkyWayContext {
 
   private _events = new Events();
   /**
-   * @description [japanese] トークンの期限がまもなく切れる
+   * @description [japanese] トークンの期限がまもなく切れることを通知するイベント
    * @example
    * context.onTokenUpdateReminder.add(() => {
       context.updateAuthToken(tokenString);
@@ -118,18 +157,23 @@ export class SkyWayContext {
    */
   readonly onTokenUpdateReminder = this._events.make<void>();
   /**
-   * @description [japanese] トークンの期限切れ。トークンを更新するまでサービスを利用できない
+   * @description [japanese] トークンの期限切れを通知するイベント。このイベントが発火された場合、トークンを更新するまでサービスを利用できない
    */
   readonly onTokenExpired = this._events.make<void>();
   /**
-   * @description [japanese] 回復不能なエラー。インターネット接続状況を確認した上で別のインスタンスを作り直す必要がある
+   * @description [japanese] 回復不能なエラーが発生したことを通知するイベント。インターネット接続状況を確認した上で別のインスタンスを作り直す必要がある
    */
   readonly onFatalError = this._events.make<SkyWayError>();
 
-  /**@private */
+  /**@private @deprecated */
   readonly _onTokenUpdated = this._events.make<string>();
-  /**@private */
+  /**@private @deprecated */
   readonly _onDisposed = this._events.make<void>();
+
+  /**@description [japanese] トークンが更新されたことを通知するイベント */
+  readonly onTokenUpdated = this._events.make<string>();
+  /**@description [japanese] コンテキストが破棄されたことを通知するイベント */
+  readonly onDisposed = this._events.make<void>();
 
   /**@private */
   constructor(
@@ -160,6 +204,7 @@ export class SkyWayContext {
     });
   }
 
+  /**@description [japanese] トークンのエンコード済み文字列 */
   get authTokenString() {
     return this._authTokenString;
   }
@@ -237,6 +282,7 @@ export class SkyWayContext {
     this.authToken = newToken;
 
     this._onTokenUpdated.emit(token);
+    this.onTokenUpdated.emit(token);
     await this._setTokenExpireTimer();
 
     await this._api.updateAuthToken(token).catch((e) => {
@@ -287,7 +333,7 @@ export class SkyWayContext {
    * @description [japanese] Contextの利用を終了し次のリソースを解放する
    * - イベントリスナー
    * - バックエンドサーバとの通信
-   * - Contextを参照する全Channelインスタンス
+   * - コンテキストを参照する全Channelインスタンス
    */
   dispose() {
     if (this.disposed) {
@@ -300,6 +346,7 @@ export class SkyWayContext {
     clearTimeout(this._tokenUpdateRemindTimer);
 
     this._onDisposed.emit();
+    this.onDisposed.emit();
     this._events.dispose();
 
     this._api.close();

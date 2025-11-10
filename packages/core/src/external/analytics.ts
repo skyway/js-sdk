@@ -81,7 +81,7 @@ export class AnalyticsSession {
 
   constructor(public client: AnalyticsClient, private context: SkyWayContext) {
     this._listen();
-    context._onTokenUpdated.add((token) => {
+    context.onTokenUpdated.add((token) => {
       this.client.setNewSkyWayAuthToken(token);
     });
   }

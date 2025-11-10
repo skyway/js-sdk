@@ -55,7 +55,7 @@ export class SFUBotPlugin extends SkyWayPlugin {
         log: context.config.log,
       });
       this._transportRepository = new TransportRepository(context, this._api);
-      context._onTokenUpdated.add((token) => {
+      context.onTokenUpdated.add((token) => {
         this._api.updateToken(token);
       });
     });

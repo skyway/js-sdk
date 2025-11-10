@@ -579,6 +579,9 @@ export class PublicationImpl<T extends LocalStream = LocalStream>
 
     this._onReplaceStream.emit({ newStream: stream, oldStream });
 
+    // replaceStream 実行後に旧 LocalStream の _unpublished() を呼び明示的に行う
+    oldStream._unpublished();
+
     if (this._analytics && !this._analytics.isClosed()) {
       // 再送時に他の処理をブロックしないためにawaitしない
       void this._analytics.client.sendMediaDeviceReport({

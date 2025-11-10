@@ -62,6 +62,7 @@ export {
   type RtcApiConfig,
   type RtcRpcApiConfig,
   type SkyWayConfigOptions,
+  type SkyWayContextInterface,
   SkyWayContext,
   SkyWayStreamFactory,
   sortEncodingParameters,

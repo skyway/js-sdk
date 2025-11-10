@@ -1,6 +1,6 @@
 {
   "name": "@skyway-sdk/rtc-api-client",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "The official Next Generation JavaScript SDK for SkyWay",
   "homepage": "https://skyway.ntt.com/",
   "repository": {

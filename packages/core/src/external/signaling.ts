@@ -72,7 +72,7 @@ export class SignalingSession {
 
   constructor(public _client: SignalingClient, private context: SkyWayContext) {
     this._listen();
-    context._onTokenUpdated
+    context.onTokenUpdated
       .add(async (token) => {
         await this._updateSkyWayAuthToken(token);
       })
