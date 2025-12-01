@@ -1,15 +1,26 @@
-import { Event, Events, Logger, RuntimeInfo, SkyWayError } from '@skyway-sdk/common';
+import {
+  EventInterface,
+  Events,
+  Logger,
+  RuntimeInfo,
+  SkyWayError,
+  SkyWayErrorInterface,
+} from '@skyway-sdk/common';
 import model, { MemberType } from '@skyway-sdk/model';
 import { RtcApiClient } from '@skyway-sdk/rtc-api-client';
 import { SkyWayAuthToken } from '@skyway-sdk/token';
 import { v4 as uuidV4 } from 'uuid';
 
 import { SkyWayChannelImpl } from './channel';
-import { ContextConfig, SkyWayConfigOptions } from './config';
+import {
+  ContextConfig,
+  SkyWayConfigOptions,
+  SkyWayContextConfig,
+} from './config';
 import { errors } from './errors';
 import { AnalyticsSession, setupAnalyticsSession } from './external/analytics';
 import { RemoteMemberImplInterface } from './member/remoteMember';
-import { SkyWayPlugin } from './plugin/interface/plugin';
+import { SkyWayPlugin, SkyWayPluginInterface } from './plugin/interface/plugin';
 import { registerPersonPlugin } from './plugin/internal/person/plugin';
 import { UnknownPlugin } from './plugin/internal/unknown/plugin';
 import { createError, getRuntimeInfo } from './util';
@@ -19,7 +30,7 @@ const log = new Logger('packages/core/src/context.ts');
 
 export interface SkyWayContextInterface {
   /**@description [japanese] コンテキストの設定 */
-  config: ContextConfig;
+  config: SkyWayContextConfig;
   /**@description [japanese] SkyWayのアプリケーションID */
   readonly appId: string;
   /**@description [japanese] コンテキストが破棄済みかどうかを示すフラグ */
@@ -28,26 +39,26 @@ export interface SkyWayContextInterface {
   readonly authTokenString: string;
 
   /**@description [japanese] トークンの期限がまもなく切れることを通知するイベント */
-  readonly onTokenUpdateReminder: Event<void>;
+  readonly onTokenUpdateReminder: EventInterface<void>;
   /**@description [japanese] トークンの期限切れを通知するイベント。このイベントが発火された場合、トークンを更新するまでサービスを利用できない */
-  readonly onTokenExpired: Event<void>;
+  readonly onTokenExpired: EventInterface<void>;
   /**@description [japanese] 回復不能なエラーが発生したことを通知するイベント。インターネット接続状況を確認した上で別のインスタンスを作り直す必要がある */
-  readonly onFatalError: Event<SkyWayError>;
+  readonly onFatalError: EventInterface<SkyWayErrorInterface>;
   /**@description [japanese] トークンが更新されたことを通知するイベント */
-  readonly onTokenUpdated: Event<string>;
+  readonly onTokenUpdated: EventInterface<string>;
   /**@description [japanese] コンテキストが破棄されたことを通知するイベント */
-  readonly onDisposed: Event<void>;
-  
+  readonly onDisposed: EventInterface<void>;
+
   /**@private @deprecated */
-  readonly _onTokenUpdated: Event<string>;
+  readonly _onTokenUpdated: EventInterface<string>;
   /**@private @deprecated */
-  readonly _onDisposed: Event<void>;
+  readonly _onDisposed: EventInterface<void>;
 
   /**@description [japanese] トークンの更新 */
   updateAuthToken(token: string): Promise<void>;
   /**@description [japanese] プラグインの登録 */
-  registerPlugin(plugin: SkyWayPlugin): void;
-    /**
+  registerPlugin(plugin: SkyWayPluginInterface): void;
+  /**
    * @description [japanese] コンテキストの利用を終了し次のリソースを解放する
    * - イベントリスナー
    * - バックエンドサーバとの通信
@@ -163,7 +174,7 @@ export class SkyWayContext implements SkyWayContextInterface {
   /**
    * @description [japanese] 回復不能なエラーが発生したことを通知するイベント。インターネット接続状況を確認した上で別のインスタンスを作り直す必要がある
    */
-  readonly onFatalError = this._events.make<SkyWayError>();
+  readonly onFatalError = this._events.make<SkyWayErrorInterface>();
 
   /**@private @deprecated */
   readonly _onTokenUpdated = this._events.make<string>();

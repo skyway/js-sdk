@@ -6,6 +6,12 @@ import { RemoteMember } from '../../../member/remoteMember';
 import { Transport, TransportConnectionState } from '../../../plugin/interface';
 import { ContentType, Stream, WebRTCStats } from '../base';
 
+export interface LocalStreamInterface extends Stream {
+  readonly side: 'local';
+  readonly id: string;
+  published: boolean;
+}
+
 export abstract class LocalStreamBase implements Stream {
   readonly side = 'local';
   /**@internal */

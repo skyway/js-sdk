@@ -43,6 +43,7 @@ export {
   type LocalMediaStreamOptions,
   type LocalMemberConfig,
   type LocalStream,
+  type DataStreamSubscriber,
   LocalStreamBase,
   LocalVideoStream,
   MediaDevice,

@@ -1,4 +1,4 @@
-@skyway-sdk/room@2.1.0
+@skyway-sdk/room@2.2.0
 
 MIT
 
@@ -29,7 +29,7 @@ SOFTWARE.
 
 ---
 
-@skyway-sdk/token@2.0.0
+@skyway-sdk/token@2.0.1
 
 MIT
 
@@ -60,7 +60,7 @@ SOFTWARE.
 
 ---
 
-@skyway-sdk/common@2.0.0
+@skyway-sdk/common@2.0.1
 
 MIT
 
@@ -91,7 +91,7 @@ SOFTWARE.
 
 ---
 
-@skyway-sdk/sfu-bot@2.0.1
+@skyway-sdk/sfu-bot@2.0.2
 
 MIT
 
@@ -122,7 +122,7 @@ SOFTWARE.
 
 ---
 
-@skyway-sdk/sfu-api-client@2.0.0
+@skyway-sdk/sfu-api-client@2.0.1
 
 MIT
 
@@ -153,7 +153,7 @@ SOFTWARE.
 
 ---
 
-@skyway-sdk/core@2.1.0
+@skyway-sdk/core@2.2.0
 
 MIT
 
@@ -215,7 +215,7 @@ SOFTWARE.
 
 ---
 
-@skyway-sdk/rtc-api-client@2.0.1
+@skyway-sdk/rtc-api-client@2.0.2
 
 MIT
 
@@ -246,7 +246,7 @@ SOFTWARE.
 
 ---
 
-@skyway-sdk/rtc-rpc-api-client@2.0.0
+@skyway-sdk/rtc-rpc-api-client@2.0.1
 
 MIT
 
@@ -501,7 +501,7 @@ SOFTWARE.
 
 ---
 
-axios@1.11.0
+axios@1.12.0
 
 MIT
 
@@ -604,27 +604,6 @@ MIT
 
 https://github.com/felixge/node-combined-stream
 
-Copyright (c) 2011 Debuggable Limited <felix@debuggable.com>
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
-
-
 ---
 
 debug@4.4.3
@@ -670,27 +649,6 @@ delayed-stream@1.0.0
 MIT
 
 https://github.com/felixge/node-delayed-stream
-
-Copyright (c) 2011 Debuggable Limited <felix@debuggable.com>
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
-
 
 ---
 
@@ -914,27 +872,6 @@ form-data@4.0.4
 MIT
 
 https://github.com/form-data/form-data
-
-Copyright (c) 2012 Felix Geisendörfer (felix@debuggable.com) and contributors
-
- Permission is hereby granted, free of charge, to any person obtaining a copy
- of this software and associated documentation files (the "Software"), to deal
- in the Software without restriction, including without limitation the rights
- to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- copies of the Software, and to permit persons to whom the Software is
- furnished to do so, subject to the following conditions:
-
- The above copyright notice and this permission notice shall be included in
- all copies or substantial portions of the Software.
-
- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- THE SOFTWARE.
-
 
 ---
 

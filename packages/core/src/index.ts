@@ -32,6 +32,7 @@ export * from './plugin/internal/person/util';
 export * from './publication';
 export * from './subscription';
 export * from './util';
+export * from './validation';
 export * from './version';
 export * from '@skyway-sdk/common';
 export * from '@skyway-sdk/token';

@@ -4,11 +4,22 @@ import { errors } from '../../../errors';
 import { createError } from '../../../util';
 import { AudioMediaTrackConstraints } from '../../factory';
 import { AudioLevel } from '../audioLevel';
-import { LocalMediaStreamBase, LocalMediaStreamOptions } from './media';
+import {
+  LocalMediaStreamBase,
+  LocalMediaStreamInterface,
+  LocalMediaStreamOptions,
+} from './media';
 
 const log = new Logger('packages/core/src/media/stream/local/audio.ts');
 
-export class LocalAudioStream extends LocalMediaStreamBase {
+export interface LocalAudioStreamInterface extends LocalMediaStreamInterface {
+  readonly contentType: 'audio';
+}
+
+export class LocalAudioStream
+  extends LocalMediaStreamBase
+  implements LocalAudioStreamInterface
+{
   readonly contentType = 'audio';
   private _isEnabled = true;
   private _promiseQueue = new PromiseQueue();

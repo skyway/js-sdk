@@ -2,9 +2,14 @@ import { Logger } from './logger';
 
 const log = new Logger('packages/common/src/error.ts');
 
+export interface SkyWayErrorInterface extends Error {
+  info: ErrorInfo;
+  toJSON: () => object;
+}
+
 export class SkyWayError<
   PayloadType extends Record<string, any> = Record<string, any>
-> extends Error {
+> extends Error implements SkyWayErrorInterface {
   private readonly id = Math.random().toString().slice(2, 10);
   payload?: PayloadType;
   path?: string;

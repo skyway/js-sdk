@@ -4,7 +4,25 @@ const log = new Logger('packages/common/src/event.ts');
 
 type EventExecute<T extends any> = (arg: T) => void;
 
-export class Event<T extends any> {
+export interface EventInterface<T extends any> {
+  emit: (arg: T) => void;
+  removeAllListeners: () => void;
+  add: (callback: (args: T) => void) => {
+    removeListener: () => void;
+    disposer: (disposer: EventDisposerInterface) => void;
+  };
+  once: (callback: (arg: T) => void) => {
+    removeListener: () => void;
+    disposer: (disposer: EventDisposerInterface) => void;
+  };
+  asPromise: (timeLimit?: number) => Promise<T>;
+  watch: (
+    callback: (arg: T) => boolean | undefined | null,
+    timeLimit?: number
+  ) => Promise<T>;
+}
+
+export class Event<T extends any> implements EventInterface<T> {
   private _stack: {
     execute: EventExecute<T>;
     id: number;
@@ -48,7 +66,7 @@ export class Event<T extends any> {
       this._stack = this._stack.filter((item) => item.id !== id && item);
     };
 
-    const disposer = (disposer: EventDisposer) => {
+    const disposer = (disposer: EventDisposerInterface) => {
       disposer.push(removeListener);
     };
 
@@ -131,6 +149,12 @@ export class Events {
     this.events.forEach((event) => event.removeAllListeners());
     this.events = [];
   }
+}
+
+/**@internal */
+export interface EventDisposerInterface {
+  push: (disposer: () => void) => void;
+  dispose: () => void;
 }
 
 /**@internal */

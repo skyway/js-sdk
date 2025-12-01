@@ -65,6 +65,20 @@ export type TurnPolicy = 'enable' | 'disable' | 'turnOnly';
 
 export type TurnProtocol = 'all' | 'udp' | 'tcp' | 'tls';
 
+// SkyWayConfigOptionsの全てのプロパティをRequiredにしてContextConfigクラスへ代入可能となった型
+// SkyWayContextInterfaceはこちらを利用することで、クラスを直接参照することなく後方互換性を保つ
+export type SkyWayContextConfig = {
+  rtcApi: Required<SkyWayConfigOptions['rtcApi']>;
+  iceParamServer: Required<SkyWayConfigOptions['iceParamServer']>;
+  signalingService: Required<SkyWayConfigOptions['signalingService']>;
+  analyticsService: Required<SkyWayConfigOptions['analyticsService']>;
+  rtcConfig: Required<SkyWayConfigOptions['rtcConfig']>;
+  token: Required<SkyWayConfigOptions['token']>;
+  log: Required<SkyWayConfigOptions['log']>;
+  internal: Required<SkyWayConfigOptions['internal']>;
+  member: Required<SkyWayConfigOptions['member']>;
+};
+
 export class ContextConfig implements SkyWayConfigOptions {
   /**@internal */
   rtcApi: Required<SkyWayConfigOptions['rtcApi']> = {

@@ -6,8 +6,12 @@ import { SkyWayContext } from '../../context';
 import { LocalPersonImpl } from '../../member/localPerson';
 import { RemoteMemberImplInterface } from '../../member/remoteMember';
 
+export interface SkyWayPluginInterface {
+  subtype: string;
+}
+
 /**@internal */
-export abstract class SkyWayPlugin {
+export abstract class SkyWayPlugin implements SkyWayPluginInterface {
   subtype!: string;
   /**@internal */
   _context?: SkyWayContext;

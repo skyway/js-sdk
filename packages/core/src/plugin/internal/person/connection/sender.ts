@@ -16,6 +16,7 @@ import { AnalyticsSession } from '../../../../external/analytics';
 import { IceManager } from '../../../../external/ice';
 import { SignalingSession } from '../../../../external/signaling';
 import { Codec } from '../../../../media';
+import { DataStreamSubscriber } from '../../../../media/stream/local/data';
 import {
   LocalAudioStream,
   LocalCustomVideoStream,
@@ -72,6 +73,8 @@ export class Sender extends Peer {
   private _cleanupStreamCallbacks: {
     [streamId: string]: () => void;
   } = {};
+  
+  private _endpoint: RemoteMember;
 
   constructor(
     context: SkyWayContext,
@@ -91,6 +94,8 @@ export class Sender extends Peer {
       'sender'
     );
     this._log.debug('spawned');
+
+    this._endpoint = endpoint;
 
     this.signaling.onMessage
       .add(async ({ src, data }) => {
@@ -456,6 +461,18 @@ export class Sender extends Peer {
         new DataChannelNegotiationLabel(publication.id, stream.id).toLabel(),
         stream.options
       );
+      const dataStreamSubscriber: DataStreamSubscriber = {
+        id: this._endpoint.id,
+        name: this._endpoint.name,
+      };
+
+      dc.onopen = () => {
+        stream.onWritable.emit(dataStreamSubscriber);
+      }
+
+      dc.onclose = () => {
+        stream.onUnwritable.emit(dataStreamSubscriber);
+      };
 
       dc.onerror = (err) => {
         if ('error' in err && (err as any).error.errorDetail.includes('data-channel')) {

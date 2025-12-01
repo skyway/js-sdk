@@ -29,6 +29,7 @@ import { createPublication } from '../publication/factory';
 import { Subscription, SubscriptionImpl } from '../subscription';
 import { createSubscription } from '../subscription/factory';
 import { createError, createLogPayload } from '../util';
+import { isValidName } from '../validation';
 import {
   ChannelClosedEvent,
   ChannelMetadataUpdatedEvent,
@@ -526,6 +527,17 @@ export class SkyWayChannelImpl implements Channel {
       });
     }
 
+    if (!isValidName(options.name)) {
+      throw createError({
+        operationName: 'SkyWayChannelImpl.join',
+        path: log.prefix,
+        info: errors.invalidRequestParameter,
+        channel: this,
+        context: this._context,
+        payload: options,
+      });
+    }
+
     if (options.name != undefined) {
       const exist = this.members.find((m) => m.name === options.name);
       if (exist) {
@@ -750,6 +762,17 @@ export class SkyWayChannel {
     const timestamp = log.info('[start] createChannel', {
       operationName: 'SkyWayChannel.Create',
     });
+
+    if (!isValidName(init.name)) {
+      throw createError({
+        operationName: 'SkyWayChannel.Create',
+        info: errors.invalidRequestParameter,
+        path: log.prefix,
+        context,
+        payload: init,
+      });
+    }
+
     const channelImpl = await context._api.createChannel(init).catch((e) => {
       log.error('[failed] createChannel', e);
       throw e;
@@ -769,6 +792,18 @@ export class SkyWayChannel {
     const timestamp = log.info('[start] findChannel', {
       operationName: 'SkyWayChannel.Find',
     });
+
+    // id が指定されていない場合に channelName の validation を行う
+    if (query.id === undefined && !isValidName(query.name)) {
+      throw createError({
+        operationName: 'SkyWayChannel.Find',
+        info: errors.invalidRequestParameter,
+        path: log.prefix,
+        context,
+        payload: query,
+      });
+    }
+
     const channelImpl = await context._api.findChannel(query).catch((e) => {
       log.error('[failed] findChannel', e);
       throw e;
@@ -788,6 +823,17 @@ export class SkyWayChannel {
     const timestamp = log.info('[start] findOrCreateChannel', {
       operationName: 'SkyWayChannel.FindOrCreate',
     });
+
+    if (!isValidName(query.name)) {
+      throw createError({
+        operationName: 'SkyWayChannel.Create',
+        info: errors.invalidRequestParameter,
+        path: log.prefix,
+        context,
+        payload: query,
+      });
+    }
+
     const channelImpl = await context._api
       .findOrCreateChannel(query)
       .catch((e) => {
