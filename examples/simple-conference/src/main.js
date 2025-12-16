@@ -1,12 +1,11 @@
 import {
   nowInSec,
-
   SkyWayAuthToken,
   SkyWayContext,
   SkyWayRoom,
   SkyWayStreamFactory,
-  uuidV4 } from
-'@skyway-sdk/room';
+  uuidV4,
+} from '@skyway-sdk/room';
 
 import { appId, secret } from '../../../env';
 
@@ -20,49 +19,46 @@ const token = new SkyWayAuthToken({
       turn: true,
       actions: ['read'],
       channels: [
-      {
-        id: '*',
-        name: '*',
-        actions: ['write'],
-        members: [
         {
           id: '*',
           name: '*',
           actions: ['write'],
-          publication: {
-            actions: ['write']
-          },
-          subscription: {
-            actions: ['write']
-          }
-        }],
+          members: [
+            {
+              id: '*',
+              name: '*',
+              actions: ['write'],
+              publication: {
+                actions: ['write'],
+              },
+              subscription: {
+                actions: ['write'],
+              },
+            },
+          ],
 
-        sfuBots: [
-        {
-          actions: ['write'],
-          forwardings: [{ actions: ['write'] }]
-        }]
-
-      }]
-
-    }
-  }
+          sfuBots: [
+            {
+              actions: ['write'],
+              forwardings: [{ actions: ['write'] }],
+            },
+          ],
+        },
+      ],
+    },
+  },
 }).encode(secret);
 
 void (async () => {
-  const localVideo = document.getElementById(
-    'js-local-stream'
-  );
+  const localVideo = document.getElementById('js-local-stream');
   const joinTrigger = document.getElementById('js-join-trigger');
   const leaveTrigger = document.getElementById('js-leave-trigger');
   const remoteVideos = document.getElementById('js-remote-streams');
-  const channelName = document.getElementById(
-    'js-channel-name'
-  );
+  const channelName = document.getElementById('js-channel-name');
   const messages = document.getElementById('js-messages');
 
   const { audio, video } =
-  await SkyWayStreamFactory.createMicrophoneAudioAndCameraStream();
+    await SkyWayStreamFactory.createMicrophoneAudioAndCameraStream();
 
   // Render local stream
   localVideo.muted = true;
@@ -71,7 +67,7 @@ void (async () => {
   await localVideo.play();
 
   const context = await SkyWayContext.Create(token, {
-    log: { level: 'warn', format: 'object' }
+    log: { level: 'warn', format: 'object' },
   });
 
   let room;
@@ -83,7 +79,7 @@ void (async () => {
     }
 
     room = await SkyWayRoom.FindOrCreate(context, {
-      name: channelName.value
+      name: channelName.value,
     });
 
     const member = await room.join();
@@ -105,7 +101,7 @@ void (async () => {
         newVideo.autoplay = true;
         newVideo.setAttribute(
           'data-member-id',
-          subscription.publication.publisher.id
+          subscription.publication.publisher.id,
         );
 
         remoteVideos.append(newVideo);
@@ -114,7 +110,10 @@ void (async () => {
       const newVideo = userVideo[publisherId];
       stream.attach(newVideo);
 
-      if (subscription.contentType === 'video' && subscription.publication.type === 'sfu') {
+      if (
+        subscription.contentType === 'video' &&
+        subscription.publication.type === 'sfu'
+      ) {
         newVideo.onclick = () => {
           if (subscription.preferredEncoding === 'low') {
             subscription.changePreferredEncoding('high');
@@ -134,14 +133,17 @@ void (async () => {
     await member.publish(audio, { type: 'sfu' });
     await member.publish(video, {
       encodings: [
-      { maxBitrate: 10_000, id: 'low' },
-      { maxBitrate: 800_000, id: 'high' }],
+        { maxBitrate: 10_000, id: 'low' },
+        { maxBitrate: 800_000, id: 'high' },
+      ],
 
-      type: 'sfu'
+      type: 'sfu',
     });
     const disposeVideoElement = (remoteVideo) => {
       const stream = remoteVideo.srcObject;
-      stream.getTracks().forEach((track) => track.stop());
+      stream.getTracks().forEach((track) => {
+        track.stop();
+      });
       remoteVideo.srcObject = null;
       remoteVideo.remove();
     };
@@ -150,7 +152,7 @@ void (async () => {
       if (e.member.id === member.id) return;
 
       const remoteVideo = remoteVideos.querySelector(
-        `[data-member-id="${e.member.id}"]`
+        `[data-member-id="${e.member.id}"]`,
       );
       disposeVideoElement(remoteVideo);
 
@@ -167,7 +169,7 @@ void (async () => {
     });
 
     leaveTrigger.addEventListener('click', () => member.leave(), {
-      once: true
+      once: true,
     });
   });
 })();

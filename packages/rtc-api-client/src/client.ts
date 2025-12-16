@@ -1,12 +1,11 @@
-import { Logger, SkyWayError } from '@skyway-sdk/common';
-import { Event } from '@skyway-sdk/common';
-import { Channel } from '@skyway-sdk/model';
+import { Event, Logger, type SkyWayError } from '@skyway-sdk/common';
+import type { Channel } from '@skyway-sdk/model';
 import { RtcRpcApiClient } from '@skyway-sdk/rtc-rpc-api-client';
 
-import { channelFactory, ChannelInit, RtcApi } from '.';
-import { Config, ConfigOptions } from './config';
-import { ChannelQuery } from './domain/api';
-import { EventObserver } from './domain/eventObserver';
+import { type ChannelInit, channelFactory, type RtcApi } from '.';
+import { Config, type ConfigOptions } from './config';
+import type { ChannelQuery } from './domain/api';
+import type { EventObserver } from './domain/eventObserver';
 import { RtcApiImpl } from './infrastructure/api';
 import { EventObserverImpl } from './infrastructure/eventObserver';
 
@@ -52,8 +51,8 @@ export class RtcApiClient {
     private apiClient: RtcApi,
     private _eventObserverFactory: (
       appId: string,
-      channel: Channel
-    ) => EventObserver
+      channel: Channel,
+    ) => EventObserver,
   ) {
     this.apiClient.onFatalError.pipe(this.onFatalError);
   }
@@ -88,7 +87,7 @@ export class RtcApiClient {
       this._eventObserverFactory(this.appId, channelDto),
       this.apiClient,
       channelDto,
-      this.config
+      this.config,
     );
     return channel;
   }
@@ -107,7 +106,7 @@ export class RtcApiClient {
       this._eventObserverFactory(this.appId, channelDto),
       this.apiClient,
       channelDto,
-      this.config
+      this.config,
     );
     log.debug('[end] apiClient.getChannel', { channelId: channel.id });
 
@@ -129,7 +128,7 @@ export class RtcApiClient {
       this._eventObserverFactory(this.appId, channelDto),
       this.apiClient,
       channelDto,
-      this.config
+      this.config,
     );
     return channel;
   }

@@ -2,12 +2,12 @@ import { Logger, PromiseQueue } from '@skyway-sdk/common';
 
 import { errors } from '../../../errors';
 import { createError } from '../../../util';
-import { AudioMediaTrackConstraints } from '../../factory';
+import type { AudioMediaTrackConstraints } from '../../factory';
 import { AudioLevel } from '../audioLevel';
 import {
   LocalMediaStreamBase,
-  LocalMediaStreamInterface,
-  LocalMediaStreamOptions,
+  type LocalMediaStreamInterface,
+  type LocalMediaStreamOptions,
 } from './media';
 
 const log = new Logger('packages/core/src/media/stream/local/audio.ts');
@@ -27,7 +27,7 @@ export class LocalAudioStream
 
   constructor(
     track: MediaStreamTrack,
-    options: AudioMediaTrackConstraints & Partial<LocalMediaStreamOptions> = {}
+    options: AudioMediaTrackConstraints & Partial<LocalMediaStreamOptions> = {},
   ) {
     super(track, 'audio', options);
 

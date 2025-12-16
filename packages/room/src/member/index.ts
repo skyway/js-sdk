@@ -1,10 +1,10 @@
 import { Event } from '@skyway-sdk/common';
-import { Member, MemberSide, MemberState } from '@skyway-sdk/core';
+import type { Member, MemberSide, MemberState } from '@skyway-sdk/core';
 
-import { RoomPublication } from '../publication';
-import { RoomType } from '../room';
-import { Room } from '../room/default';
-import { RoomSubscription } from '../subscription';
+import type { RoomPublication } from '../publication';
+import type { RoomType } from '../room';
+import type { Room } from '../room/default';
+import type { RoomSubscription } from '../subscription';
 
 export interface RoomMember {
   readonly id: string;
@@ -61,7 +61,10 @@ export abstract class RoomMemberImpl implements RoomMember {
     return this.member.metadata;
   }
 
-  constructor(protected member: Member, public room: Room) {
+  constructor(
+    protected member: Member,
+    public room: Room,
+  ) {
     const { removeListener } = room.onMemberLeft.add((e) => {
       if (e.member.id === this.member.id) {
         removeListener();
@@ -82,7 +85,7 @@ export abstract class RoomMemberImpl implements RoomMember {
 
   get subscriptions() {
     return this.member.subscriptions.map((s) =>
-      this.room._getSubscription(s.id)
+      this.room._getSubscription(s.id),
     );
   }
 

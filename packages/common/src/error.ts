@@ -8,8 +8,11 @@ export interface SkyWayErrorInterface extends Error {
 }
 
 export class SkyWayError<
-  PayloadType extends Record<string, any> = Record<string, any>
-> extends Error implements SkyWayErrorInterface {
+    PayloadType extends Record<string, any> = Record<string, any>,
+  >
+  extends Error
+  implements SkyWayErrorInterface
+{
   private readonly id = Math.random().toString().slice(2, 10);
   payload?: PayloadType;
   path?: string;
@@ -19,7 +22,7 @@ export class SkyWayError<
   /**@internal */
   constructor(
     init: Pick<SkyWayError<PayloadType>, 'path' | 'payload' | 'error' | 'info'>,
-    logging = true
+    logging = true,
   ) {
     super(init.info.detail);
     Object.assign(this, init);

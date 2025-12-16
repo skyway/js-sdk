@@ -1,8 +1,8 @@
-import model from '@skyway-sdk/model';
+import type model from '@skyway-sdk/model';
 
-import { SkyWayChannelImpl } from '../../../channel';
-import { SkyWayContext } from '../../../context';
-import { LocalPersonImpl } from '../../../member/localPerson';
+import type { SkyWayChannelImpl } from '../../../channel';
+import type { SkyWayContext } from '../../../context';
+import type { LocalPersonImpl } from '../../../member/localPerson';
 import { SkyWayPlugin } from '../../interface/plugin';
 import { MessageBuffer } from './connection/messageBuffer';
 import { RemotePersonImpl } from './member';
@@ -27,7 +27,7 @@ export class PersonPlugin extends SkyWayPlugin {
 
   readonly _createRemoteMember = (
     channel: SkyWayChannelImpl,
-    memberDto: model.Member
+    memberDto: model.Member,
   ) => {
     const person = new RemotePersonImpl({
       ...this._context,

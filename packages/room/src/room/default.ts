@@ -1,5 +1,5 @@
-import { Event } from '@skyway-sdk/common';
-import {
+import type { Event } from '@skyway-sdk/common';
+import type {
   LocalPersonAdapter,
   LocalStream,
   Publication,
@@ -9,16 +9,19 @@ import {
   SkyWayContext,
   SubscriptionImpl,
 } from '@skyway-sdk/core';
-import { PublicationType } from '@skyway-sdk/model';
-import { SFUBotPlugin } from '@skyway-sdk/sfu-bot';
+import type { PublicationType } from '@skyway-sdk/model';
+import type { SFUBotPlugin } from '@skyway-sdk/sfu-bot';
 
-import { RoomMember, RoomMemberImpl } from '../member';
-import { LocalRoomMember, LocalRoomMemberImpl } from '../member/local/default';
-import { RoomPublication, RoomPublicationImpl } from '../publication';
-import { RoomSubscription, RoomSubscriptionImpl } from '../subscription';
-import { RoomType } from '.';
-import { RoomBase, RoomMemberInit, RoomState } from './base';
-import * as event from './event';
+import type { RoomMember, RoomMemberImpl } from '../member';
+import {
+  type LocalRoomMember,
+  LocalRoomMemberImpl,
+} from '../member/local/default';
+import type { RoomPublication, RoomPublicationImpl } from '../publication';
+import type { RoomSubscription, RoomSubscriptionImpl } from '../subscription';
+import type { RoomType } from '.';
+import { RoomBase, type RoomMemberInit, type RoomState } from './base';
+import type * as event from './event';
 
 export interface Room {
   readonly type: RoomType;
@@ -156,7 +159,7 @@ export interface Room {
 export class RoomImpl extends RoomBase implements Room {
   protected _disableSignaling = false;
   static async Create(context: SkyWayContext, channel: SkyWayChannelImpl) {
-    const plugin = await this._createBot(context, channel);
+    const plugin = await RoomImpl._createBot(context, channel);
 
     const room = new RoomImpl(channel, plugin);
     return room;
@@ -166,14 +169,14 @@ export class RoomImpl extends RoomBase implements Room {
 
   private constructor(
     channel: SkyWayChannelImpl,
-    readonly _plugin: SFUBotPlugin
+    readonly _plugin: SFUBotPlugin,
   ) {
     super('default', channel);
   }
 
   protected _getTargetPublication(
     publicationId: string,
-    publicationType: PublicationType
+    publicationType: PublicationType,
   ): RoomPublication<LocalStream> | undefined {
     return publicationType === 'sfu'
       ? this._getOriginPublication(publicationId)
@@ -182,7 +185,7 @@ export class RoomImpl extends RoomBase implements Room {
 
   protected _createLocalRoomMember<T extends LocalRoomMemberImpl>(
     local: LocalPersonAdapter,
-    room: this
+    room: this,
   ): T {
     return new LocalRoomMemberImpl(local, room) as T;
   }

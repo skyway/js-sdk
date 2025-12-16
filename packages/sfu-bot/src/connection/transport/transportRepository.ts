@@ -1,22 +1,22 @@
 import { Event, Logger } from '@skyway-sdk/common';
 import {
-  AnalyticsSession,
+  type AnalyticsSession,
   createError,
   getRuntimeInfo,
-  IceManager,
-  SkyWayContext,
+  type IceManager,
+  type SkyWayContext,
 } from '@skyway-sdk/core';
-import { SFURestApiClient } from '@skyway-sdk/sfu-api-client';
+import type { SFURestApiClient } from '@skyway-sdk/sfu-api-client';
 import { Device } from 'mediasoup-client';
-import { RtpCapabilities } from 'mediasoup-client/lib/RtpParameters';
-import { TransportOptions } from 'mediasoup-client/lib/Transport';
+import type { RtpCapabilities } from 'mediasoup-client/lib/RtpParameters';
+import type { TransportOptions } from 'mediasoup-client/lib/Transport';
 
 import { errors } from '../../errors';
-import { SFUBotMember } from '../../member';
+import type { SFUBotMember } from '../../member';
 import { SFUTransport } from './transport';
 
 const log = new Logger(
-  'packages/sfu-bot/src/connection/transport/transportRepository.ts'
+  'packages/sfu-bot/src/connection/transport/transportRepository.ts',
 );
 
 export class TransportRepository {
@@ -35,12 +35,12 @@ export class TransportRepository {
 
   constructor(
     private _context: SkyWayContext,
-    private readonly _api: SFURestApiClient
+    private readonly _api: SFURestApiClient,
   ) {
     const { browserName, browserVersion } = getRuntimeInfo();
     log.debug('runtime info', { browserName, browserVersion });
     // wkwebview対応
-    if (browserName === 'Safari' && browserVersion == undefined) {
+    if (browserName === 'Safari' && browserVersion === undefined) {
       this._device = new Device({ handlerName: 'Safari12' });
     } else {
       this._device = new Device();
@@ -77,7 +77,7 @@ export class TransportRepository {
     transportOptions: TransportOptions,
     direction: 'send' | 'recv',
     iceManager: IceManager,
-    analyticsSession?: AnalyticsSession
+    analyticsSession?: AnalyticsSession,
   ) {
     const createTransport =
       direction === 'send'
@@ -99,7 +99,7 @@ export class TransportRepository {
       iceManager,
       this._api,
       this._context,
-      analyticsSession
+      analyticsSession,
     );
     this._transports[personId + msTransport.id] = transport;
 

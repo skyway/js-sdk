@@ -2,38 +2,38 @@ import { Event, EventDisposer, Logger } from '@skyway-sdk/common';
 import {
   createError,
   createLogPayload,
-  IceManager,
+  type IceManager,
   isSafari,
-  LocalAudioStream,
-  LocalCustomVideoStream,
-  LocalPersonImpl,
-  LocalStream,
-  LocalVideoStream,
-  PublicationImpl,
+  type LocalAudioStream,
+  type LocalCustomVideoStream,
+  type LocalPersonImpl,
+  type LocalStream,
+  type LocalVideoStream,
+  type PublicationImpl,
+  type SkyWayChannelImpl,
+  type SkyWayContext,
+  type SubscriptionImpl,
   setEncodingParams,
-  SkyWayChannelImpl,
-  SkyWayContext,
   statsToArray,
-  SubscriptionImpl,
-  TransportConnectionState,
+  type TransportConnectionState,
   uuidV4,
   waitForLocalStats,
 } from '@skyway-sdk/core';
-import { SFURestApiClient } from '@skyway-sdk/sfu-api-client';
+import type { SFURestApiClient } from '@skyway-sdk/sfu-api-client';
 import isEqual from 'lodash/isEqual';
-import { Producer, ProducerOptions } from 'mediasoup-client/lib/Producer';
-import {
+import type { Producer, ProducerOptions } from 'mediasoup-client/lib/Producer';
+import type {
   RtpCodecCapability,
   RtpCodecParameters,
   RtpParameters,
 } from 'mediasoup-client/lib/RtpParameters';
 
 import { errors } from '../errors';
-import { Forwarding, ForwardingConfigure } from '../forwarding';
-import { SFUBotMember } from '../member';
+import { Forwarding, type ForwardingConfigure } from '../forwarding';
+import type { SFUBotMember } from '../member';
 import { createWarnPayload } from '../util';
-import { SFUTransport } from './transport/transport';
-import { TransportRepository } from './transport/transportRepository';
+import type { SFUTransport } from './transport/transport';
+import type { TransportRepository } from './transport/transportRepository';
 
 const log = new Logger('packages/sfu-bot/src/connection/sender.ts');
 
@@ -65,7 +65,7 @@ export class Sender {
     private _localPerson: LocalPersonImpl,
     private _bot: SFUBotMember,
     private _iceManager: IceManager,
-    private _context: SkyWayContext
+    private _context: SkyWayContext,
   ) {
     const analyticsSession = this._localPerson._analytics;
     if (analyticsSession) {
@@ -133,7 +133,7 @@ export class Sender {
         log.debug(
           'transport connection state changed',
           this._broadcasterTransport?.id,
-          state
+          state,
         );
         stream._setConnectionState(this._bot, state);
       })
@@ -174,13 +174,13 @@ export class Sender {
         broadcasterTransportOptions,
         'send',
         this._iceManager,
-        this._localPerson._analytics
+        this._localPerson._analytics,
       );
     }
 
     this._broadcasterTransport = this._transportRepository.getTransport(
       this._localPerson.id,
-      broadcasterTransportId
+      broadcasterTransportId,
     );
     if (!this._broadcasterTransport) {
       throw createError({
@@ -204,7 +204,7 @@ export class Sender {
     this._cleanupStreamCallbacks = this._setupTransportAccessForStream(
       stream,
       this._broadcasterTransport,
-      producer
+      producer,
     );
 
     const analyticsSession = this._localPerson._analytics;
@@ -227,7 +227,7 @@ export class Sender {
         await this.channel.onStreamPublished
           .watch(
             (e) => e.publication.id === forwardingId,
-            this._context.config.rtcApi.timeout
+            this._context.config.rtcApi.timeout,
           )
           .catch(() => {
             throw createError({
@@ -256,7 +256,7 @@ export class Sender {
     this.forwarding = forwarding;
 
     const botSubscribing = this.channel.subscriptions.find(
-      (s) => s.publication.id === this.publication.id
+      (s) => s.publication.id === this.publication.id,
     ) as SubscriptionImpl;
     const [codec] = producer.rtpParameters.codecs;
     botSubscribing.codec = codec;
@@ -271,7 +271,7 @@ export class Sender {
           subscriptionId: botSubscribing.id,
           role: 'sender',
           rtcPeerConnectionId: this._broadcasterTransport.id,
-        }
+        },
       );
     }
 
@@ -282,7 +282,8 @@ export class Sender {
         end: (stats) => {
           const outbound = stats.find(
             (s) =>
-              s.id.includes('RTCOutboundRTP') || s.type.includes('outbound-rtp')
+              s.id.includes('RTCOutboundRTP') ||
+              s.type.includes('outbound-rtp'),
           );
           if (outbound?.keyFramesEncoded > 0) return true;
           return false;
@@ -296,7 +297,7 @@ export class Sender {
             await setEncodingParams(producer.rtpSender!, encodings).catch(
               (e) => {
                 log.error('_onEncodingsChanged failed', e, this);
-              }
+              },
             );
           }
         })
@@ -325,7 +326,7 @@ export class Sender {
   }
 
   private _listenStreamEnableChange(
-    stream: LocalAudioStream | LocalVideoStream | LocalCustomVideoStream
+    stream: LocalAudioStream | LocalVideoStream | LocalCustomVideoStream,
   ) {
     if (this._unsubscribeStreamEnableChange) {
       this._unsubscribeStreamEnableChange();
@@ -338,7 +339,7 @@ export class Sender {
             operationName: 'Sender._listenStreamEnableChange',
             bot: this._bot,
             payload: e,
-          })
+          }),
         );
       });
     });
@@ -347,7 +348,7 @@ export class Sender {
 
   private async _produce(
     stream: LocalAudioStream | LocalVideoStream | LocalCustomVideoStream,
-    transport: SFUTransport
+    transport: SFUTransport,
   ) {
     this.publication._onReplaceStream
       .add(async ({ newStream }) => {
@@ -370,7 +371,7 @@ export class Sender {
         this._cleanupStreamCallbacks = this._setupTransportAccessForStream(
           newStream as LocalStream,
           this._broadcasterTransport,
-          producer
+          producer,
         );
         await this._replaceTrack(newStream.track);
       })
@@ -421,7 +422,7 @@ export class Sender {
         return codec;
       }
       const codec = deviceCodecs.find(
-        (c) => c.mimeType.toLowerCase() === cap.mimeType.toLowerCase()
+        (c) => c.mimeType.toLowerCase() === cap.mimeType.toLowerCase(),
       );
       return codec;
     });
@@ -449,14 +450,14 @@ export class Sender {
             codecCapabilities,
             deviceCodecs,
           },
-        })
+        }),
       );
     }
 
     if (stream.contentType === 'audio') {
       // apply opusDtx
       const opusDtx = codecCapabilities.find(
-        (c) => c.mimeType.toLowerCase() === 'audio/opus'
+        (c) => c.mimeType.toLowerCase() === 'audio/opus',
       )?.parameters?.usedtx;
       if (opusDtx !== false) {
         producerOptions.codecOptions = {
@@ -467,7 +468,7 @@ export class Sender {
 
       // apply opusStereo
       const opusStereo = codecCapabilities.find(
-        (c) => c.mimeType.toLowerCase() === 'audio/opus'
+        (c) => c.mimeType.toLowerCase() === 'audio/opus',
       )?.parameters?.stereo;
       if (opusStereo) {
         producerOptions.codecOptions = {
@@ -478,7 +479,7 @@ export class Sender {
 
       // apply opusFec
       const opusFec = codecCapabilities.find(
-        (c) => c.mimeType.toLowerCase() === 'audio/opus'
+        (c) => c.mimeType.toLowerCase() === 'audio/opus',
       )?.parameters?.useinbandfec;
       if (opusFec) {
         producerOptions.codecOptions = {
@@ -491,7 +492,7 @@ export class Sender {
     transport.onProduce
       .watch(
         (p) => p.producerOptions.appData?.transactionId === transactionId,
-        this._context.config.rtcConfig.timeout
+        this._context.config.rtcConfig.timeout,
       )
       .then(async (producer) => {
         try {
@@ -534,8 +535,8 @@ export class Sender {
    */
   private _fixVideoCodecWithParametersOrder(codec: RtpCodecCapability) {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    //@ts-ignore
-    const handler = this._broadcasterTransport!.msTransport._handler;
+    //@ts-expect-error
+    const handler = this._broadcasterTransport?.msTransport._handler;
 
     const findCodecWithParameters = (c: RtpCodecParameters) => {
       if (c.mimeType === codec.mimeType) {
@@ -552,21 +553,21 @@ export class Sender {
 
     const copyCodecExceptPayloadType = (
       target: RtpCodecParameters,
-      src: RtpCodecParameters
+      src: RtpCodecParameters,
     ) => {
       for (const key of Object.keys(target)) {
         if (key === 'payloadType') {
           continue;
         }
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        //@ts-ignore
+        //@ts-expect-error
         target[key] = src[key];
       }
     };
 
     if (handler._sendingRtpParametersByKind) {
       const parameters: RtpParameters =
-        handler._sendingRtpParametersByKind['video'];
+        handler._sendingRtpParametersByKind.video;
       const target = parameters.codecs.find(findCodecWithParameters);
 
       if (parameters && target) {
@@ -586,7 +587,7 @@ export class Sender {
     }
     if (handler._sendingRemoteRtpParametersByKind) {
       const parameters: RtpParameters =
-        handler._sendingRemoteRtpParametersByKind['video'];
+        handler._sendingRemoteRtpParametersByKind.video;
       const target = parameters.codecs.find(findCodecWithParameters);
 
       if (parameters && target) {
@@ -609,7 +610,7 @@ export class Sender {
   private _setupTransportAccessForStream(
     stream: LocalStream,
     transport: SFUTransport,
-    producer: Producer
+    producer: Producer,
   ) {
     stream._getTransportCallbacks[this._bot.id] = () => ({
       rtcPeerConnection: transport.pc,
@@ -624,7 +625,7 @@ export class Sender {
       const stats = await producer.getStats();
       let arr = statsToArray(stats);
       arr = arr.map((stats) => {
-        stats['sfuTransportId'] = transport.id;
+        stats.sfuTransportId = transport.id;
         return stats;
       });
       return arr;
@@ -686,7 +687,7 @@ export class Sender {
   private startSendSubscriptionStatsReportTimer() {
     const analyticsSession = this._localPerson._analytics;
     const subscription = this._bot.subscriptions.find(
-      (s) => s.publication.id === this.publication.id
+      (s) => s.publication.id === this.publication.id,
     );
     if (subscription && analyticsSession) {
       const intervalSec = analyticsSession.client.getIntervalSec();

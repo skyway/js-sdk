@@ -3,6 +3,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 
 const pkg = require('../package.json');
+
 import { appendLicenses, createLicenses } from './license.mjs';
 
 const dist = 'dist';

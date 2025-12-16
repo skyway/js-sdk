@@ -4,41 +4,41 @@ import {
   EventDisposer,
   Logger,
   PromiseQueue,
-  SkyWayError,
+  type SkyWayError,
 } from '@skyway-sdk/common';
 import * as sdpTransform from 'sdp-transform';
 import { v4 } from 'uuid';
 
-import { SkyWayContext } from '../../../../context';
+import type { SkyWayContext } from '../../../../context';
 import { errors } from '../../../../errors';
-import { AnalyticsSession } from '../../../../external/analytics';
-import { IceManager } from '../../../../external/ice';
-import { SignalingSession } from '../../../../external/signaling';
-import { Codec } from '../../../../media';
-import { RemoteStream } from '../../../../media/stream';
+import type { AnalyticsSession } from '../../../../external/analytics';
+import type { IceManager } from '../../../../external/ice';
+import type { SignalingSession } from '../../../../external/signaling';
+import type { Codec } from '../../../../media';
+import type { RemoteStream } from '../../../../media/stream';
 import { createRemoteStream } from '../../../../media/stream/remote/factory';
-import { LocalPersonImpl } from '../../../../member/localPerson';
-import { RemoteMember } from '../../../../member/remoteMember';
-import { SubscriptionImpl } from '../../../../subscription';
+import type { LocalPersonImpl } from '../../../../member/localPerson';
+import type { RemoteMember } from '../../../../member/remoteMember';
+import type { SubscriptionImpl } from '../../../../subscription';
 import {
   createError,
   createWarnPayload,
   fmtpConfigParser,
   statsToArray,
 } from '../../../../util';
-import { TransportConnectionState } from '../../../interface';
+import type { TransportConnectionState } from '../../../interface';
 import { convertConnectionState } from '../util';
-import { P2PMessage } from '.';
+import type { P2PMessage } from '.';
 import { DataChannelNegotiationLabel } from './datachannel';
-import { IceCandidateMessage, Peer } from './peer';
-import {
+import { type IceCandidateMessage, Peer } from './peer';
+import type {
   SenderProduceMessage,
   SenderRestartIceMessage,
   SenderUnproduceMessage,
 } from './sender';
 
 const log = new Logger(
-  'packages/core/src/plugin/internal/person/connection/receiver.ts'
+  'packages/core/src/plugin/internal/person/connection/receiver.ts',
 );
 
 export class Receiver extends Peer {
@@ -71,7 +71,7 @@ export class Receiver extends Peer {
     signaling: SignalingSession,
     analytics: AnalyticsSession | undefined,
     localPerson: LocalPersonImpl,
-    endpoint: RemoteMember
+    endpoint: RemoteMember,
   ) {
     super(
       context,
@@ -80,7 +80,7 @@ export class Receiver extends Peer {
       analytics,
       localPerson,
       endpoint,
-      'receiver'
+      'receiver',
     );
     this._log.debug('spawned');
 
@@ -103,7 +103,7 @@ export class Receiver extends Peer {
                   this._log.error('handle senderProduceMessage failed', err, {
                     localPersonId: this.localPerson.id,
                     endpointId: this.endpoint.id,
-                  })
+                  }),
                 );
             }
             break;
@@ -115,7 +115,7 @@ export class Receiver extends Peer {
                   this._log.error('handle handleSenderUnproduce', err, {
                     localPersonId: this.localPerson.id,
                     endpointId: this.endpoint.id,
-                  })
+                  }),
                 );
             }
             break;
@@ -127,7 +127,7 @@ export class Receiver extends Peer {
                   this._log.error('_handleSenderRestartIce', err, {
                     localPersonId: this.localPerson.id,
                     endpointId: this.endpoint.id,
-                  })
+                  }),
                 );
             }
             break;
@@ -158,7 +158,7 @@ export class Receiver extends Peer {
       }
 
       const info = Object.values(this._publicationInfo).find(
-        (i) => i.mid === transceiver.mid?.toString()
+        (i) => i.mid === transceiver.mid?.toString(),
       );
       if (!info) {
         const error = createError({
@@ -196,7 +196,7 @@ export class Receiver extends Peer {
 
     this.pc.ondatachannel = async ({ channel }) => {
       const { publicationId, streamId } = DataChannelNegotiationLabel.fromLabel(
-        channel.label
+        channel.label,
       );
 
       const codec = { mimeType: 'datachannel' };
@@ -237,7 +237,7 @@ export class Receiver extends Peer {
       'onConnectionStateChanged',
       this.id,
       this._connectionState,
-      state
+      state,
     );
     this._connectionState = state;
     this.onConnectionStateChanged.emit(state);
@@ -276,7 +276,7 @@ export class Receiver extends Peer {
                 skywayConnectionState: state,
               },
               createdAt: Date.now(),
-            }
+            },
           );
         }
       })
@@ -286,11 +286,11 @@ export class Receiver extends Peer {
   private _getCodecFromSdp(
     sdpObject: sdpTransform.SessionDescription,
     transceiver: RTCRtpTransceiver,
-    kind: string
+    kind: string,
   ): Codec {
     const media = sdpObject.media.find(
       // sdpTransformのmidは実際はnumber
-      (m) => m.mid?.toString() === transceiver.mid?.toString()
+      (m) => m.mid?.toString() === transceiver.mid?.toString(),
     );
     if (!media) {
       throw createError({
@@ -304,7 +304,7 @@ export class Receiver extends Peer {
         channel: this.localPerson.channel,
       });
     }
-    const codecPT = media.payloads?.toString()!.split(' ')[0];
+    const codecPT = media.payloads?.toString()?.split(' ')[0];
 
     const rtp = media.rtp.find((r) => r.payload.toString() === codecPT)!;
     const mimeType = `${kind}/${rtp.codec}`.toLowerCase();
@@ -363,7 +363,7 @@ export class Receiver extends Peer {
         continue;
       }
       const exist = Object.values(this._publicationInfo).find(
-        (info) => sdpMediaLine.mid?.toString() === info.mid
+        (info) => sdpMediaLine.mid?.toString() === info.mid,
       );
       if (!exist) {
         const error = createError({
@@ -414,7 +414,7 @@ export class Receiver extends Peer {
             channel: this.localPerson.channel,
             detail: '_handleSenderProduce wait for be stable',
             payload: { signalingState: this.pc.signalingState },
-          })
+          }),
         );
 
         await this.waitForSignalingState('stable');
@@ -460,7 +460,7 @@ export class Receiver extends Peer {
           channel: this.localPerson.channel,
           detail: 'signalingState closed',
           operationName: 'Receiver._handleSenderUnproduce',
-        })
+        }),
       );
       return;
     }
@@ -476,7 +476,7 @@ export class Receiver extends Peer {
             detail: 'signalingState is not stable',
             operationName: 'Receiver._handleSenderUnproduce',
             payload: { signalingState: this.pc.signalingState },
-          })
+          }),
         );
         await this.waitForSignalingState('stable');
         await this._handleSenderUnproduce({
@@ -520,7 +520,7 @@ export class Receiver extends Peer {
             detail: 'signalingState is not stable',
             operationName: 'Receiver._handleSenderRestartIce',
             payload: { signalingState: this.pc.signalingState },
-          })
+          }),
         );
         await this.waitForSignalingState('stable');
         await this._handleSenderRestartIce({ sdp });
@@ -575,7 +575,7 @@ export class Receiver extends Peer {
       const answerMedia = answerObject.media[i];
       answerMedia.fmtp = deepCopy(answerMedia.fmtp).map((answerFmtp) => {
         const offerFmtp = offerMedia.fmtp.find(
-          (f) => f.payload === answerFmtp.payload
+          (f) => f.payload === answerFmtp.payload,
         );
         if (offerFmtp) {
           return offerFmtp;
@@ -595,7 +595,7 @@ export class Receiver extends Peer {
       this._log.error('failed to send answer', e, {
         localPersonId: this.localPerson.id,
         endpointId: this.endpoint.id,
-      })
+      }),
     );
 
     this._log.debug(`[receiver] end: sendAnswer`);

@@ -1,12 +1,12 @@
-import model from '@skyway-sdk/model';
+import type model from '@skyway-sdk/model';
 
-export interface ChannelOpenedEvent {}
-export interface ChannelClosedEvent {}
+export type ChannelOpenedEvent = Record<PropertyKey, unknown>;
+export type ChannelClosedEvent = Record<PropertyKey, unknown>;
 export interface ChannelMetadataUpdatedEvent {
   channel: { metadata: string };
 }
 
-export interface ChangedEvent {}
+export type ChangedEvent = Record<PropertyKey, unknown>;
 export interface MemberJoinedEvent {
   member: model.Member;
 }

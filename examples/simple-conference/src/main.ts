@@ -1,6 +1,6 @@
 import {
   nowInSec,
-  Room,
+  type Room,
   SkyWayAuthToken,
   SkyWayContext,
   SkyWayRoom,
@@ -51,13 +51,13 @@ const token = new SkyWayAuthToken({
 
 void (async () => {
   const localVideo = document.getElementById(
-    'js-local-stream'
+    'js-local-stream',
   ) as HTMLVideoElement;
   const joinTrigger = document.getElementById('js-join-trigger');
   const leaveTrigger = document.getElementById('js-leave-trigger');
   const remoteVideos = document.getElementById('js-remote-streams');
   const channelName = document.getElementById(
-    'js-channel-name'
+    'js-channel-name',
   ) as HTMLInputElement;
   const messages = document.getElementById('js-messages');
 
@@ -105,7 +105,7 @@ void (async () => {
         newVideo.autoplay = true;
         newVideo.setAttribute(
           'data-member-id',
-          subscription.publication.publisher.id
+          subscription.publication.publisher.id,
         );
 
         remoteVideos.append(newVideo);
@@ -114,7 +114,10 @@ void (async () => {
       const newVideo = userVideo[publisherId];
       stream.attach(newVideo);
 
-      if (subscription.contentType === 'video' && subscription.publication.type === 'sfu') {
+      if (
+        subscription.contentType === 'video' &&
+        subscription.publication.type === 'sfu'
+      ) {
         newVideo.onclick = () => {
           if (subscription.preferredEncoding === 'low') {
             subscription.changePreferredEncoding('high');
@@ -141,7 +144,9 @@ void (async () => {
     });
     const disposeVideoElement = (remoteVideo: HTMLVideoElement) => {
       const stream = remoteVideo.srcObject as MediaStream;
-      stream.getTracks().forEach((track) => track.stop());
+      stream.getTracks().forEach((track) => {
+        track.stop();
+      });
       remoteVideo.srcObject = null;
       remoteVideo.remove();
     };
@@ -150,7 +155,7 @@ void (async () => {
       if (e.member.id === member.id) return;
 
       const remoteVideo = remoteVideos.querySelector(
-        `[data-member-id="${e.member.id}"]`
+        `[data-member-id="${e.member.id}"]`,
       ) as HTMLVideoElement;
       disposeVideoElement(remoteVideo);
 

@@ -1,6 +1,6 @@
 import {
   defaultSFUApiOptions,
-  SFUApiOptions,
+  type SFUApiOptions,
 } from '@skyway-sdk/sfu-api-client';
 
 export type SFUBotPluginOptions = Omit<SFUApiOptions, 'log'> & {

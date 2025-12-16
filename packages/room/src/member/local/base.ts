@@ -1,27 +1,26 @@
-import { Logger } from '@skyway-sdk/common';
-import { Event, SkyWayError } from '@skyway-sdk/common';
+import { Event, Logger, type SkyWayError } from '@skyway-sdk/common';
 import {
   LocalDataStream,
-  LocalPerson,
-  LocalPersonAdapter,
-  LocalStream,
-  PublicationOptions,
-  RemoteAudioStream,
-  RemoteDataStream,
-  RemoteVideoStream,
-  SubscriptionImpl,
-  SubscriptionOptions,
+  type LocalPerson,
+  type LocalPersonAdapter,
+  type LocalStream,
+  type PublicationOptions,
+  type RemoteAudioStream,
+  type RemoteDataStream,
+  type RemoteVideoStream,
+  type SubscriptionImpl,
+  type SubscriptionOptions,
 } from '@skyway-sdk/core';
-import { errors as sfuErrors, SFUBotMember } from '@skyway-sdk/sfu-bot';
+import { SFUBotMember, errors as sfuErrors } from '@skyway-sdk/sfu-bot';
 
 import { defaultMaxSubscribers } from '../../const';
 import { errors } from '../../errors';
 import { RoomMemberImpl } from '../../member';
-import { RoomPublication } from '../../publication';
-import { Room } from '../../room/default';
-import { RoomSubscription } from '../../subscription';
-import { RemoteRoomMemberImpl } from '../remote/base';
-import { LocalRoomMember } from './default';
+import type { RoomPublication } from '../../publication';
+import type { Room } from '../../room/default';
+import type { RoomSubscription } from '../../subscription';
+import type { RemoteRoomMemberImpl } from '../remote/base';
+import type { LocalRoomMember } from './default';
 
 const log = new Logger('packages/room/src/member/local/base.ts');
 
@@ -53,7 +52,7 @@ export abstract class LocalRoomMemberBase
 
     this._local.onPublicationSubscribed.add(async (e) => {
       const roomSubscription = room._addSubscription(
-        e.subscription as SubscriptionImpl
+        e.subscription as SubscriptionImpl,
       );
       this.onPublicationSubscribed.emit({
         subscription: roomSubscription,
@@ -67,10 +66,10 @@ export abstract class LocalRoomMemberBase
     this.onStreamPublished.add(() => this.onPublicationListChanged.emit());
     this.onStreamUnpublished.add(() => this.onPublicationListChanged.emit());
     this.onPublicationSubscribed.add(() =>
-      this.onSubscriptionListChanged.emit()
+      this.onSubscriptionListChanged.emit(),
     );
     this.onPublicationUnsubscribed.add(() =>
-      this.onSubscriptionListChanged.emit()
+      this.onSubscriptionListChanged.emit(),
     );
   }
 
@@ -93,7 +92,7 @@ export abstract class LocalRoomMemberBase
 
   abstract publish<T extends LocalStream = LocalStream>(
     stream: LocalStream,
-    options?: RoomPublicationOptions
+    options?: RoomPublicationOptions,
   ): Promise<RoomPublication<T>>;
 
   abstract unpublish(publicationId: string | RoomPublication): Promise<void>;
@@ -101,7 +100,7 @@ export abstract class LocalRoomMemberBase
   /** internal */
   async _publishAsP2P<T extends LocalStream = LocalStream>(
     stream: LocalStream,
-    options: PublicationOptions = {}
+    options: PublicationOptions = {},
   ): Promise<RoomPublication<T>> {
     const publication = await this._local.publish(stream, options);
 
@@ -114,7 +113,7 @@ export abstract class LocalRoomMemberBase
   /** internal */
   async _publishAsSFU<T extends LocalStream = LocalStream>(
     stream: LocalStream,
-    options: PublicationOptions & SFURoomPublicationOptions = {}
+    options: PublicationOptions & SFURoomPublicationOptions = {},
   ): Promise<RoomPublication<T>> {
     if (stream instanceof LocalDataStream) {
       throw errors.sfuPublicationNotSupportDataStream;
@@ -125,7 +124,7 @@ export abstract class LocalRoomMemberBase
 
     const origin = await this._local.publish(stream, options);
     const bot = this.room._channel.members.find(
-      (m) => m.subtype === SFUBotMember.subtype
+      (m) => m.subtype === SFUBotMember.subtype,
     ) as SFUBotMember;
     if (!bot) {
       throw sfuErrors.sfuBotNotInChannel;
@@ -151,7 +150,7 @@ export abstract class LocalRoomMemberBase
     const { publication } = await this.room.onStreamUnpublished
       .watch(
         (e) => e.publication.id === publicationId,
-        this._context.config.rtcApi.timeout
+        this._context.config.rtcApi.timeout,
       )
       .catch((error) => {
         throw [{ ...errors.timeout, detail: 'onStreamUnpublished' }, error];
@@ -175,7 +174,7 @@ export abstract class LocalRoomMemberBase
     await this.room.onStreamUnpublished
       .watch(
         (e) => e.publication.id === publicationId,
-        this._context.config.rtcApi.timeout
+        this._context.config.rtcApi.timeout,
       )
       .catch((error) => {
         throw [{ ...errors.timeout, detail: 'onStreamUnpublished' }, error];
@@ -185,19 +184,19 @@ export abstract class LocalRoomMemberBase
   }
 
   async subscribe<
-    T extends RemoteVideoStream | RemoteAudioStream | RemoteDataStream
+    T extends RemoteVideoStream | RemoteAudioStream | RemoteDataStream,
   >(
     target: string | RoomPublication,
-    options?: SubscriptionOptions
+    options?: SubscriptionOptions,
   ): Promise<{ subscription: RoomSubscription<T>; stream: T }> {
     const publicationId = typeof target === 'string' ? target : target.id;
     const { subscription, stream } = await this._local.subscribe(
       publicationId,
-      options
+      options,
     );
 
     const roomSubscription = this.room._addSubscription(
-      subscription as SubscriptionImpl
+      subscription as SubscriptionImpl,
     );
 
     return {
@@ -214,7 +213,7 @@ export abstract class LocalRoomMemberBase
     await this.room.onPublicationUnsubscribed
       .watch(
         (e) => e.subscription.id === subscriptionId,
-        this._context.config.rtcApi.timeout
+        this._context.config.rtcApi.timeout,
       )
       .catch((error) => {
         throw [

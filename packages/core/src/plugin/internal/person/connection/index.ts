@@ -1,22 +1,22 @@
 import { Event, Logger, PromiseQueue } from '@skyway-sdk/common';
 import { v4 } from 'uuid';
 
-import { SkyWayContext } from '../../../../context';
+import type { SkyWayContext } from '../../../../context';
 import { errors } from '../../../../errors';
-import { AnalyticsSession } from '../../../../external/analytics';
-import { IceManager } from '../../../../external/ice';
-import { SignalingSession } from '../../../../external/signaling';
-import { LocalPersonImpl } from '../../../../member/localPerson';
-import { RemoteMember } from '../../../../member/remoteMember';
-import { Publication, PublicationImpl } from '../../../../publication';
-import { Subscription, SubscriptionImpl } from '../../../../subscription';
+import type { AnalyticsSession } from '../../../../external/analytics';
+import type { IceManager } from '../../../../external/ice';
+import type { SignalingSession } from '../../../../external/signaling';
+import type { LocalPersonImpl } from '../../../../member/localPerson';
+import type { RemoteMember } from '../../../../member/remoteMember';
+import { type Publication, PublicationImpl } from '../../../../publication';
+import type { Subscription, SubscriptionImpl } from '../../../../subscription';
 import { createError } from '../../../../util';
-import { SkyWayConnection } from '../../../interface/connection';
+import type { SkyWayConnection } from '../../../interface/connection';
 import { Receiver } from './receiver';
 import { Sender } from './sender';
 
 const log = new Logger(
-  'packages/core/src/plugin/internal/person/connection/index.ts'
+  'packages/core/src/plugin/internal/person/connection/index.ts',
 );
 
 /**@internal */
@@ -46,7 +46,7 @@ export class P2PConnection implements SkyWayConnection {
     this._signaling,
     this._analytics,
     this.localPerson,
-    this.remoteMember
+    this.remoteMember,
   );
   readonly receiver = new Receiver(
     this._context,
@@ -54,7 +54,7 @@ export class P2PConnection implements SkyWayConnection {
     this._signaling,
     this._analytics,
     this.localPerson,
-    this.remoteMember
+    this.remoteMember,
   );
 
   /**@internal */
@@ -65,7 +65,7 @@ export class P2PConnection implements SkyWayConnection {
     private readonly _context: SkyWayContext,
     readonly channelId: string,
     readonly localPerson: LocalPersonImpl,
-    readonly remoteMember: RemoteMember
+    readonly remoteMember: RemoteMember,
   ) {
     this.sender.onDisconnect.once(() => {
       this.disconnected = true;
@@ -87,7 +87,7 @@ export class P2PConnection implements SkyWayConnection {
             if (publication) {
               this.startSendSubscriptionStatsReportTimer(
                 publication,
-                subscriptionId
+                subscriptionId,
               );
             }
           }
@@ -100,7 +100,7 @@ export class P2PConnection implements SkyWayConnection {
             if (subscription) {
               this.startSendSubscriptionStatsReportTimer(
                 subscription,
-                subscriptionId
+                subscriptionId,
               );
             }
           }
@@ -134,7 +134,7 @@ export class P2PConnection implements SkyWayConnection {
         // AnalyticsServerに初回接続できなかった場合はキューに入れる
         this._waitingSendSubscriptionStatsReportsFromPublish.set(
           subscriptionId,
-          publication.id
+          publication.id,
         );
       }
     }
@@ -177,7 +177,7 @@ export class P2PConnection implements SkyWayConnection {
         await this.receiver.onStreamAdded
           .watch(
             (res) => res.publicationId === publicationId,
-            this._context.config.rtcConfig.timeout
+            this._context.config.rtcConfig.timeout,
           )
           .catch(() => {
             throw createError({
@@ -207,12 +207,12 @@ export class P2PConnection implements SkyWayConnection {
         if (this._analytics.client.isConnectionEstablished()) {
           this.startSendSubscriptionStatsReportTimer(
             subscription,
-            subscription.id
+            subscription.id,
           );
         } else {
           // AnalyticsServerに初回接続できなかった場合はキューに入れる
           this._waitingSendSubscriptionStatsReportsFromSubscribe.push(
-            subscription.id
+            subscription.id,
           );
         }
       }
@@ -296,7 +296,7 @@ export class P2PConnection implements SkyWayConnection {
 
   private startSendSubscriptionStatsReportTimer(
     stream: Publication | Subscription,
-    subscriptionId: string
+    subscriptionId: string,
   ) {
     if (this._analytics) {
       const role = stream instanceof PublicationImpl ? 'sender' : 'receiver';
@@ -338,7 +338,7 @@ export class P2PConnection implements SkyWayConnection {
               createdAt: Date.now(),
             });
           }
-        }, intervalSec * 1000)
+        }, intervalSec * 1000),
       );
     }
   }

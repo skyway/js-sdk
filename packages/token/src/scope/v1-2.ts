@@ -23,9 +23,11 @@ const publicationScopeSchema = z
      */
     actions: z.array(
       // 型補完のため enum で定義しておく
-      z.enum(publicationActions).refine((arg) => {
-        return typeof arg === 'string'; // バリデーションとしては publicationAction 以外の文字列も許容する
-      })
+      z
+        .enum(publicationActions)
+        .refine((arg) => {
+          return typeof arg === 'string'; // バリデーションとしては publicationAction 以外の文字列も許容する
+        }),
     ),
   })
   .passthrough();
@@ -42,9 +44,11 @@ const subscriptionScopeSchema = z
      */
     actions: z.array(
       // 型補完のため enum で定義しておく
-      z.enum(subscriptionActions).refine((arg) => {
-        return typeof arg === 'string'; // バリデーションとしては subscriptionAction 以外の文字列も許容する
-      })
+      z
+        .enum(subscriptionActions)
+        .refine((arg) => {
+          return typeof arg === 'string'; // バリデーションとしては subscriptionAction 以外の文字列も許容する
+        }),
     ),
   })
   .passthrough();
@@ -91,16 +95,18 @@ const memberScopeSchema = z.intersection(
        */
       actions: z.array(
         // 型補完のため enum で定義しておく
-        z.enum(memberActions).refine((arg) => {
-          return typeof arg === 'string'; // バリデーションとしては memberAction 以外の文字列も許容する
-        })
+        z
+          .enum(memberActions)
+          .refine((arg) => {
+            return typeof arg === 'string'; // バリデーションとしては memberAction 以外の文字列も許容する
+          }),
       ),
       /**publication リソースに関するオブジェクトを指定*/
       publication: publicationScopeSchema.optional(),
       /**subscription リソースに関するオブジェクトを指定*/
       subscription: subscriptionScopeSchema.optional(),
     })
-    .passthrough()
+    .passthrough(),
 );
 export type MemberScope = z.input<typeof memberScopeSchema>;
 
@@ -144,16 +150,18 @@ const channelScopeSchema = z.intersection(
        */
       actions: z.array(
         // 型補完のため enum で定義しておく
-        z.enum(channelActions).refine((arg) => {
-          return typeof arg === 'string'; // バリデーションとしては channelAction 以外の文字列も許容する
-        })
+        z
+          .enum(channelActions)
+          .refine((arg) => {
+            return typeof arg === 'string'; // バリデーションとしては channelAction 以外の文字列も許容する
+          }),
       ),
       /**member リソースに関するオブジェクトを配列で指定 */
       members: z.array(memberScopeSchema),
       /**sfuBot リソースに関するオブジェクトを配列で指定 */
       sfuBots: z.array(sfuScopeSchema).optional(),
     })
-    .passthrough() // [key: string]: unknown; として他のkeyを許容していた部分
+    .passthrough(), // [key: string]: unknown; として他のkeyを許容していた部分
 );
 
 export type ChannelScope = z.input<typeof channelScopeSchema>;
@@ -170,9 +178,11 @@ export const appScopeSchema = z
     actions: z
       .array(
         // 型補完のため enum で定義しておく
-        z.enum(appActions).refine((arg) => {
-          return typeof arg === 'string'; // バリデーションとしては AppAction 以外の文字列も許容する
-        })
+        z
+          .enum(appActions)
+          .refine((arg) => {
+            return typeof arg === 'string'; // バリデーションとしては AppAction 以外の文字列も許容する
+          }),
       )
       .optional(),
     /**channelリソースに関するオブジェクトを配列で指定*/

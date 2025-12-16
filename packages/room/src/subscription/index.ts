@@ -1,23 +1,21 @@
 import { Logger } from '@skyway-sdk/common';
 import {
-  Codec,
-  ContentType,
+  type Codec,
+  type ContentType,
   Event,
-  RemoteAudioStream,
-  RemoteDataStream,
-  RemoteStream,
-  RemoteVideoStream,
-  SubscriptionImpl,
-  SubscriptionState,
-  TransportConnectionState,
-  WebRTCStats,
+  type RemoteAudioStream,
+  type RemoteDataStream,
+  type RemoteStream,
+  type RemoteVideoStream,
+  type SubscriptionImpl,
+  type SubscriptionState,
+  type TransportConnectionState,
+  type WebRTCStats,
 } from '@skyway-sdk/core';
 
-import { errors } from '../errors';
-import { RoomMember } from '../member';
-import { RoomPublication } from '../publication';
-import { Room } from '../room/default';
-import { createError } from '../util';
+import type { RoomMember } from '../member';
+import type { RoomPublication } from '../publication';
+import type { Room } from '../room/default';
 
 const log = new Logger('packages/room/src/subscription/index.ts');
 
@@ -25,7 +23,7 @@ export interface RoomSubscription<
   T extends
     | RemoteVideoStream
     | RemoteAudioStream
-    | RemoteDataStream = RemoteStream
+    | RemoteDataStream = RemoteStream,
 > {
   readonly id: string;
   readonly contentType: ContentType;
@@ -72,7 +70,7 @@ export class RoomSubscriptionImpl<
   T extends
     | RemoteVideoStream
     | RemoteAudioStream
-    | RemoteDataStream = RemoteStream
+    | RemoteDataStream = RemoteStream,
 > implements RoomSubscription
 {
   readonly id: string;
@@ -87,7 +85,7 @@ export class RoomSubscriptionImpl<
   constructor(
     /**@private */
     public _subscription: SubscriptionImpl<T>,
-    private _room: Room
+    private _room: Room,
   ) {
     this.id = _subscription.id;
     this.contentType = _subscription.contentType;

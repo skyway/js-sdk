@@ -1,8 +1,8 @@
 import axios, {
-  AxiosError,
-  AxiosInstance,
-  AxiosRequestConfig,
-  AxiosResponse,
+  type AxiosError,
+  type AxiosInstance,
+  type AxiosRequestConfig,
+  type AxiosResponse,
 } from 'axios';
 
 import { Logger } from './logger';
@@ -18,13 +18,13 @@ export class HttpClient {
   }
 
   /**@throws {@link HttpResponse} */
-  async get<T extends unknown>(
+  async get<T>(
     url: string,
     config?:
       | (AxiosRequestConfig<any> & {
           retry?: (err: HttpResponse) => Promise<boolean>;
         })
-      | undefined
+      | undefined,
   ): Promise<T> {
     const res = await this.api
       .get<T>(url, config)
@@ -50,14 +50,14 @@ export class HttpClient {
   }
 
   /**@throws {@link HttpResponse} */
-  async post<T extends unknown>(
+  async post<T>(
     url: string,
     data?: any,
     config?:
       | (AxiosRequestConfig<any> & {
           retry?: (err: HttpResponse) => Promise<boolean>;
         })
-      | undefined
+      | undefined,
   ): Promise<T> {
     const res = await this.api
       .post<T>(url, data, config)
@@ -89,14 +89,14 @@ export class HttpClient {
   }
 
   /**@throws {@link HttpResponse} */
-  async put<T extends unknown>(
+  async put<T>(
     url: string,
     data?: any,
     config?:
       | (AxiosRequestConfig<any> & {
           retry?: (err: HttpResponse) => Promise<boolean>;
         })
-      | undefined
+      | undefined,
   ): Promise<T> {
     const res = await this.api
       .put<T>(url, data, config)
@@ -122,13 +122,13 @@ export class HttpClient {
   }
 
   /**@throws {@link HttpResponse} */
-  async delete<T extends unknown>(
+  async delete<T>(
     url: string,
     config?:
       | (AxiosRequestConfig<any> & {
           retry?: (err: HttpResponse) => Promise<boolean>;
         })
-      | undefined
+      | undefined,
   ): Promise<T> {
     const res = await this.api
       .delete<T>(url, config)

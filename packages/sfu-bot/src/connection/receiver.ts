@@ -1,23 +1,23 @@
 import { EventDisposer, Logger } from '@skyway-sdk/common';
 import {
   createError,
-  IceManager,
-  LocalPersonImpl,
-  RemoteStream,
-  SkyWayContext,
+  createRemoteStream,
+  type IceManager,
+  type LocalPersonImpl,
+  type RemoteStream,
+  type SkyWayContext,
+  type SubscriptionImpl,
   statsToArray,
-  SubscriptionImpl,
   uuidV4,
 } from '@skyway-sdk/core';
-import { createRemoteStream } from '@skyway-sdk/core';
-import { SFURestApiClient } from '@skyway-sdk/sfu-api-client';
-import { Consumer } from 'mediasoup-client/lib/Consumer';
+import type { SFURestApiClient } from '@skyway-sdk/sfu-api-client';
+import type { Consumer } from 'mediasoup-client/lib/Consumer';
 
 import { errors } from '../errors';
-import { SFUBotMember } from '../member';
+import type { SFUBotMember } from '../member';
 import { getLayerFromEncodings } from '../util';
-import { SFUTransport } from './transport/transport';
-import { TransportRepository } from './transport/transportRepository';
+import type { SFUTransport } from './transport/transport';
+import type { TransportRepository } from './transport/transportRepository';
 
 const log = new Logger('packages/sfu-bot/src/connection/receiver.ts');
 
@@ -38,7 +38,7 @@ export class Receiver {
     private _localPerson: LocalPersonImpl,
     private _bot: SFUBotMember,
     private _iceManager: IceManager,
-    private _context: SkyWayContext
+    private _context: SkyWayContext,
   ) {
     const analyticsSession = this._localPerson._analytics;
     if (analyticsSession) {
@@ -92,7 +92,7 @@ export class Receiver {
     const spatialLayer = this.subscription.preferredEncoding
       ? getLayerFromEncodings(
           this.subscription.preferredEncoding,
-          this.subscription.publication.origin?.encodings ?? []
+          this.subscription.publication.origin?.encodings ?? [],
         )
       : undefined;
 
@@ -115,13 +115,13 @@ export class Receiver {
         transportOptions as any,
         'recv',
         this._iceManager,
-        this._localPerson._analytics
+        this._localPerson._analytics,
       );
     }
 
     this.transport = this._transportRepository.getTransport(
       this._localPerson.id,
-      transportId
+      transportId,
     );
     if (!this.transport) {
       log.warn('transport is under race condition', { transportId });
@@ -149,7 +149,7 @@ export class Receiver {
         });
       this.transport = this._transportRepository.getTransport(
         this._localPerson.id,
-        transportId
+        transportId,
       );
     }
 
@@ -163,7 +163,7 @@ export class Receiver {
           subscriptionId: this.subscription.id,
           role: 'receiver',
           rtcPeerConnectionId: this.transport.id,
-        }
+        },
       );
     }
 
@@ -218,7 +218,7 @@ export class Receiver {
 
   private _setupTransportAccessForStream(
     stream: RemoteStream,
-    consumer: Consumer
+    consumer: Consumer,
   ) {
     const transport = this.transport!;
     const pc = this.pc!;
@@ -232,7 +232,7 @@ export class Receiver {
       const stats = await consumer.getStats();
       let arr = statsToArray(stats);
       arr = arr.map((stats) => {
-        stats['sfuTransportId'] = transport.id;
+        stats.sfuTransportId = transport.id;
         return stats;
       });
       return arr;

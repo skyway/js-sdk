@@ -1,13 +1,13 @@
-import { ErrorInfo, Logger } from '@skyway-sdk/common';
-import { LocalPersonAdapter, LocalStream } from '@skyway-sdk/core';
+import { type ErrorInfo, Logger } from '@skyway-sdk/common';
+import type { LocalPersonAdapter, LocalStream } from '@skyway-sdk/core';
 
 import { errors } from '../../errors';
-import { RoomPublication } from '../../publication';
-import { SFURoomImpl } from '../../room/sfu';
-import { RoomSubscription } from '../../subscription';
+import type { RoomPublication } from '../../publication';
+import type { SFURoomImpl } from '../../room/sfu';
+import type { RoomSubscription } from '../../subscription';
 import { createError } from '../../util';
-import { LocalRoomMemberBase, RoomPublicationOptions } from './base';
-import { LocalRoomMember } from './default';
+import { LocalRoomMemberBase, type RoomPublicationOptions } from './base';
+import type { LocalRoomMember } from './default';
 
 const log = new Logger('packages/room/src/member/local/sfu.ts');
 
@@ -17,7 +17,7 @@ export interface LocalSFURoomMember extends LocalRoomMember {
    */
   publish: <T extends LocalStream = LocalStream>(
     stream: T,
-    options?: RoomPublicationOptions
+    options?: RoomPublicationOptions,
   ) => Promise<RoomPublication<T>>;
 }
 
@@ -27,13 +27,14 @@ export class LocalSFURoomMemberImpl
   implements LocalSFURoomMember
 {
   /**@private */
+  // biome-ignore lint/complexity/noUselessConstructor: Private constructor is intentional to control instantiation
   constructor(member: LocalPersonAdapter, room: SFURoomImpl) {
     super(member, room);
   }
 
   async publish<T extends LocalStream = LocalStream>(
     stream: LocalStream,
-    options: RoomPublicationOptions = {}
+    options: RoomPublicationOptions = {},
   ): Promise<RoomPublication<T>> {
     if (options.type && options.type !== 'sfu') {
       throw createError({
@@ -54,7 +55,7 @@ export class LocalSFURoomMemberImpl
           info: errorInfo,
           path: log.prefix,
         });
-      }
+      },
     );
 
     return roomPublication as RoomPublication<T>;

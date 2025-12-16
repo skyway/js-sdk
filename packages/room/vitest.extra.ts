@@ -8,5 +8,5 @@ export default mergeConfig(
       testTimeout: 20_000,
       outputFile: './test-extra.json',
     },
-  })
+  }),
 );

@@ -1,6 +1,6 @@
-import { SkyWayConnection } from '../plugin/interface';
-import { Member, MemberImpl } from '.';
-import { LocalPersonImpl } from './localPerson';
+import type { SkyWayConnection } from '../plugin/interface';
+import type { Member, MemberImpl } from '.';
+import type { LocalPersonImpl } from './localPerson';
 
 export interface RemoteMember extends Member {
   readonly side: 'remote';
@@ -17,12 +17,9 @@ export interface RemoteMemberImplInterface extends MemberImpl {
 
 /**@internal */
 export function isRemoteMember(
-  member: Member
+  member: Member,
 ): member is RemoteMemberImplInterface {
-  if (member == undefined) return false;
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  //@ts-ignore
-  if (member['side'] === 'remote') {
+  if (member.side === 'remote') {
     return true;
   }
   return false;

@@ -13,7 +13,9 @@ const LOGGER_PREFIX = 'packages/core/src/external/analytics.ts';
 const log = new Logger(LOGGER_PREFIX);
 
 /**@internal */
-export async function setupAnalyticsSession(context: SkyWayContext): Promise<AnalyticsSession> {
+export async function setupAnalyticsSession(
+  context: SkyWayContext,
+): Promise<AnalyticsSession> {
   const { analyticsService } = context.config;
 
   const client = new AnalyticsClient(
@@ -33,7 +35,7 @@ export async function setupAnalyticsSession(context: SkyWayContext): Promise<Ana
               info: { ...errors.internal, detail: 'AnalyticsClient error' },
               error,
               path: log.prefix,
-            })
+            }),
           );
         },
         debug: (message, ...optionalParams) => {
@@ -45,7 +47,7 @@ export async function setupAnalyticsSession(context: SkyWayContext): Promise<Ana
       },
       analyticsLoggingServerDomain: analyticsService.domain,
       secure: analyticsService.secure,
-    }
+    },
   );
 
   const analyticsSession = new AnalyticsSession(client, context);
@@ -66,7 +68,7 @@ export async function setupAnalyticsSession(context: SkyWayContext): Promise<Ana
         info: { ...errors.internal, detail: 'AnalyticsClient error' },
         error,
         path: log.prefix,
-      })
+      }),
     );
     analyticsSession.onConnectionFailed.emit({});
   });
@@ -79,7 +81,10 @@ export class AnalyticsSession {
   readonly onMessage = new Event<MessageEvent>();
   private _isClosed = false;
 
-  constructor(public client: AnalyticsClient, private context: SkyWayContext) {
+  constructor(
+    public client: AnalyticsClient,
+    context: SkyWayContext,
+  ) {
     this._listen();
     context.onTokenUpdated.add((token) => {
       this.client.setNewSkyWayAuthToken(token);
@@ -112,7 +117,7 @@ export class AnalyticsSession {
       .catch((error) => {
         this.close();
         log.debug(
-          '[end] failed connect analyticsService: also unreachable to server'
+          '[end] failed connect analyticsService: also unreachable to server',
         );
         log.error(
           `AnalyticsClient error: ${error.message}`,
@@ -121,7 +126,7 @@ export class AnalyticsSession {
             info: { ...errors.internal, detail: 'AnalyticsClient error' },
             error,
             path: log.prefix,
-          })
+          }),
         );
         this.onConnectionFailed.emit({});
       });
@@ -133,7 +138,7 @@ export class AnalyticsSession {
     const timeoutPromise = new Promise((_, reject) => {
       connectTimeout = setTimeout(() => {
         log.debug(
-          '[end] failed connect analyticsService: no initial response from the server'
+          '[end] failed connect analyticsService: no initial response from the server',
         );
         reject(new Error('failed connect analyticsService'));
       }, 30 * 1000);
@@ -166,4 +171,4 @@ export class AnalyticsSession {
   }
 }
 
-export { ConnectionState };
+export type { ConnectionState };

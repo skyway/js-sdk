@@ -1,19 +1,19 @@
 import {
-  ErrorInfo,
+  type ErrorInfo,
   Logger,
-  RuntimeInfo,
+  type RuntimeInfo,
   SkyWayError,
 } from '@skyway-sdk/common';
 import Bowser from 'bowser';
-import sdpTransform, { MediaAttributes } from 'sdp-transform';
+import sdpTransform, { type MediaAttributes } from 'sdp-transform';
 import { UAParser } from 'ua-parser-js';
 
-import { Channel, SkyWayChannelImpl } from './channel';
-import { SkyWayContext } from './context';
+import type { Channel, SkyWayChannelImpl } from './channel';
+import type { SkyWayContext } from './context';
 import { errors } from './errors';
-import { Codec } from './media';
-import { LocalStream, RemoteStream, WebRTCStats } from './media/stream';
-import { Member } from './member';
+import type { Codec } from './media';
+import type { LocalStream, RemoteStream, WebRTCStats } from './media/stream';
+import type { Member } from './member';
 
 const log = new Logger('packages/core/src/util.ts');
 
@@ -22,7 +22,7 @@ export function getBitrateFromPeerConnection(
   stream: LocalStream | RemoteStream,
   direction: 'inbound' | 'outbound',
   cb: (bitrate: number) => void,
-  selector: Member | string
+  selector: Member | string,
 ) {
   let preBytes = 0;
   const id = setInterval(async () => {
@@ -86,14 +86,14 @@ export async function createLogPayload({
         if (p.stream) {
           for (const { memberId, stats } of await p.stream._getStatsAll()) {
             const localCandidate = stats.find((s) =>
-              s.type.includes('local-candidate')
+              s.type.includes('local-candidate'),
             );
 
             publication.stats[memberId] = {
               transportType: localCandidate?.protocol ?? 'none',
               relayProtocol: localCandidate?.relayProtocol ?? 'none',
               callType: p.subscriptions.find(
-                (s) => s.subscriber.id === memberId
+                (s) => s.subscriber.id === memberId,
               )?.subscriber.subtype,
               outbound: stats.find((s) => s.type.includes('outbound-rtp')),
               localCandidate,
@@ -109,9 +109,9 @@ export async function createLogPayload({
           }
         }
         return publication;
-      })
+      }),
     );
-    payload['publishing'] = publishing;
+    payload.publishing = publishing;
 
     const subscribing = await Promise.all(
       member.subscriptions.map(async (s) => {
@@ -120,25 +120,25 @@ export async function createLogPayload({
           contentType: s.contentType,
           stats: {},
         };
-        subscription['callType'] = s.publication.publisher.subtype;
+        subscription.callType = s.publication.publisher.subtype;
         if (s.stream) {
           const stats = await s.stream._getStats();
           subscription.stats = stats.find((s) =>
-            s.type.includes('inbound-rtp')
+            s.type.includes('inbound-rtp'),
           );
           const iceCandidate = stats.find((s) =>
-            s.type.includes('local-candidate')
+            s.type.includes('local-candidate'),
           );
-          subscription['transportType'] = iceCandidate?.protocol;
-          subscription['relayProtocol'] = iceCandidate?.relayProtocol;
+          subscription.transportType = iceCandidate?.protocol;
+          subscription.relayProtocol = iceCandidate?.relayProtocol;
         }
         if (s.stream) {
-          subscription['connectionState'] = s.stream._getConnectionState();
+          subscription.connectionState = s.stream._getConnectionState();
         }
         return subscription;
-      })
+      }),
     );
-    payload['subscribing'] = subscribing;
+    payload.subscribing = subscribing;
   }
 
   return payload;
@@ -164,13 +164,13 @@ export function createWarnPayload({
     detail,
   };
   if (member) {
-    warn['appId'] = member.channel.appId;
-    warn['channelId'] = member.channel.id;
-    warn['memberId'] = member.id;
+    warn.appId = member.channel.appId;
+    warn.channelId = member.channel.id;
+    warn.memberId = member.id;
   }
   if (channel) {
-    warn['appId'] = channel.appId;
-    warn['channelId'] = channel.id;
+    warn.appId = channel.appId;
+    warn.channelId = channel.id;
   }
 
   return warn;
@@ -200,15 +200,15 @@ export function createError({
   };
 
   if (channel) {
-    errPayload['appId'] = channel.appId;
-    errPayload['channelId'] = channel.id;
+    errPayload.appId = channel.appId;
+    errPayload.channelId = channel.id;
     if (channel.localPerson) {
-      errPayload['memberId'] = channel.localPerson.id;
+      errPayload.memberId = channel.localPerson.id;
     }
   }
   if (context) {
-    errPayload['info'] = context.info;
-    errPayload['plugins'] = context.plugins.map((p) => p.subtype);
+    errPayload.info = context.info;
+    errPayload.plugins = context.plugins.map((p) => p.subtype);
   }
 
   return new SkyWayError({ error, info, payload: errPayload, path });
@@ -230,32 +230,36 @@ export const waitForLocalStats = async ({
   /**ms */
   timeout?: number;
 }) =>
-  new Promise<WebRTCStats>(async (r, f) => {
-    interval ??= 100;
-    timeout ??= 10_000;
+  new Promise<WebRTCStats>((r, f) => {
+    const intervalMs = interval ?? 100;
+    const timeoutMs = timeout ?? 10_000;
 
-    for (let elapsed = 0; ; elapsed += interval) {
-      if (elapsed >= timeout) {
-        f(
-          createError({
-            operationName: 'Peer.waitForStats',
-            info: {
-              ...errors.timeout,
-              detail: 'waitForStats timeout',
-            },
-            path: log.prefix,
-          })
-        );
-        break;
-      }
+    const checkStats = async () => {
+      for (let elapsed = 0; ; elapsed += intervalMs) {
+        if (elapsed >= timeoutMs) {
+          f(
+            createError({
+              operationName: 'Peer.waitForStats',
+              info: {
+                ...errors.timeout,
+                detail: 'waitForStats timeout',
+              },
+              path: log.prefix,
+            }),
+          );
+          break;
+        }
 
-      const stats = await stream._getStats(remoteMember);
-      if (end(stats)) {
-        r(stats);
-        break;
+        const stats = await stream._getStats(remoteMember);
+        if (end(stats)) {
+          r(stats);
+          break;
+        }
+        await new Promise((r) => setTimeout(r, intervalMs));
       }
-      await new Promise((r) => setTimeout(r, interval));
-    }
+    };
+
+    checkStats().catch(f);
   });
 
 /**@internal */
@@ -276,7 +280,7 @@ export async function getRtcRtpCapabilities(): Promise<{
 
   try {
     pc.close();
-  } catch (error) {}
+  } catch (_error) {}
 
   const sdpObject = sdpTransform.parse(offer.sdp!);
   const [audio, video] = sdpObject.media;
@@ -287,9 +291,9 @@ export async function getRtcRtpCapabilities(): Promise<{
         ({
           ...r,
           payload: r.payload,
-          mimeType: 'audio/' + r.codec,
+          mimeType: `audio/${r.codec}`,
           parameters: getParameters(audio.fmtp, r.payload),
-        } as Codec & { payload: number })
+        }) as Codec & { payload: number },
     ),
     video: video.rtp
       .filter((r) => !['red', 'rtx', 'ulpfec'].includes(r.codec))
@@ -298,9 +302,9 @@ export async function getRtcRtpCapabilities(): Promise<{
           ({
             ...r,
             payload: r.payload,
-            mimeType: 'video/' + r.codec,
+            mimeType: `video/${r.codec}`,
             parameters: getParameters(video.fmtp, r.payload),
-          } as Codec & { payload: number })
+          }) as Codec & { payload: number },
       ),
   };
 }
@@ -316,7 +320,7 @@ export const fmtpConfigParser = (config: string) => {
     .reduce((acc: { [k: string]: number | string | undefined }, cur) => {
       const [k, v] = cur.split('=');
       if (k) {
-        acc[k] = !isNaN(Number(v)) ? Number(v) : v;
+        acc[k] = !Number.isNaN(Number(v)) ? Number(v) : v;
       }
       return acc;
     }, {});
@@ -339,14 +343,14 @@ export function createTestVideoTrack(width: number, height: number) {
     ctx.font = '45px Monaco,Consolas';
     ctx.textAlign = 'center';
     ctx.fillStyle = 'red';
-    const hours = ('0' + date.getHours()).slice(-2);
-    const minutes = ('0' + date.getMinutes()).slice(-2);
-    const seconds = ('0' + date.getSeconds()).slice(-2);
-    const milliseconds = ('00' + date.getMilliseconds()).slice(-3);
+    const hours = `0${date.getHours()}`.slice(-2);
+    const minutes = `0${date.getMinutes()}`.slice(-2);
+    const seconds = `0${date.getSeconds()}`.slice(-2);
+    const milliseconds = `00${date.getMilliseconds()}`.slice(-3);
     ctx.fillText(
       `${hours}:${minutes}:${seconds}.${milliseconds}`,
       canvas.width / 2,
-      canvas.height / 2
+      canvas.height / 2,
     );
 
     requestAnimationFrame(drawAnimation);
@@ -413,7 +417,7 @@ export function detectDevice(): BuiltinHandlerName | undefined {
 
     const browser = uaParser.getBrowser();
     const browserName = browser.name?.toLowerCase() ?? '';
-    const browserVersion = parseInt(browser.major ?? '0');
+    const browserVersion = parseInt(browser.major ?? '0', 10);
     const engine = uaParser.getEngine();
     const engineName = engine.name?.toLowerCase() ?? '';
     const os = uaParser.getOS();
@@ -431,7 +435,7 @@ export function detectDevice(): BuiltinHandlerName | undefined {
     ].includes(browserName);
 
     const isFirefox = ['firefox', 'mobile firefox', 'mobile focus'].includes(
-      browserName
+      browserName,
     );
 
     const isSafari = ['safari', 'mobile safari'].includes(browserName);
@@ -466,7 +470,7 @@ export function detectDevice(): BuiltinHandlerName | undefined {
       isSafari &&
       browserVersion >= 12 &&
       typeof RTCRtpTransceiver !== 'undefined' &&
-      // eslint-disable-next-line no-prototype-builtins
+      // biome-ignore lint/suspicious/noPrototypeBuiltins: Legacy compatibility
       RTCRtpTransceiver.prototype.hasOwnProperty('currentDirection')
     ) {
       return 'Safari12';
@@ -485,7 +489,7 @@ export function detectDevice(): BuiltinHandlerName | undefined {
       isIOS &&
       osVersion >= 14.3 &&
       typeof RTCRtpTransceiver !== 'undefined' &&
-      // eslint-disable-next-line no-prototype-builtins
+      // biome-ignore lint/suspicious/noPrototypeBuiltins: Legacy compatibility
       RTCRtpTransceiver.prototype.hasOwnProperty('currentDirection')
     ) {
       return 'Safari12';

@@ -29,7 +29,7 @@ const authTokenV1_2Schema = z.intersection(
     version: z
       .union([z.literal(1), z.literal(2), z.literal(undefined)])
       .optional(),
-  })
+  }),
 );
 export type AuthTokenV1_2 = z.input<typeof authTokenV1_2Schema>;
 
@@ -45,7 +45,7 @@ const authTokenV3Schema = z.intersection(
      * - 2以下の場合とでscopeの構造に違いがあります。
      * */
     version: z.literal(3),
-  })
+  }),
 );
 export type AuthTokenV3 = z.input<typeof authTokenV3Schema>;
 

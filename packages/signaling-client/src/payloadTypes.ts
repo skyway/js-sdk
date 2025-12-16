@@ -33,13 +33,16 @@ export function isMessagePayload(payload: any): payload is MessagePayload {
   return true;
 }
 
-export function isAcknowledgePayload(payload: any): payload is AcknowledgePayload {
+export function isAcknowledgePayload(
+  payload: any,
+): payload is AcknowledgePayload {
   if (!payload || typeof payload !== 'object') return false;
   if (typeof payload.eventId !== 'string') return false;
   if (typeof payload.ok !== 'boolean') return false;
   if (
     typeof payload.reason !== 'undefined' &&
-    (typeof payload.reason !== 'string' || !AcknowledgeReason.includes(payload.reason))
+    (typeof payload.reason !== 'string' ||
+      !AcknowledgeReason.includes(payload.reason))
   )
     return false;
   return true;
@@ -49,6 +52,7 @@ export function isMember(arg: any): arg is Member {
   if (arg === undefined || Array.isArray(arg)) return false;
   if (typeof arg !== 'object') return false;
   if (typeof arg.id !== 'string') return false;
-  if (typeof arg.name !== 'undefined' && typeof arg.name !== 'string') return false;
+  if (typeof arg.name !== 'undefined' && typeof arg.name !== 'string')
+    return false;
   return true;
 }

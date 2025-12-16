@@ -3,11 +3,12 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 
 import { appendLicenses, createLicenses } from '../../bundler/license.mjs';
+
 const pkg = require('./package.json');
 
 await fs.writeFile(
   './src/version.ts',
-  `export const PACKAGE_VERSION = '${pkg.version}';\n`
+  `export const PACKAGE_VERSION = '${pkg.version}';\n`,
 );
 
 const globalName = 'skyway_sfu_bot';

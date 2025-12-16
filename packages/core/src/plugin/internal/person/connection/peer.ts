@@ -1,19 +1,19 @@
 import { Event, Logger } from '@skyway-sdk/common';
 import { uuidV4 } from '@skyway-sdk/token';
 
-import { SkyWayContext } from '../../../../context';
+import type { SkyWayContext } from '../../../../context';
 import { errors } from '../../../../errors';
-import { AnalyticsSession } from '../../../../external/analytics';
-import { IceManager } from '../../../../external/ice';
-import { SignalingSession } from '../../../../external/signaling';
-import { LocalPersonImpl } from '../../../../member/localPerson';
-import { RemoteMember } from '../../../../member/remoteMember';
+import type { AnalyticsSession } from '../../../../external/analytics';
+import type { IceManager } from '../../../../external/ice';
+import type { SignalingSession } from '../../../../external/signaling';
+import type { LocalPersonImpl } from '../../../../member/localPerson';
+import type { RemoteMember } from '../../../../member/remoteMember';
 import { createError, createWarnPayload } from '../../../../util';
 import { statsToJson } from '../util';
-import { P2PMessage } from '.';
+import type { P2PMessage } from '.';
 
 const log = new Logger(
-  'packages/core/src/plugin/internal/person/connection/peer.ts'
+  'packages/core/src/plugin/internal/person/connection/peer.ts',
 );
 
 export abstract class Peer {
@@ -40,7 +40,7 @@ export abstract class Peer {
     protected readonly analytics: AnalyticsSession | undefined,
     protected readonly localPerson: LocalPersonImpl,
     protected readonly endpoint: RemoteMember,
-    readonly role: PeerRole
+    readonly role: PeerRole,
   ) {
     log.debug('peerConfig', this.pc.getConfiguration());
 
@@ -80,7 +80,7 @@ export abstract class Peer {
     if (
       ev.candidate == null ||
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      //@ts-ignore firefox
+      //@ts-expect-error firefox
       ev.candidate === '' ||
       this.pc.connectionState === 'closed'
     ) {
@@ -130,7 +130,7 @@ export abstract class Peer {
           detail: '[failed] send candidate',
           payload: { message },
         }),
-        error
+        error,
       );
     }
   };
@@ -152,7 +152,7 @@ export abstract class Peer {
     }
   };
 
-  private _onIceGatheringStateChange = async (ev: globalThis.Event) => {
+  private _onIceGatheringStateChange = async () => {
     if (
       this.localPerson._analytics &&
       !this.localPerson._analytics.isClosed()
@@ -247,9 +247,9 @@ export abstract class Peer {
 
     await Promise.all(
       candidates.map((candidate) => {
-        if (this.pc.signalingState === 'closed') return;
+        if (this.pc.signalingState === 'closed') return Promise.resolve();
 
-        this.pc.addIceCandidate(candidate).catch((err) => {
+        return this.pc.addIceCandidate(candidate).catch((err) => {
           log.warn(
             '[failed] add ice candidate',
             createWarnPayload({
@@ -258,10 +258,10 @@ export abstract class Peer {
               detail: '[failed] send candidate',
               payload: { endpointId: this.endpoint.id },
             }),
-            err
+            err,
           );
         });
-      })
+      }),
     );
   }
 
@@ -269,7 +269,7 @@ export abstract class Peer {
   protected waitForSignalingState = async (
     state: RTCSignalingState,
     /**ms */
-    timeout = 10_000
+    timeout = 10_000,
   ) => {
     if (this.pc.signalingState === state) return;
     await this.onSignalingStateChanged
@@ -293,7 +293,7 @@ export abstract class Peer {
   protected waitForConnectionState = async (
     state: RTCPeerConnectionState,
     /**ms */
-    timeout = 10_000
+    timeout = 10_000,
   ) => {
     if (state === this.pc.connectionState) return;
     await this.onPeerConnectionStateChanged

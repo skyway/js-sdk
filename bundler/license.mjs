@@ -1,13 +1,13 @@
 #!/usr/bin/env zx
 /* eslint-disable no-undef */
 /* eslint-disable @typescript-eslint/no-var-requires */
-import { appendFile, readFile, unlink } from 'fs/promises';
-import https from 'https';
+import { appendFile, readFile, unlink } from 'node:fs/promises';
+import https from 'node:https';
 
 const LICENSE_POLICY = {
-  allow: ["MIT", "ISC", "BSD"],
-  deny:  ["GPL", "Apache"]
-}; 
+  allow: ['MIT', 'ISC', 'BSD'],
+  deny: ['GPL', 'Apache'],
+};
 
 export async function createLicenses(pkg) {
   let output = '';
@@ -23,16 +23,16 @@ export async function createLicenses(pkg) {
       for (const [i, version] of versions.entries()) {
         const path = paths[i];
         const pkg = JSON.parse(
-          (await readFile(path + '/package.json')).toString()
+          (await readFile(`${path}/package.json`)).toString(),
         );
         const repoUrl = pkg.repository ? fmtRepoUrl(pkg.repository) : '';
         const [, , , user, repo] = (repoUrl ?? '').split('/');
         const licenseText = await getLicenseText({ path, user, repo, version });
-        const licenseLevel = pkg.license ?? license ?? 'unlicensed'
+        const licenseLevel = pkg.license ?? license ?? 'unlicensed';
 
         if (isRestrictedLicense(licenseLevel)) {
           throw new Error(
-            `License of ${name} is Restricted (${licenseLevel}). Please use a different package.`
+            `License of ${name} is Restricted (${licenseLevel}). Please use a different package.`,
           );
         }
 
@@ -58,13 +58,14 @@ export async function appendLicenses(dist, licenses) {
 
 export async function getLicenseText({ path, user, repo, version }) {
   let licenseText =
-    (await readFile(path + '/LICENSE').catch(() => '')).toString() ||
-    (await readFile(path + '/license').catch(() => '')).toString() ||
-    (await readFile(path + '/LICENSE.md').catch(() => '')).toString() ||
-    (await readFile(path + '/license.md').catch(() => '')).toString();
+    (await readFile(`${path}/LICENSE`).catch(() => '')).toString() ||
+    (await readFile(`${path}/license`).catch(() => '')).toString() ||
+    (await readFile(`${path}/LICENSE.md`).catch(() => '')).toString() ||
+    (await readFile(`${path}/license.md`).catch(() => '')).toString();
 
   licenseText =
-    licenseText || (user && repo && (await downloadLicenses(user, repo, version)));
+    licenseText ||
+    (user && repo && (await downloadLicenses(user, repo, version)));
 
   return licenseText;
 }
@@ -84,7 +85,7 @@ function fmtRepoUrl(repo) {
     url = url.replace(/\.git$/, '');
     if (!url.startsWith('https://github.com')) {
       // https://github.com/clux/sdp-transform/blob/649ed1279b78a577e6944df2f675e8a285da5dd7/package.json#L8
-      url = 'https://github.com/' + url;
+      url = `https://github.com/${url}`;
     }
     return url;
   }
@@ -121,9 +122,12 @@ async function downloadLicenses(user, repo, version) {
 
   let result = '';
   for (const filename of filenames) {
-    result = await downloadFromVersionBranch(user, repo, version, filename).catch(
-      () => ''
-    );
+    result = await downloadFromVersionBranch(
+      user,
+      repo,
+      version,
+      filename,
+    ).catch(() => '');
     if (result) {
       break;
     }
@@ -132,7 +136,7 @@ async function downloadLicenses(user, repo, version) {
   if (!result) {
     for (const filename of filenames) {
       result = await downloadFromDefaultBranch(user, repo, filename).catch(
-        () => ''
+        () => '',
       );
       if (result) {
         break;
@@ -143,43 +147,43 @@ async function downloadLicenses(user, repo, version) {
 }
 
 const downloadFromVersionBranch = async (user, repo, version, filename) => {
-  const prefixes = ["", "v"];
+  const prefixes = ['', 'v'];
   let result = '';
   for (const prefix of prefixes) {
     const branch = prefix + version;
     result = await downloadFromGithub(user, repo, branch, filename).catch(
-      () => ''
+      () => '',
     );
     if (result) {
       break;
     }
   }
   return result;
-}
+};
 
 const downloadFromDefaultBranch = async (user, repo, filename) => {
-  const defaultBranches = ["main", "master"];
+  const defaultBranches = ['main', 'master'];
   let result = '';
   for (const branch of defaultBranches) {
     result = await downloadFromGithub(user, repo, branch, filename).catch(
-      () => ''
+      () => '',
     );
     if (result) {
       return result;
     }
   }
   return result;
-}
+};
 
 const downloadFromGithub = async (user, repo, branch, filename) => {
-  const dist = Math.random().toString().slice(2) + '.temp';
+  const dist = `${Math.random().toString().slice(2)}.temp`;
   await new Promise((r) => {
     const file = fs.createWriteStream(dist);
     https.get(
       `https://raw.githubusercontent.com/${user}/${repo}/${branch}/${filename}`,
       (response) => {
         response.pipe(file);
-      }
+      },
     );
     file.on('finish', r);
   });

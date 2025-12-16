@@ -1,11 +1,16 @@
 import WebSocket from 'isomorphic-ws';
 
-import { ClientEvent } from './clientEvent';
+import type { ClientEvent } from './clientEvent';
 import { Event } from './utils/event';
-import { Logger } from './utils/logger';
+import type { Logger } from './utils/logger';
 import { PACKAGE_VERSION } from './version';
 
-const ServerEventType = ['open', 'sendRequestSignalingMessage', 'sendResponseSignalingMessage', 'acknowledge'] as const;
+const ServerEventType = [
+  'open',
+  'sendRequestSignalingMessage',
+  'sendResponseSignalingMessage',
+  'acknowledge',
+] as const;
 type ServerEventType = (typeof ServerEventType)[number];
 
 export type ServerEvent = {
@@ -65,7 +70,15 @@ export class Socket {
 
   private _reconnectTimer: ReturnType<typeof setTimeout> | undefined;
 
-  constructor({ channelId, channelName, memberId, memberName, sessionEndpoint, token, logger }: SocketParams) {
+  constructor({
+    channelId,
+    channelName,
+    memberId,
+    memberName,
+    sessionEndpoint,
+    token,
+    logger,
+  }: SocketParams) {
     this._sessionEndpoint = sessionEndpoint;
     this._channelId = channelId;
     this._channelName = channelName;
@@ -105,7 +118,9 @@ export class Socket {
       const wsURL = `${this._sessionEndpoint}?${queryString}`;
       ws = new WebSocket(wsURL, subProtocol);
 
-      this._logger.debug(`Connecting to signaling-server: ${this._sessionEndpoint}`);
+      this._logger.debug(
+        `Connecting to signaling-server: ${this._sessionEndpoint}`,
+      );
 
       ws.onerror = (event) => {
         this._logger.error('WebSocket error occurred', event.error);
@@ -123,8 +138,7 @@ export class Socket {
     };
 
     ws.onclose = (event) => {
-      const logMessage =
-        'Close event fired: ' + JSON.stringify({ code: event.code, reason: event.reason, type: event.type });
+      const logMessage = `Close event fired: ${JSON.stringify({ code: event.code, reason: event.reason, type: event.type })}`;
 
       // 1000, 4000~4099: normal case (should not reconnect)
       // 4100~4199: non-normal case (should not reconnect)
@@ -229,7 +243,7 @@ export class Socket {
       if (this._ws === undefined || !this._isOpen) {
         // Call send method again after connected
         this._logger.debug(
-          'Retry send the client event when connected because WebSocket is undefined or isOpen = false'
+          'Retry send the client event when connected because WebSocket is undefined or isOpen = false',
         );
         retrySend();
         return;
@@ -240,8 +254,14 @@ export class Socket {
       this._ws.send(clientEvent.data, (err) => {
         if (err) {
           // If state is invalid, call send method again after reconnected
-          if (this._ws === undefined || !this._isOpen || this._ws.readyState !== WebSocket.OPEN) {
-            this._logger.debug('Retry send the client event when connected because WebSocket.send failed');
+          if (
+            this._ws === undefined ||
+            !this._isOpen ||
+            this._ws.readyState !== WebSocket.OPEN
+          ) {
+            this._logger.debug(
+              'Retry send the client event when connected because WebSocket.send failed',
+            );
             retrySend();
             return;
           }
@@ -270,7 +290,10 @@ export class Socket {
     }
 
     if (!isServerEvent(parsedData)) {
-      this._logger.error(`Received invalid message: ${parsedData}`, new Error());
+      this._logger.error(
+        `Received invalid message: ${parsedData}`,
+        new Error(),
+      );
       return;
     }
 
@@ -286,7 +309,9 @@ export class Socket {
 
       this.onOpened.emit();
     } else {
-      this._logger.debug(`Received the event: ${parsedData.event}, payload: ${JSON.stringify(parsedData.payload)}`);
+      this._logger.debug(
+        `Received the event: ${parsedData.event}, payload: ${JSON.stringify(parsedData.payload)}`,
+      );
       this.onEventReceived.emit(parsedData);
     }
   }
@@ -294,7 +319,8 @@ export class Socket {
 
 function isServerEvent(data: any): data is ServerEvent {
   if (!data || typeof data !== 'object') return false;
-  if (typeof data.event !== 'string' || !ServerEventType.includes(data.event)) return false;
+  if (typeof data.event !== 'string' || !ServerEventType.includes(data.event))
+    return false;
   if (typeof data.eventId !== 'string') return false;
   if (data.payload && typeof data.payload !== 'object') return false;
   return true;

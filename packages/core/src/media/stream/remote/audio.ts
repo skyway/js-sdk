@@ -6,7 +6,10 @@ export class RemoteAudioStream extends RemoteMediaStreamBase {
   private _audioLevel: AudioLevel | undefined;
 
   /**@internal */
-  constructor(id: string, readonly track: MediaStreamTrack) {
+  constructor(
+    id: string,
+    readonly track: MediaStreamTrack,
+  ) {
     super(id, 'audio', track);
   }
 

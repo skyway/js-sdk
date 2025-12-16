@@ -4,7 +4,6 @@ const log = new Logger('packages/common/src/promise.ts');
 
 /**@internal */
 export class PromiseQueue {
-  private id = Math.random().toString().slice(2);
   queue: {
     promise: () => Promise<unknown>;
     done: (...args: any[]) => void;
@@ -12,7 +11,7 @@ export class PromiseQueue {
   }[] = [];
   running = false;
 
-  push = <T extends any>(promise: () => Promise<T>) =>
+  push = <T>(promise: () => Promise<T>) =>
     new Promise<T>((r, f) => {
       this.queue.push({ promise, done: r, failed: f });
       if (!this.running) {
@@ -26,7 +25,6 @@ export class PromiseQueue {
     const task = this.queue.shift();
     if (task) {
       this.running = true;
-      // log.debug('[start] task', { id: this.id, task });
 
       try {
         const res = await task.promise();
@@ -34,8 +32,6 @@ export class PromiseQueue {
       } catch (error) {
         task.failed(error);
       }
-
-      // log.debug('[end] task', { id: this.id, task });
 
       await this.run();
     } else {

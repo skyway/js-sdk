@@ -1,9 +1,9 @@
 import { Logger } from '@skyway-sdk/common';
 
 import { errors } from '../../../errors';
-import { RemoteMemberImplInterface } from '../../../member/remoteMember';
-import { PublicationImpl } from '../../../publication';
-import { SubscriptionImpl } from '../../../subscription';
+import type { RemoteMemberImplInterface } from '../../../member/remoteMember';
+import type { PublicationImpl } from '../../../publication';
+import type { SubscriptionImpl } from '../../../subscription';
 import { createError } from '../../../util';
 import type { LocalPersonImpl } from '../../localPerson';
 
@@ -27,7 +27,7 @@ export class PublishingAgent {
       await this._localPerson.onStreamPublished
         .watch(
           (e) => e.publication.id === publication.id,
-          this.context.config.rtcApi.timeout
+          this.context.config.rtcApi.timeout,
         )
         .catch((error) => {
           throw createError({
@@ -54,7 +54,7 @@ export class PublishingAgent {
 
   async stopPublishing(
     publication: PublicationImpl,
-    endpoint: RemoteMemberImplInterface
+    endpoint: RemoteMemberImplInterface,
   ) {
     const connection = endpoint._getConnection(this._localPerson.id);
     if (connection?.stopPublishing) {

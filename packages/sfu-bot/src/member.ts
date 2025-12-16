@@ -1,29 +1,29 @@
 import { Event, Logger, PromiseQueue } from '@skyway-sdk/common';
 import {
+  errors as coreErrors,
   createError,
   createLogPayload,
-  errors as coreErrors,
-  LocalAudioStream,
-  LocalCustomVideoStream,
-  LocalPersonImpl,
-  LocalVideoStream,
+  type LocalAudioStream,
+  type LocalCustomVideoStream,
+  type LocalPersonImpl,
+  type LocalVideoStream,
   MemberImpl,
-  MemberType,
-  Publication,
-  PublicationImpl,
-  RemoteMemberImplInterface,
-  SkyWayChannelImpl,
-  SkyWayContext,
+  type MemberType,
+  type Publication,
+  type PublicationImpl,
+  type RemoteMemberImplInterface,
+  type SkyWayChannelImpl,
+  type SkyWayContext,
 } from '@skyway-sdk/core';
-import { SFURestApiClient } from '@skyway-sdk/sfu-api-client';
+import type { SFURestApiClient } from '@skyway-sdk/sfu-api-client';
 
-import { SFUBotPlugin } from '.';
+import type { SFUBotPlugin } from '.';
 import { SFUConnection } from './connection';
-import { TransportRepository } from './connection/transport/transportRepository';
+import type { TransportRepository } from './connection/transport/transportRepository';
 import { defaultMaxSubscribers } from './const';
 import { errors } from './errors';
-import { Forwarding, ForwardingConfigure } from './forwarding';
-import { SFUBotPluginOptions } from './option';
+import type { Forwarding, ForwardingConfigure } from './forwarding';
+import type { SFUBotPluginOptions } from './option';
 
 const log = new Logger('packages/sfu-bot/src/member.ts');
 
@@ -100,7 +100,7 @@ export class SFUBotMember
   private _createConnection(
     channel: SkyWayChannelImpl,
     localPerson: LocalPersonImpl,
-    endpointBot: SFUBotMember
+    endpointBot: SFUBotMember,
   ) {
     const connection = new SFUConnection(
       endpointBot._api,
@@ -108,7 +108,7 @@ export class SFUBotMember
       localPerson,
       endpointBot,
       this._transportRepository,
-      this._context
+      this._context,
     );
     connection.onClose.once(() => {
       delete this._connections[localPerson.id];
@@ -127,14 +127,14 @@ export class SFUBotMember
     publication: Publication<
       LocalVideoStream | LocalAudioStream | LocalCustomVideoStream
     >,
-    configure: Partial<ForwardingConfigure> = {}
+    configure: Partial<ForwardingConfigure> = {},
   ) {
     const timestamp = log.info(
       '[start] startForwarding',
       await createLogPayload({
         operationName: 'SFUBotMember.startForwarding',
         channel: this.channel,
-      })
+      }),
     );
 
     const res = await this._startForwardQueue.push(() =>
@@ -142,8 +142,8 @@ export class SFUBotMember
         publication as PublicationImpl<
           LocalAudioStream | LocalVideoStream | LocalCustomVideoStream
         >,
-        configure
-      )
+        configure,
+      ),
     );
 
     log.elapsed(
@@ -152,7 +152,7 @@ export class SFUBotMember
       await createLogPayload({
         operationName: 'SFUBotMember.startForwarding',
         channel: this.channel,
-      })
+      }),
     );
 
     return res;
@@ -162,9 +162,9 @@ export class SFUBotMember
     origin: PublicationImpl<
       LocalAudioStream | LocalVideoStream | LocalCustomVideoStream
     >,
-    configure: Partial<ForwardingConfigure>
+    configure: Partial<ForwardingConfigure>,
   ): Promise<Forwarding> {
-    if (configure.maxSubscribers == undefined) {
+    if (configure.maxSubscribers === undefined) {
       configure.maxSubscribers = defaultMaxSubscribers;
     }
 
@@ -267,15 +267,7 @@ export class SFUBotMember
    * @description [japanese] Forwardingを停止する
    */
   stopForwarding = (target: string | Forwarding) =>
-    new Promise<void>(async (r, f) => {
-      const timestamp = log.info(
-        '[start] stopForwarding',
-        await createLogPayload({
-          operationName: 'SFUBotMember.stopForwarding',
-          channel: this.channel,
-        })
-      );
-
+    new Promise<void>((r, f) => {
       if (this.state !== 'joined') {
         f(
           createError({
@@ -285,7 +277,7 @@ export class SFUBotMember
             path: log.prefix,
             channel: this.channel,
             payload: { status: this.state },
-          })
+          }),
         );
         return;
       }
@@ -304,52 +296,65 @@ export class SFUBotMember
               forwardingId,
               _forwardings: Object.keys(this._forwardings),
             },
-          })
+          }),
         );
         return;
       }
-      delete this._forwardings[forwarding.id];
 
-      const { promise, fulfilled } = this._api.stopForwarding({
-        botId: this.id,
-        forwardingId,
-      });
-      let failed = false;
-      promise.catch((e) => {
-        failed = true;
-        f(e);
-      });
+      const executeStop = async () => {
+        const timestamp = log.info(
+          '[start] stopForwarding',
+          await createLogPayload({
+            operationName: 'SFUBotMember.stopForwarding',
+            channel: this.channel,
+          }),
+        );
 
-      this.onForwardingStopped
-        .watch(
-          (e) => e.forwarding.id === forwardingId,
-          this._context.config.rtcApi.timeout
-        )
-        .then(async () => {
-          log.elapsed(
-            timestamp,
-            '[end] stopForwarding',
-            await createLogPayload({
-              operationName: 'SFUBotMember.stopForwarding',
-              channel: this.channel,
-            })
-          );
-          r();
-        })
-        .catch((error) => {
-          if (!failed)
-            f(
-              createError({
-                operationName: 'SFUBotMember.stopForwarding',
-                context: this._context,
-                info: { ...errors.timeout, detail: 'onForwardingStopped' },
-                path: log.prefix,
-                channel: this.channel,
-                payload: { fulfilled },
-                error,
-              })
-            );
+        delete this._forwardings[forwarding.id];
+
+        const { promise, fulfilled } = this._api.stopForwarding({
+          botId: this.id,
+          forwardingId,
         });
+        let failed = false;
+        promise.catch((e) => {
+          failed = true;
+          f(e);
+        });
+
+        this.onForwardingStopped
+          .watch(
+            (e) => e.forwarding.id === forwardingId,
+            this._context.config.rtcApi.timeout,
+          )
+          .then(async () => {
+            log.elapsed(
+              timestamp,
+              '[end] stopForwarding',
+              await createLogPayload({
+                operationName: 'SFUBotMember.stopForwarding',
+                channel: this.channel,
+              }),
+            );
+            r();
+          })
+          .catch((error) => {
+            if (!failed)
+              f(
+                createError({
+                  operationName: 'SFUBotMember.stopForwarding',
+                  context: this._context,
+                  info: { ...errors.timeout, detail: 'onForwardingStopped' },
+                  path: log.prefix,
+                  channel: this.channel,
+                  payload: { fulfilled },
+                  error,
+                }),
+              );
+          });
+      };
+
+      executeStop().catch(f);
     });
 
   /**@private */

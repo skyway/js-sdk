@@ -18,16 +18,16 @@ const token = new SkyWayAuthToken({
     appId: appId,
     rooms: [
       {
-        name: "*",
-        methods: ["create", "close", "updateMetadata"],
+        name: '*',
+        methods: ['create', 'close', 'updateMetadata'],
         member: {
-          name: "*",
-          methods: ["publish", "subscribe", "updateMetadata"],
+          name: '*',
+          methods: ['publish', 'subscribe', 'updateMetadata'],
         },
       },
     ],
     turn: {
-      enabled: true
+      enabled: true,
     },
   },
 }).encode(secret);
@@ -37,10 +37,10 @@ void (async () => {
   const buttonArea = document.getElementById('button-area');
   const remoteMediaArea = document.getElementById('remote-media-area');
   const channelNameInput = document.getElementById(
-    'channel-name'
+    'channel-name',
   ) as HTMLInputElement;
   const dataStreamInput = document.getElementById(
-    'data-stream'
+    'data-stream',
   ) as HTMLInputElement;
   const myId = document.getElementById('my-id');
   const joinButton = document.getElementById('join');
@@ -107,7 +107,7 @@ void (async () => {
             remoteMediaArea.appendChild(elm);
             elm.innerText = 'data\n';
             stream.onData.add((data) => {
-              elm.innerText += (data as string) + '\n';
+              elm.innerText += `${data as string}\n`;
             });
           }
         }

@@ -1,13 +1,13 @@
-import { ErrorInfo, Logger } from '@skyway-sdk/common';
-import { LocalPersonAdapter, LocalStream } from '@skyway-sdk/core';
+import { type ErrorInfo, Logger } from '@skyway-sdk/common';
+import type { LocalPersonAdapter, LocalStream } from '@skyway-sdk/core';
 
 import { errors } from '../../errors';
-import { RoomPublication } from '../../publication';
-import { P2PRoomImpl } from '../../room/p2p';
-import { RoomSubscription } from '../../subscription';
+import type { RoomPublication } from '../../publication';
+import type { P2PRoomImpl } from '../../room/p2p';
+import type { RoomSubscription } from '../../subscription';
 import { createError } from '../../util';
-import { LocalRoomMemberBase, RoomPublicationOptions } from './base';
-import { LocalRoomMember } from './default';
+import { LocalRoomMemberBase, type RoomPublicationOptions } from './base';
+import type { LocalRoomMember } from './default';
 
 const log = new Logger('packages/room/src/member/local/p2p.ts');
 
@@ -17,7 +17,7 @@ export interface LocalP2PRoomMember extends LocalRoomMember {
    */
   publish: <T extends LocalStream = LocalStream>(
     stream: T,
-    options?: RoomPublicationOptions
+    options?: RoomPublicationOptions,
   ) => Promise<RoomPublication<T>>;
 }
 
@@ -27,13 +27,14 @@ export class LocalP2PRoomMemberImpl
   implements LocalP2PRoomMember
 {
   /**@private */
+  // biome-ignore lint/complexity/noUselessConstructor: Private constructor is intentional to control instantiation
   constructor(member: LocalPersonAdapter, room: P2PRoomImpl) {
     super(member, room);
   }
 
   async publish<T extends LocalStream = LocalStream>(
     stream: LocalStream,
-    options: RoomPublicationOptions = {}
+    options: RoomPublicationOptions = {},
   ): Promise<RoomPublication<T>> {
     if (options.type && options.type !== 'p2p') {
       throw createError({

@@ -46,7 +46,10 @@ export class LocalDataStream extends LocalStreamBase {
       });
     }
 
-    const isObject = !ArrayBuffer.isView(data) && !(data instanceof ArrayBuffer) && !(typeof data === 'string');
+    const isObject =
+      !ArrayBuffer.isView(data) &&
+      !(data instanceof ArrayBuffer) &&
+      !(typeof data === 'string');
     if (isObject) {
       data = objectFlag + JSON.stringify(data);
     }
@@ -74,6 +77,6 @@ export type DataStreamOptions = {
 
 /**@description [japanese] データストリームをSubscribeしているMemberの情報 */
 export type DataStreamSubscriber = {
-  id: string,
-  name?: string,
+  id: string;
+  name?: string;
 };

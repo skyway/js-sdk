@@ -1,13 +1,13 @@
 import { Event, Logger } from '@skyway-sdk/common';
 
-import { LocalPersonImpl } from '../../../member/localPerson';
-import { RemoteMemberImplInterface } from '../../../member/remoteMember';
-import { PublicationImpl } from '../../../publication';
-import { SubscriptionImpl } from '../../../subscription';
-import { SkyWayConnection } from '../../interface';
+import type { LocalPersonImpl } from '../../../member/localPerson';
+import type { RemoteMemberImplInterface } from '../../../member/remoteMember';
+import type { PublicationImpl } from '../../../publication';
+import type { SubscriptionImpl } from '../../../subscription';
+import type { SkyWayConnection } from '../../interface';
 
 const log = new Logger(
-  'packages/core/src/plugin/internal/unknown/connection.ts'
+  'packages/core/src/plugin/internal/unknown/connection.ts',
 );
 
 export class UnknownConnection implements SkyWayConnection {
@@ -18,7 +18,7 @@ export class UnknownConnection implements SkyWayConnection {
 
   constructor(
     readonly localPerson: LocalPersonImpl,
-    readonly remoteMember: RemoteMemberImplInterface
+    readonly remoteMember: RemoteMemberImplInterface,
   ) {}
 
   close() {
@@ -29,28 +29,28 @@ export class UnknownConnection implements SkyWayConnection {
   async startPublishing(publication: PublicationImpl) {
     log.debug(
       `this is unknown type connection. should install ${this.remoteMember.subtype} plugin`,
-      { publication }
+      { publication },
     );
   }
 
   async stopPublishing(publication: PublicationImpl) {
     log.debug(
       `this is unknown type connection. should install ${this.remoteMember.subtype} plugin`,
-      { publication }
+      { publication },
     );
   }
 
   async startSubscribing(subscription: SubscriptionImpl) {
     log.debug(
       `this is unknown type connection. should install ${this.remoteMember.subtype} plugin`,
-      { subscription }
+      { subscription },
     );
   }
 
   async stopSubscribing(subscription: SubscriptionImpl) {
     log.debug(
       `this is unknown type connection. should install ${this.remoteMember.subtype} plugin`,
-      { subscription }
+      { subscription },
     );
   }
 }

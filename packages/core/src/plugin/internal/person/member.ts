@@ -1,22 +1,22 @@
-import { Event, EventDisposer, Logger } from '@skyway-sdk/common';
+import { type Event, EventDisposer, Logger } from '@skyway-sdk/common';
 
-import { SkyWayChannelImpl } from '../../../channel';
-import { SkyWayContext } from '../../../context';
+import type { SkyWayChannelImpl } from '../../../channel';
+import type { SkyWayContext } from '../../../context';
 import { errors } from '../../../errors';
-import { RemoteAudioStream } from '../../../media/stream/remote/audio';
-import { RemoteDataStream } from '../../../media/stream/remote/data';
-import { RemoteVideoStream } from '../../../media/stream/remote/video';
+import type { RemoteAudioStream } from '../../../media/stream/remote/audio';
+import type { RemoteDataStream } from '../../../media/stream/remote/data';
+import type { RemoteVideoStream } from '../../../media/stream/remote/video';
 import { MemberImpl } from '../../../member';
-import { LocalPersonImpl } from '../../../member/localPerson';
-import { Person } from '../../../member/person';
-import {
+import type { LocalPersonImpl } from '../../../member/localPerson';
+import type { Person } from '../../../member/person';
+import type {
   RemoteMember,
   RemoteMemberImplInterface,
 } from '../../../member/remoteMember';
-import { Subscription } from '../../../subscription';
+import type { Subscription } from '../../../subscription';
 import { createError } from '../../../util';
 import { P2PConnection } from './connection';
-import { PersonPlugin } from './plugin';
+import type { PersonPlugin } from './plugin';
 
 const log = new Logger('packages/core/src/plugin/internal/person/member.ts');
 
@@ -32,7 +32,7 @@ export type RemotePerson = RemoteMemberImplInterface &
     readonly onSubscriptionListChanged: Event<void>;
     /**@description [japanese] この RemotePerson にPublicationをSubscribeさせる */
     subscribe: (
-      publicationId: string
+      publicationId: string,
     ) => Promise<{ subscription: Subscription }>;
     /**@description [japanese] この RemotePerson にPublicationをUnsubscribeさせる */
     unsubscribe: (subscriptionId: string) => Promise<void>;
@@ -66,7 +66,7 @@ export class RemotePersonImpl extends MemberImpl implements RemotePerson {
       metadata?: string;
       plugin: PersonPlugin;
       context: SkyWayContext;
-    }
+    },
   ) {
     super(args);
 
@@ -128,7 +128,7 @@ export class RemotePersonImpl extends MemberImpl implements RemotePerson {
   private _createConnection(
     channel: SkyWayChannelImpl,
     localPerson: LocalPersonImpl,
-    endpointMember: RemoteMember
+    endpointMember: RemoteMember,
   ) {
     if (localPerson.side !== 'local') {
       throw createError({
@@ -162,10 +162,10 @@ export class RemotePersonImpl extends MemberImpl implements RemotePerson {
       this._context,
       channel.id,
       localPerson,
-      endpointMember
+      endpointMember,
     );
     this.plugin._messageBuffers[localPerson.id].resolveMessagingBuffer(
-      endpointMember
+      endpointMember,
     );
     connection.onClose.once(() => {
       log.debug('connection closed', this.toJSON(), {
@@ -188,7 +188,7 @@ export class RemotePersonImpl extends MemberImpl implements RemotePerson {
       this.onPublicationSubscribed
         .watch(
           ({ subscription }) => subscription.publication.id === publicationId,
-          this._context.config.rtcApi.timeout
+          this._context.config.rtcApi.timeout,
         )
         .then(({ subscription }) => {
           r({ subscription });
@@ -205,7 +205,7 @@ export class RemotePersonImpl extends MemberImpl implements RemotePerson {
                 path: log.prefix,
                 context: this._context,
                 channel: this.channel,
-              })
+              }),
             );
           }
         });

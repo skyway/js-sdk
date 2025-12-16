@@ -1,8 +1,8 @@
-import { RoomMember } from '../member';
-import { RoomPublication } from '../publication';
-import { RoomSubscription } from '../subscription';
+import type { RoomMember } from '../member';
+import type { RoomPublication } from '../publication';
+import type { RoomSubscription } from '../subscription';
 
-export type RoomClosedEvent = {};
+export type RoomClosedEvent = Record<PropertyKey, unknown>;
 export type RoomMetadataUpdatedEvent = {
   metadata: string;
 };
@@ -13,7 +13,7 @@ export type MemberJoinedEvent = {
 export type MemberLeftEvent = {
   member: RoomMember;
 };
-export type ListChangedEvent = {};
+export type ListChangedEvent = Record<PropertyKey, unknown>;
 export type MemberMetadataUpdatedEvent = {
   metadata: string;
   member: RoomMember;

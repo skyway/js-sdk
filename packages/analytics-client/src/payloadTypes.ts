@@ -21,14 +21,24 @@ export function isRecord(arg: unknown): arg is Record<string, unknown> {
   return true;
 }
 
-export function isOpenServerEventPayload(payload: any): payload is OpenServerEventPayload {
+export function isOpenServerEventPayload(
+  payload: any,
+): payload is OpenServerEventPayload {
   if (!payload || typeof payload !== 'object') return false;
-  if (!payload.statsRequest || typeof payload.statsRequest !== 'object') return false;
-  if (!payload.statsRequest.intervalSec || typeof payload.statsRequest.intervalSec !== 'number') return false;
-  if (!payload.statsRequest.types || !Array.isArray(payload.statsRequest.types)) return false;
+  if (!payload.statsRequest || typeof payload.statsRequest !== 'object')
+    return false;
+  if (
+    !payload.statsRequest.intervalSec ||
+    typeof payload.statsRequest.intervalSec !== 'number'
+  )
+    return false;
+  if (!payload.statsRequest.types || !Array.isArray(payload.statsRequest.types))
+    return false;
   for (const statsRequestType of payload.statsRequest.types) {
-    if (!statsRequestType.type || typeof statsRequestType.type !== 'string') return false;
-    if (!statsRequestType.properties || !isRecord(statsRequestType.properties)) return false;
+    if (!statsRequestType.type || typeof statsRequestType.type !== 'string')
+      return false;
+    if (!statsRequestType.properties || !isRecord(statsRequestType.properties))
+      return false;
 
     for (const key of Object.keys(statsRequestType.properties)) {
       if (
@@ -36,7 +46,10 @@ export function isOpenServerEventPayload(payload: any): payload is OpenServerEve
         typeof statsRequestType.properties[key].normalization !== 'boolean'
       )
         return false;
-      if (!statsRequestType.properties[key].outputKey || typeof statsRequestType.properties[key].outputKey !== 'string')
+      if (
+        !statsRequestType.properties[key].outputKey ||
+        typeof statsRequestType.properties[key].outputKey !== 'string'
+      )
         return false;
     }
   }
@@ -53,13 +66,16 @@ export type AcknowledgePayload = {
   reason?: AcknowledgeReason;
 };
 
-export function isAcknowledgePayload(payload: any): payload is AcknowledgePayload {
+export function isAcknowledgePayload(
+  payload: any,
+): payload is AcknowledgePayload {
   if (!payload || typeof payload !== 'object') return false;
   if (typeof payload.eventId !== 'string') return false;
   if (typeof payload.ok !== 'boolean') return false;
   if (
     typeof payload.reason !== 'undefined' &&
-    (typeof payload.reason !== 'string' || !AcknowledgeReason.includes(payload.reason))
+    (typeof payload.reason !== 'string' ||
+      !AcknowledgeReason.includes(payload.reason))
   )
     return false;
   return true;

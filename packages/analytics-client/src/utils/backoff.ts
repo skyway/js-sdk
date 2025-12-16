@@ -7,7 +7,9 @@ export class BackOff {
   readonly jitter: number = 0;
 
   /**20.4 sec {var sum=0;for(i=0;i<=8;i++){sum +=i ** 2 * 100}} */
-  constructor(props: Partial<Pick<BackOff, 'times' | 'interval' | 'jitter'>> = {}) {
+  constructor(
+    props: Partial<Pick<BackOff, 'times' | 'interval' | 'jitter'>> = {},
+  ) {
     Object.assign(this, props);
   }
 
@@ -23,7 +25,9 @@ export class BackOff {
   }
 
   get timeout() {
-    const timeout = this.count ** 2 * this.interval + this.count ** 2 * this.jitter * Math.random();
+    const timeout =
+      this.count ** 2 * this.interval +
+      this.count ** 2 * this.jitter * Math.random();
     return timeout;
   }
 

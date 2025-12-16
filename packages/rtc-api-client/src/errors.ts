@@ -107,7 +107,8 @@ export const errors = {
   invalidPublicationType: {
     name: 'invalidPublicationType',
     detail: 'Publicationのtypeが正しくありません',
-    solution: 'typeを正しい値に設定してください。 "p2p" または "sfu" のいずれかを指定できます。',
+    solution:
+      'typeを正しい値に設定してください。 "p2p" または "sfu" のいずれかを指定できます。',
   },
 } as const;
 

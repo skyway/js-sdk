@@ -1,10 +1,6 @@
 import { secret } from '../../../env';
 import { nowInSec } from '../dist';
-import {
-  ChannelScope,
-  SkyWayAuthToken,
-  uuidV4,
-} from '../src';
+import { type ChannelScope, SkyWayAuthToken, uuidV4 } from '../src';
 
 const token = new SkyWayAuthToken({
   version: 1,
@@ -39,7 +35,7 @@ const token = new SkyWayAuthToken({
                 ],
               },
             ],
-          } as ChannelScope)
+          }) as ChannelScope,
       ),
       turn: true,
     },

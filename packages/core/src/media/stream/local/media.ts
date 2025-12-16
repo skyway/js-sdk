@@ -1,17 +1,17 @@
 import {
   Event,
   EventDisposer,
-  EventInterface,
+  type EventInterface,
   Logger,
 } from '@skyway-sdk/common';
 
-import {
+import type {
   AudioMediaTrackConstraints,
   DisplayMediaTrackConstraints,
   VideoMediaTrackConstraints,
 } from '../../factory';
-import { attachElement, ContentType, detachElement } from '../base';
-import { LocalStreamBase, LocalStreamInterface } from './base';
+import { attachElement, type ContentType, detachElement } from '../base';
+import { LocalStreamBase, type LocalStreamInterface } from './base';
 
 const logger = new Logger('packages/core/src/media/stream/local/media.ts');
 
@@ -98,7 +98,7 @@ export abstract class LocalMediaStreamBase extends LocalStreamBase {
       | DisplayMediaTrackConstraints
       | AudioMediaTrackConstraints
     ) &
-      Partial<LocalMediaStreamOptions> = {}
+      Partial<LocalMediaStreamOptions> = {},
   ) {
     super(contentType);
 
@@ -172,7 +172,7 @@ export abstract class LocalMediaStreamBase extends LocalStreamBase {
     };
     this._track.addEventListener('ended', onended);
     this._disposer.push(() =>
-      this._track.removeEventListener('ended', onended)
+      this._track.removeEventListener('ended', onended),
     );
   }
 

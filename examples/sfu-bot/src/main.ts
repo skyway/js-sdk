@@ -1,6 +1,6 @@
 import {
   nowInSec,
-  Publication,
+  type Publication,
   SkyWayAuthToken,
   SkyWayChannel,
   SkyWayContext,
@@ -20,11 +20,11 @@ const token = new SkyWayAuthToken({
     appId: appId,
     rooms: [
       {
-        name: "*",
-        methods: ["create", "close", "updateMetadata"],
+        name: '*',
+        methods: ['create', 'close', 'updateMetadata'],
         member: {
-          name: "*",
-          methods: ["publish", "subscribe", "updateMetadata"],
+          name: '*',
+          methods: ['publish', 'subscribe', 'updateMetadata'],
         },
         sfu: {
           enabled: true,
@@ -32,7 +32,7 @@ const token = new SkyWayAuthToken({
       },
     ],
     turn: {
-      enabled: true
+      enabled: true,
     },
   },
 }).encode(secret);
@@ -42,7 +42,7 @@ void (async () => {
   const buttonArea = document.getElementById('button-area');
   const remoteMediaArea = document.getElementById('remote-media-area');
   const channelNameInput = document.getElementById(
-    'channel-name'
+    'channel-name',
   ) as HTMLInputElement;
   const myId = document.getElementById('my-id');
   const joinButton = document.getElementById('join');

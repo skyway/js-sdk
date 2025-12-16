@@ -5,10 +5,10 @@ import { z } from 'zod';
 
 // import { fromZodError } from 'zod-validation-error'; // 下記にかいてある理由によりコメントアウト
 import {
-  AuthToken,
+  type AuthToken,
   AuthTokenSchema,
-  AuthTokenV1_2,
-  AuthTokenV3,
+  type AuthTokenV1_2,
+  type AuthTokenV3,
   tokenErrors,
 } from '.';
 
@@ -48,7 +48,7 @@ export class SkyWayAuthToken {
           path: log.prefix,
           info: tokenErrors.invalidParameter,
           error: new Error(
-            'Received invalid token. Please check your SkyWayAuthToken.'
+            'Received invalid token. Please check your SkyWayAuthToken.',
           ),
         });
       } else {
@@ -56,7 +56,7 @@ export class SkyWayAuthToken {
           path: log.prefix,
           info: tokenErrors.invalidParameter,
           error: new Error(
-            'Received invalid token. Please check your SkyWayAuthToken.'
+            'Received invalid token. Please check your SkyWayAuthToken.',
           ),
         });
       }
@@ -91,7 +91,7 @@ export class SkyWayAuthToken {
       'HS256',
       JSON.stringify({ alg: 'HS256', typ: 'JWT' }),
       JSON.stringify(payload),
-      secret
+      secret,
     );
     return this.tokenString;
   }
@@ -126,7 +126,7 @@ export class SkyWayAuthToken {
           path: log.prefix,
           info: tokenErrors.invalidParameter,
           error: new Error(
-            `invalid token version: version ${this.version} is not supported.`
+            `invalid token version: version ${this.version} is not supported.`,
           ),
         });
     }
@@ -150,7 +150,7 @@ export class SkyWayAuthToken {
           path: log.prefix,
           info: tokenErrors.invalidParameter,
           error: new Error(
-            `invalid token version: version ${this.version} is not supported.`
+            `invalid token version: version ${this.version} is not supported.`,
           ),
         });
     }

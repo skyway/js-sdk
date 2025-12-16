@@ -11,9 +11,11 @@ const forwardingScopeSchema = z
      */
     actions: z.array(
       // 型補完のため enum で定義しておく
-      z.enum(forwardingActions).refine((arg) => {
-        return typeof arg === 'string'; // バリデーションとしては ForwardingAction 以外の文字列も許容する
-      })
+      z
+        .enum(forwardingActions)
+        .refine((arg) => {
+          return typeof arg === 'string'; // バリデーションとしては ForwardingAction 以外の文字列も許容する
+        }),
     ),
   })
   .passthrough();
@@ -31,9 +33,11 @@ export const sfuScopeSchema = z
      */
     actions: z.array(
       // 型補完のため enum で定義しておく
-      z.enum(sfuBotActions).refine((arg) => {
-        return typeof arg === 'string'; // バリデーションとしては SFUBotAction 以外の文字列も許容する
-      })
+      z
+        .enum(sfuBotActions)
+        .refine((arg) => {
+          return typeof arg === 'string'; // バリデーションとしては SFUBotAction 以外の文字列も許容する
+        }),
     ),
     /**forwarding リソースに関するオブジェクトを指定（forwardingオブジェクトについては後述） */
     forwardings: z.array(forwardingScopeSchema),

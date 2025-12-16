@@ -1,12 +1,15 @@
 import { BackOff, Event, EventDisposer, Logger } from '@skyway-sdk/common';
-import { Member } from '@skyway-sdk/model';
-import { ConnectionState, SignalingClient } from '@skyway-sdk/signaling-client';
+import type { Member } from '@skyway-sdk/model';
+import {
+  type ConnectionState,
+  SignalingClient,
+} from '@skyway-sdk/signaling-client';
 import { uuidV4 } from '@skyway-sdk/token';
 
-import { SkyWayChannelImpl } from '../channel';
-import { SkyWayContext } from '../context';
+import type { SkyWayChannelImpl } from '../channel';
+import type { SkyWayContext } from '../context';
 import { errors } from '../errors';
-import { RemoteMember } from '../member/remoteMember';
+import type { RemoteMember } from '../member/remoteMember';
 import { createError, createWarnPayload } from '../util';
 
 const log = new Logger('packages/core/src/external/signaling.ts');
@@ -14,7 +17,7 @@ const log = new Logger('packages/core/src/external/signaling.ts');
 export async function setupSignalingSession(
   context: SkyWayContext,
   channel: SkyWayChannelImpl,
-  memberDto: Member
+  memberDto: Member,
 ) {
   const { signalingService } = context.config;
 
@@ -38,16 +41,14 @@ export async function setupSignalingSession(
               error,
               path: log.prefix,
               channel,
-            })
+            }),
           );
         },
-        debug: (s) => {
-          // log.debug('signaling service:', s);
-        },
+        debug: () => {},
       },
       signalingServerDomain: signalingService.domain,
       secure: signalingService.secure,
-    }
+    },
   );
 
   const signalingSession = new SignalingSession(client, context);
@@ -70,7 +71,10 @@ export class SignalingSession {
   });
   private _disposer = new EventDisposer();
 
-  constructor(public _client: SignalingClient, private context: SkyWayContext) {
+  constructor(
+    public _client: SignalingClient,
+    private context: SkyWayContext,
+  ) {
     this._listen();
     context.onTokenUpdated
       .add(async (token) => {
@@ -126,7 +130,7 @@ export class SignalingSession {
             operationName: 'SignalingSession.reply',
             detail: 'SignalingClient failed to reply',
           }),
-          e
+          e,
         );
       });
     });
@@ -153,7 +157,7 @@ export class SignalingSession {
           operationName: 'SignalingSession._updateSkyWayAuthToken',
           detail: '[retry] updateSkyWayAuthToken',
         }),
-        e
+        e,
       );
       await this._updateSkyWayAuthToken(token);
       return;
@@ -195,7 +199,7 @@ export class SignalingSession {
     target: RemoteMember,
     data: object,
     /**ms */
-    timeout = 10_000
+    timeout = 10_000,
   ) {
     try {
       const payload = JSON.stringify(data);
@@ -217,7 +221,7 @@ export class SignalingSession {
           await this._client.request(
             target,
             chunkMessage as any,
-            timeout / 1000
+            timeout / 1000,
           );
         }
       } else {

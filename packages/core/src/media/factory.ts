@@ -2,13 +2,13 @@ import { Event, Logger } from '@skyway-sdk/common';
 
 import { errors } from '../errors';
 import { createError, createWarnPayload } from '../util';
-import { LocalMediaStreamOptions } from './stream';
+import type { LocalMediaStreamOptions } from './stream';
 import { LocalAudioStream } from './stream/local/audio';
 import {
   LocalCustomVideoStream,
-  ProcessedStream,
+  type ProcessedStream,
 } from './stream/local/customVideo';
-import { DataStreamOptions, LocalDataStream } from './stream/local/data';
+import { type DataStreamOptions, LocalDataStream } from './stream/local/data';
 import { LocalVideoStream } from './stream/local/video';
 
 const log = new Logger('packages/core/src/media/factory.ts');
@@ -76,7 +76,7 @@ export class StreamFactory {
     { video, audio }: { video?: boolean; audio?: boolean } = {
       audio: true,
       video: true,
-    }
+    },
   ) {
     let tracks: MediaStreamTrack[] = [];
     if (video || audio) {
@@ -88,7 +88,9 @@ export class StreamFactory {
     }
 
     this._devices = await this._enumerateDevicesArray();
-    tracks.forEach((t) => t.stop());
+    tracks.forEach((t) => {
+      t.stop();
+    });
 
     return this._devices;
   }
@@ -129,7 +131,7 @@ export class StreamFactory {
    * @description [japanese] CameraのVideoStreamを作成する
    */
   async createCameraVideoStream(
-    options: VideoMediaTrackConstraints & Partial<LocalMediaStreamOptions> = {}
+    options: VideoMediaTrackConstraints & Partial<LocalMediaStreamOptions> = {},
   ) {
     options.stopTrackWhenDisabled = options.stopTrackWhenDisabled ?? true;
 
@@ -146,7 +148,7 @@ export class StreamFactory {
    * @description [japanese] マイクのAudioStreamを作成する
    */
   async createMicrophoneAudioStream(
-    options: AudioMediaTrackConstraints & Partial<LocalMediaStreamOptions> = {}
+    options: AudioMediaTrackConstraints & Partial<LocalMediaStreamOptions> = {},
   ) {
     options.stopTrackWhenDisabled = options.stopTrackWhenDisabled ?? true;
 
@@ -168,7 +170,7 @@ export class StreamFactory {
    * それ以外の環境では有効にしても戻り値のaudioにはundefinedが返される。
    */
   async createDisplayStreams<T extends DisplayStreamOptions>(
-    options: T = {} as T
+    options: T = {} as T,
   ): Promise<{
     video: LocalVideoStream;
     audio: T extends { audio: infer U }
@@ -197,7 +199,7 @@ export class StreamFactory {
         createWarnPayload({
           operationName: 'StreamFactory.createDisplayStreams',
           detail: 'This client does not support device audio capture',
-        })
+        }),
       );
     }
 
@@ -271,7 +273,7 @@ export class StreamFactory {
     options: {
       stopTrackWhenDisabled?: boolean;
       constraints?: MediaTrackConstraints;
-    } = {}
+    } = {},
   ): Promise<LocalCustomVideoStream> {
     options.stopTrackWhenDisabled = options.stopTrackWhenDisabled ?? true;
     const stream = new LocalCustomVideoStream(options);
@@ -355,10 +357,9 @@ export type DisplayStreamOptions = {
     | (AudioMediaTrackConstraints &
         Partial<Pick<LocalMediaStreamOptions, 'stopTrackWhenDisabled'>>)
     | boolean;
-  video?:
-    | DisplayMediaTrackConstraints &
-        VideoMediaTrackConstraints &
-        Partial<Pick<LocalMediaStreamOptions, 'stopTrackWhenDisabled'>>;
+  video?: DisplayMediaTrackConstraints &
+    VideoMediaTrackConstraints &
+    Partial<Pick<LocalMediaStreamOptions, 'stopTrackWhenDisabled'>>;
 };
 
 interface VideoStreamProcessor {

@@ -1,1 +1,1 @@
-export let process = undefined;
+export const process = undefined;

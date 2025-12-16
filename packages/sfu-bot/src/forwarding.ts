@@ -1,11 +1,11 @@
 import { Event, Logger } from '@skyway-sdk/common';
 import {
   createError,
-  Publication,
-  SkyWayContext,
-  Subscription,
+  type Publication,
+  type SkyWayContext,
+  type Subscription,
 } from '@skyway-sdk/core';
-import { SFURestApiClient } from '@skyway-sdk/sfu-api-client';
+import type { SFURestApiClient } from '@skyway-sdk/sfu-api-client';
 
 import { errors } from './errors';
 
@@ -33,7 +33,7 @@ export class Forwarding {
       api: SFURestApiClient;
       context: SkyWayContext;
       identifierKey: string;
-    }
+    },
   ) {
     this.relayingPublication.onSubscribed.add(async (e) => {
       await this.confirmSubscription(e.subscription).catch((e) => e);

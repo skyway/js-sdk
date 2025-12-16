@@ -1,5 +1,6 @@
-import { Event, SkyWayError } from '@skyway-sdk/common';
-import model, {
+import type { Event, SkyWayError } from '@skyway-sdk/common';
+import type model from '@skyway-sdk/model';
+import type {
   Channel,
   Member,
   MemberType,
@@ -12,76 +13,76 @@ export interface RtcApi {
   /**@throws {@link SkyWayError} */
   createChannel(
     appId: string,
-    channelInit: ChannelInit
+    channelInit: ChannelInit,
   ): Promise<model.Channel>;
   getChannel(appId: string, channelQuery: ChannelQuery): Promise<model.Channel>;
   findOrCreateChannel(
     appId: string,
-    channelQuery: ChannelInit
+    channelQuery: ChannelInit,
   ): Promise<model.Channel>;
   deleteChannel(appId: string, id: Channel['id']): Promise<void>;
   updateChannelMetadata(
     appId: string,
     id: Channel['id'],
-    metadata: string
+    metadata: string,
   ): Promise<void>;
   join(
     appId: string,
     channelId: Channel['id'],
-    memberInit: MemberInit
+    memberInit: MemberInit,
   ): Promise<model.Member>;
   leave(
     appId: string,
     channelId: Channel['id'],
-    memberId: Member['id']
+    memberId: Member['id'],
   ): Promise<void>;
   updateMemberTtl(
     appId: string,
     channelId: Channel['id'],
     memberId: Member['id'],
-    ttlSec: number
+    ttlSec: number,
   ): Promise<void>;
   updateMemberMetadata(
     appId: string,
     channelId: Channel['id'],
     memberId: Member['id'],
-    metadata: string
+    metadata: string,
   ): Promise<void>;
   /**@throws {@link SkyWayError} */
   publish(
     appId: string,
-    init: PublicationInit
+    init: PublicationInit,
   ): Promise<model.Publication['id']>;
   unpublish(
     appId: string,
     channelId: Channel['id'],
-    publicationId: Publication['id']
+    publicationId: Publication['id'],
   ): Promise<void>;
   updatePublicationMetadata(
     appId: string,
     channelId: Channel['id'],
     publicationId: Publication['id'],
-    metadata: string
+    metadata: string,
   ): Promise<void>;
   disablePublication(
     appId: string,
     channelId: Channel['id'],
-    publicationId: Publication['id']
+    publicationId: Publication['id'],
   ): Promise<void>;
   enablePublication(
     appId: string,
     channelId: Channel['id'],
-    publicationId: Publication['id']
+    publicationId: Publication['id'],
   ): Promise<void>;
   /**@throws {@link SkyWayError} */
   subscribe(
     appId: string,
-    init: SubscriptionInit
+    init: SubscriptionInit,
   ): Promise<model.Subscription['id']>;
   unsubscribe(
     appId: string,
     channelId: string,
-    subscriptionId: string
+    subscriptionId: string,
   ): Promise<void>;
   getServerUnixtime(appId: string): Promise<number>;
   updateAuthToken(token: string): Promise<void>;

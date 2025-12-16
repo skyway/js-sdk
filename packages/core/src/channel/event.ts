@@ -1,12 +1,12 @@
-import { Member } from '../member';
-import { Publication } from '../publication';
-import { Subscription } from '../subscription';
+import type { Member } from '../member';
+import type { Publication } from '../publication';
+import type { Subscription } from '../subscription';
 
-export type ChannelClosedEvent = {};
+export type ChannelClosedEvent = Record<PropertyKey, unknown>;
 export type ChannelMetadataUpdatedEvent = {
   metadata: string;
 };
-export type ListChangedEvent = {};
+export type ListChangedEvent = Record<PropertyKey, unknown>;
 export type MemberJoinedEvent = {
   member: Member;
 };

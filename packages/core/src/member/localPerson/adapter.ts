@@ -1,12 +1,12 @@
-import { Events, SkyWayError } from '@skyway-sdk/common';
+import { Events, type SkyWayError } from '@skyway-sdk/common';
 
-import { LocalStream } from '../../media/stream';
-import { RemoteAudioStream } from '../../media/stream/remote/audio';
-import { RemoteDataStream } from '../../media/stream/remote/data';
-import { RemoteVideoStream } from '../../media/stream/remote/video';
-import { Publication } from '../../publication';
-import { Subscription } from '../../subscription';
-import {
+import type { LocalStream } from '../../media/stream';
+import type { RemoteAudioStream } from '../../media/stream/remote/audio';
+import type { RemoteDataStream } from '../../media/stream/remote/data';
+import type { RemoteVideoStream } from '../../media/stream/remote/video';
+import type { Publication } from '../../publication';
+import type { Subscription } from '../../subscription';
+import type {
   LocalPerson,
   LocalPersonImpl,
   PublicationOptions,
@@ -81,7 +81,7 @@ export class LocalPersonAdapter implements LocalPerson {
 
   constructor(
     /**@private */
-    public _impl: LocalPersonImpl
+    public _impl: LocalPersonImpl,
   ) {
     this.apply(_impl);
   }
@@ -103,7 +103,7 @@ export class LocalPersonAdapter implements LocalPerson {
 
   subscribe<T extends RemoteVideoStream | RemoteAudioStream | RemoteDataStream>(
     publication: string | Publication,
-    options?: SubscriptionOptions
+    options?: SubscriptionOptions,
   ) {
     return this._impl.subscribe<T>(publication, options);
   }

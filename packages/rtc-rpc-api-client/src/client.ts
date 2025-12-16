@@ -2,12 +2,13 @@ import {
   BackOff,
   Events,
   HttpClient,
-  LogFormat,
+  type LogFormat,
   Logger,
-  LogLevel,
+  type LogLevel,
   SkyWayError,
 } from '@skyway-sdk/common';
-import model, {
+import type model from '@skyway-sdk/model';
+import type {
   Channel,
   Codec,
   ContentType,
@@ -19,7 +20,7 @@ import model, {
 
 import { defaultDomain, MaxRetry } from './const';
 import { errors } from './errors';
-import { ChannelEvent } from './event';
+import type { ChannelEvent } from './event';
 import { RPC } from './rpc';
 import { createError, createWarnPayload } from './util';
 
@@ -49,7 +50,7 @@ export class RtcRpcApiClient {
   private _subscribingChannelEvents = new Set<string>();
   private _subscribingChannelVersions: { [channelId: string]: number } = {};
   private readonly _httpClient = new HttpClient(
-    `http${this.config.secure ? 's' : ''}://${this.config.domain}`
+    `http${this.config.secure ? 's' : ''}://${this.config.domain}`,
   );
   private _reconnectCount = 0;
   private readonly _reconnectLimit = MaxRetry;
@@ -112,7 +113,7 @@ export class RtcRpcApiClient {
             solution: '',
           },
           path: log.prefix,
-        })
+        }),
       );
       this.close();
       return;
@@ -127,7 +128,7 @@ export class RtcRpcApiClient {
           reconnectCount: this._reconnectCount,
           limit: this._reconnectLimit,
         },
-      })
+      }),
     );
 
     this._reconnectCount++;
@@ -147,7 +148,7 @@ export class RtcRpcApiClient {
               reconnectCount: this._reconnectCount,
             },
           }),
-          err
+          err,
         );
         throw err;
       });
@@ -164,7 +165,7 @@ export class RtcRpcApiClient {
             channelId,
             offset,
           });
-        })
+        }),
       ).catch((e) => {
         log.warn(
           'subscribeChannelEvents failed',
@@ -175,7 +176,7 @@ export class RtcRpcApiClient {
               reconnectCount: this._reconnectCount,
             },
           }),
-          e
+          e,
         );
         throw e;
       });
@@ -188,7 +189,7 @@ export class RtcRpcApiClient {
           payload: {
             reconnectCount: this._reconnectCount,
           },
-        })
+        }),
       );
 
       this.onReconnected.emit();
@@ -202,7 +203,7 @@ export class RtcRpcApiClient {
             reconnectCount: this._reconnectCount,
           },
         }),
-        error
+        error,
       );
       await this._reconnect();
     }
@@ -254,7 +255,7 @@ export class RtcRpcApiClient {
   }
 
   private _channelSubscribed(appId: string, channelId: string) {
-    this._subscribingChannelEvents.add(appId + ':' + channelId);
+    this._subscribingChannelEvents.add(`${appId}:${channelId}`);
     log.debug('_channelSubscribed', {
       appId,
       channelId,
@@ -263,7 +264,7 @@ export class RtcRpcApiClient {
   }
 
   private _isSubscribingChannel(appId: string, channelId: string) {
-    return this._subscribingChannelEvents.has(appId + ':' + channelId);
+    return this._subscribingChannelEvents.has(`${appId}:${channelId}`);
   }
 
   async createChannel({
@@ -304,7 +305,7 @@ export class RtcRpcApiClient {
         metadata,
         appId,
         authToken: this.token,
-      }
+      },
     );
     this._channelSubscribed(appId, channel.id);
 
@@ -318,7 +319,7 @@ export class RtcRpcApiClient {
         id,
         appId,
         authToken: this.token,
-      }
+      },
     );
 
     // getChannelは暗黙的にEventがsubscribeされない
@@ -347,7 +348,7 @@ export class RtcRpcApiClient {
         name,
         appId,
         authToken: this.token,
-      }
+      },
     );
 
     const channelId = res.channel.id;
@@ -365,7 +366,7 @@ export class RtcRpcApiClient {
   }
 
   async deleteChannel({ id, appId }: { appId: string; id: Channel['id'] }) {
-    await this._rpc.request<{}>('deleteChannel', {
+    await this._rpc.request<Record<PropertyKey, unknown>>('deleteChannel', {
       id,
       appId,
       authToken: this.token,
@@ -418,7 +419,7 @@ export class RtcRpcApiClient {
       metadata,
       subscribeChannelEvents,
       appId,
-      ttlSec: ttlSec && parseInt(ttlSec.toString()),
+      ttlSec: ttlSec && parseInt(ttlSec.toString(), 10),
       authToken: this.token,
       subtype,
       type,
@@ -434,7 +435,7 @@ export class RtcRpcApiClient {
       /**unixtimestamp in seconds */
       ttlSec: number;
     },
-    backoff = new BackOff({ times: 8 })
+    backoff = new BackOff({ times: 8 }),
   ) {
     const { appId, channelId, memberId, ttlSec } = args;
 
@@ -445,7 +446,7 @@ export class RtcRpcApiClient {
         appId,
         channelId,
         memberId,
-        ttlSec: ttlSec && parseInt(ttlSec.toString()),
+        ttlSec: ttlSec && parseInt(ttlSec.toString(), 10),
         authToken: this.token,
       });
     } catch (e: any) {
@@ -460,7 +461,7 @@ export class RtcRpcApiClient {
             memberId,
             payload: { backoff: backoff.count },
           }),
-          e
+          e,
         );
         await backoff.wait();
         await this.updateMemberTtl(args, backoff);
@@ -679,7 +680,7 @@ export class RtcRpcApiClient {
    */
   async getServerUnixtime(
     args: { appId: string },
-    backoff = new BackOff({ times: 8 })
+    backoff = new BackOff({ times: 8 }),
   ): Promise<number> {
     const { appId } = args;
     try {
@@ -699,7 +700,7 @@ export class RtcRpcApiClient {
             appId,
             payload: { backoff: backoff.count },
           }),
-          error
+          error,
         );
         await backoff.wait();
         return this.getServerUnixtime(args, backoff);
@@ -755,7 +756,7 @@ export class RtcRpcApiClient {
             channelId,
             payload: { offset },
           }),
-          error
+          error,
         );
         await this.subscribeChannelEvents({ appId, channelId, offset });
       } else {
@@ -772,7 +773,7 @@ export class RtcRpcApiClient {
             payload: { offset },
             appId,
             channelId,
-          })
+          }),
         );
         throw error;
       }

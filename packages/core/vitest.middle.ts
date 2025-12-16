@@ -7,5 +7,5 @@ export default mergeConfig(
     test: {
       outputFile: './test-middle.json',
     },
-  })
+  }),
 );

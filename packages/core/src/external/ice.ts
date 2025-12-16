@@ -1,6 +1,6 @@
 import { BackOff, HttpClient, Logger } from '@skyway-sdk/common';
 
-import { SkyWayContext } from '../context';
+import type { SkyWayContext } from '../context';
 
 const log = new Logger('packages/core/src/external/ice.ts');
 
@@ -30,7 +30,7 @@ export class IceManager {
       channelId: string;
       ttl?: number;
       context: SkyWayContext;
-    }
+    },
   ) {}
 
   async updateIceParams() {
@@ -92,6 +92,8 @@ export class IceManager {
           return !url.startsWith('turns') && url.endsWith('tcp');
         case 'tls':
           return url.startsWith('turns');
+        default:
+          return false;
       }
     });
 

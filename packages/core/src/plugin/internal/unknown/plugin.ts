@@ -1,6 +1,6 @@
-import model from '@skyway-sdk/model';
+import type model from '@skyway-sdk/model';
 
-import { SkyWayChannelImpl } from '../../../channel';
+import type { SkyWayChannelImpl } from '../../../channel';
 import { SkyWayPlugin } from '../../interface/plugin';
 import { UnknownMemberImpl } from './member';
 
@@ -9,7 +9,7 @@ export class UnknownPlugin extends SkyWayPlugin {
 
   readonly _createRemoteMember = (
     channel: SkyWayChannelImpl,
-    memberDto: model.Member
+    memberDto: model.Member,
   ) => {
     const person = new UnknownMemberImpl({
       ...this._context,

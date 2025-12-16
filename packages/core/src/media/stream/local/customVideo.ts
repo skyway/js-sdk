@@ -1,10 +1,10 @@
 import { Logger, PromiseQueue } from '@skyway-sdk/common';
 
-import { VideoMediaTrackConstraints } from '../../factory';
+import type { VideoMediaTrackConstraints } from '../../factory';
 import {
   emptyVideoTrack,
   LocalMediaStreamBase,
-  LocalMediaStreamOptions,
+  type LocalMediaStreamOptions,
 } from './media';
 
 const log = new Logger('packages/core/src/media/stream/local/customVideo.ts');
@@ -17,12 +17,11 @@ export interface ProcessedStream {
 
 export class LocalCustomVideoStream extends LocalMediaStreamBase {
   readonly contentType = 'video';
-  private _isEnabled = true;
   private _promiseQueue = new PromiseQueue();
   private _stream: ProcessedStream | null;
 
   constructor(
-    options: VideoMediaTrackConstraints & Partial<LocalMediaStreamOptions> = {}
+    options: VideoMediaTrackConstraints & Partial<LocalMediaStreamOptions> = {},
   ) {
     super(emptyVideoTrack, 'video', options);
     this._stream = null;

@@ -1,12 +1,12 @@
 import {
-  RemoteVideoStream,
-  RoomPublication,
-  RoomSubscription,
+  type RemoteVideoStream,
+  type RoomPublication,
+  type RoomSubscription,
   SkyWayContext,
   SkyWayRoom,
   SkyWayStreamFactory,
 } from '@skyway-sdk/room';
-import { FC, useEffect, useRef, useState } from 'react';
+import { type FC, useEffect, useRef, useState } from 'react';
 
 import { contextOptions, sfuOptions, tokenString } from './const';
 
@@ -41,7 +41,8 @@ const App: FC = () => {
 
     member.onPublicationSubscribed.add((e) => {
       if (e.stream.contentType === 'audio') {
-        const container = audioContainer.current!;
+        const container = audioContainer.current;
+        if (!container) return;
         const audio = document.createElement('audio');
         audio.srcObject = new MediaStream([e.stream.track]);
         audio.play();
@@ -57,8 +58,8 @@ const App: FC = () => {
       setVideoSubscriptions(
         member.subscriptions.filter(
           (subscription): subscription is RoomSubscription<RemoteVideoStream> =>
-            subscription.contentType === 'video'
-        )
+            subscription.contentType === 'video',
+        ),
       );
     });
 
@@ -82,7 +83,9 @@ const App: FC = () => {
   return (
     <div>
       <input onChange={(e) => setRoomName(e.target.value)} value={roomName} />
-      <button onClick={main}>join</button>
+      <button type="button" onClick={main}>
+        join
+      </button>
       <div style={{ display: 'flex', flexWrap: 'wrap' }}>
         {videoSubscriptions.map((subscription) => (
           <Video key={subscription.id} subscription={subscription} />
@@ -99,8 +102,10 @@ const Video: FC<{ subscription: RoomSubscription<RemoteVideoStream> }> = ({
   const ref = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
-    ref.current!.srcObject = new MediaStream([subscription.stream!.track]);
-  }, [ref.current]);
+    if (ref.current && subscription.stream?.track) {
+      ref.current.srcObject = new MediaStream([subscription.stream.track]);
+    }
+  }, [subscription.stream?.track]);
 
   const switchEncodingSetting = async () => {
     if (subscription.preferredEncoding === 'high') {

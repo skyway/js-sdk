@@ -1,8 +1,8 @@
-import { Channel, EncodingParameters, Member } from '@skyway-sdk/core';
+import type { Channel, EncodingParameters, Member } from '@skyway-sdk/core';
 
 export function getLayerFromEncodings(
   id: string,
-  encodings: EncodingParameters[]
+  encodings: EncodingParameters[],
 ) {
   let layer = 0;
   for (; layer < encodings.length; layer++) {
@@ -15,7 +15,7 @@ export function getLayerFromEncodings(
 }
 
 export function moveToHead<T>(arr: T[], selector: (o: T) => boolean) {
-  const target = arr.find(selector)!;
+  const target = arr.find(selector);
   return [target, ...arr.filter((o) => !selector(o))];
 }
 
@@ -38,18 +38,18 @@ export function createWarnPayload({
     detail,
   };
   if (channel) {
-    warn['appId'] = channel.appId;
-    warn['channelId'] = channel.id;
+    warn.appId = channel.appId;
+    warn.channelId = channel.id;
     if (channel.localPerson) {
-      warn['memberId'] = channel.localPerson.id;
+      warn.memberId = channel.localPerson.id;
     }
   }
 
   if (bot) {
-    warn['botId'] = bot.id;
-    warn['appId'] = bot.channel.appId;
-    warn['channelId'] = bot.channel.id;
-    warn['memberId'] = bot.channel.localPerson?.id;
+    warn.botId = bot.id;
+    warn.appId = bot.channel.appId;
+    warn.channelId = bot.channel.id;
+    warn.memberId = bot.channel.localPerson?.id;
   }
 
   return warn;

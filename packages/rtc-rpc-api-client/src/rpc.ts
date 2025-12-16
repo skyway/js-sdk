@@ -1,4 +1,4 @@
-import { Events, Logger, SkyWayError } from '@skyway-sdk/common';
+import { Events, Logger, type SkyWayError } from '@skyway-sdk/common';
 import WebSocket from 'isomorphic-ws';
 import { v4 as uuidV4 } from 'uuid';
 
@@ -46,7 +46,7 @@ export class RPC {
     const subProtocol = token;
     this._ws = new WebSocket(
       `${secure ? 'wss' : 'ws'}://${domain}/ws`,
-      subProtocol
+      subProtocol,
     );
 
     this._ws.onmessage = (ev: any) => {
@@ -81,7 +81,7 @@ export class RPC {
             operationName: 'RPC.connect',
             info: { ...errors.timeout, detail: 'ws.open' },
             path: log.prefix,
-          })
+          }),
         );
       }, 5_000);
       this._ws.onerror = (e: any) => {
@@ -91,7 +91,7 @@ export class RPC {
             info: errors.websocketConnectionFailure,
             path: log.prefix,
             error: e,
-          })
+          }),
         );
       };
       this._ws.onopen = () => {
@@ -127,41 +127,44 @@ export class RPC {
   }
 
   private _send = (request: object) =>
-    new Promise<void>(async (r, f) => {
-      // 非同期化
-      await new Promise((r) => setTimeout(r, 0));
+    new Promise<void>((r, f) => {
+      const executeSend = async () => {
+        await new Promise((r) => setTimeout(r, 0));
 
-      if (this._ws.readyState !== this._ws.OPEN) {
-        f(
-          createError({
-            operationName: 'RPC._send',
-            info: { ...errors.internalError, detail: 'wrong state' },
-            path: log.prefix,
-            payload: {
-              request,
-              wsReadyState: wsStates[this._ws.readyState],
-            },
-          })
-        );
-        return;
-      }
-
-      this._ws.send(JSON.stringify(request), (error: any) => {
-        if (error) {
-          throw f(
+        if (this._ws.readyState !== this._ws.OPEN) {
+          f(
             createError({
               operationName: 'RPC._send',
-              info: {
-                ...errors.internalError,
-                detail: 'failed to send rpc message',
-              },
+              info: { ...errors.internalError, detail: 'wrong state' },
               path: log.prefix,
-              error,
-            })
+              payload: {
+                request,
+                wsReadyState: wsStates[this._ws.readyState],
+              },
+            }),
           );
+          return;
         }
-      });
-      r();
+
+        this._ws.send(JSON.stringify(request), (error: any) => {
+          if (error) {
+            throw f(
+              createError({
+                operationName: 'RPC._send',
+                info: {
+                  ...errors.internalError,
+                  detail: 'failed to send rpc message',
+                },
+                path: log.prefix,
+                error,
+              }),
+            );
+          }
+        });
+        r();
+      };
+
+      executeSend().catch(f);
     });
 
   /**
@@ -169,7 +172,7 @@ export class RPC {
    */
   async request<Result extends object>(
     method: string,
-    params: { [key: string]: any; appId?: string; authToken: string }
+    params: { [key: string]: any; appId?: string; authToken: string },
   ) {
     if (this.closed) {
       throw createError({
@@ -226,7 +229,7 @@ export class RPC {
             operationName: 'RPC.request',
             detail: '[start] reconnecting. pending request',
             payload: { request, id: this._id },
-          })
+          }),
         );
         // 再接続後に再送する
         this._pendingRequests.push(request);
@@ -245,7 +248,7 @@ export class RPC {
                   },
                   path: log.prefix,
                 }),
-                e
+                e,
               );
             }
             throw e;
@@ -259,7 +262,7 @@ export class RPC {
             operationName: 'RPC.request',
             detail: '[end] reconnecting. pending request',
             payload: { request, id: this._id },
-          })
+          }),
         );
 
         return message;
@@ -287,7 +290,7 @@ export class RPC {
                 createWarnPayload({
                   operationName: 'request.pendingRequest',
                   detail: 'success to handle disconnected',
-                })
+                }),
               );
               return message;
             } catch (error: any) {
@@ -357,10 +360,10 @@ export class RPC {
   }
 
   async batch<Result extends object>(
-    requests: { method: string; params: object }[]
+    requests: { method: string; params: object }[],
   ) {
     const messages: RequestMessage[] = requests.map(({ method, params }) =>
-      buildRequest(method, params)
+      buildRequest(method, params),
     );
     this._send(messages).catch((e) => {
       throw e;
@@ -369,10 +372,10 @@ export class RPC {
       messages.map(async ({ id }) => {
         const message = (await this._onMessage.watch(
           (msg) => msg.id === id,
-          rpcTimeout
+          rpcTimeout,
         )) as ResponseMessage & { result: Result };
         return message;
-      })
+      }),
     );
     return responses;
   }
@@ -381,7 +384,7 @@ export class RPC {
 const buildRequest = (
   method: string,
   params: object,
-  notify?: boolean
+  notify?: boolean,
 ): RequestMessage => {
   if (notify) {
     return { jsonrpc: '2.0', method, params };
@@ -413,13 +416,13 @@ export interface ResponseError {
 type RtcApiRpcError = {
   code: number;
   message: string;
-}
+};
 
 const isNotifyMessage = (
-  msg: RequestMessage | ResponseMessage
+  msg: RequestMessage | ResponseMessage,
 ): msg is RequestMessage => {
   const notify = msg as RequestMessage;
-  if (notify.method && notify.id == undefined) {
+  if (notify.method && notify.id === undefined) {
     return true;
   }
   return false;

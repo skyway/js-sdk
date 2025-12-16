@@ -19,9 +19,9 @@ export type WebRTCStats = { id: string; type: string; [key: string]: any }[];
 /**@internal */
 export function attachElement(
   element: HTMLAudioElement | HTMLVideoElement,
-  track: MediaStreamTrack
+  track: MediaStreamTrack,
 ) {
-  if ((element ?? {})?.srcObject === undefined) {
+  if (element?.srcObject === undefined) {
     throw createError({
       operationName: 'attachElement',
       info: errors.invalidElement,
@@ -52,9 +52,9 @@ export function attachElement(
 /**@internal */
 export function detachElement(
   element: HTMLAudioElement | HTMLVideoElement,
-  track: MediaStreamTrack
+  track: MediaStreamTrack,
 ) {
-  if ((element ?? {})?.srcObject === undefined) {
+  if (element?.srcObject === undefined) {
     throw createError({
       operationName: 'attachElement',
       info: errors.invalidElement,

@@ -7,5 +7,5 @@ export default mergeConfig(
     test: {
       outputFile: './test-large.json',
     },
-  })
+  }),
 );

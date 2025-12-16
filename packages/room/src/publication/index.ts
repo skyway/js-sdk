@@ -1,6 +1,5 @@
-import { EventDisposer, Logger } from '@skyway-sdk/common';
-import { Event, Events } from '@skyway-sdk/common';
-import {
+import { Event, EventDisposer, Events, Logger } from '@skyway-sdk/common';
+import type {
   Codec,
   ContentType,
   EncodingParameters,
@@ -14,14 +13,17 @@ import {
   TransportConnectionState,
   WebRTCStats,
 } from '@skyway-sdk/core';
-import { Encoding, PublicationType } from '@skyway-sdk/model';
+import type { Encoding, PublicationType } from '@skyway-sdk/model';
 import { SFUBotMember } from '@skyway-sdk/sfu-bot';
 
 import { errors } from '../errors';
-import { RoomMember, RoomMemberImpl } from '../member';
-import { Room } from '../room/default';
-import { StreamSubscribedEvent, StreamUnsubscribedEvent } from '../room/event';
-import { RoomSubscription } from '../subscription';
+import type { RoomMember, RoomMemberImpl } from '../member';
+import type { Room } from '../room/default';
+import type {
+  StreamSubscribedEvent,
+  StreamUnsubscribedEvent,
+} from '../room/event';
+import type { RoomSubscription } from '../subscription';
 import { createError } from '../util';
 
 const path = 'packages/room/src/publication/index.ts';
@@ -98,7 +100,7 @@ export interface RoomPublication<T extends LocalStream = LocalStream> {
    */
   replaceStream: (
     stream: LocalAudioStream | LocalVideoStream | LocalCustomVideoStream,
-    options?: ReplaceStreamOptions
+    options?: ReplaceStreamOptions,
   ) => void;
   /**
    * @experimental
@@ -112,7 +114,7 @@ export interface RoomPublication<T extends LocalStream = LocalStream> {
    * @description [japanese] 対象のMemberとのRTCPeerConnectionを取得する。RTCPeerConnectionを直接操作すると SDK は正しく動作しなくなる可能性があります。
    */
   getRTCPeerConnection(
-    selector: RoomMember | string
+    selector: RoomMember | string,
   ): RTCPeerConnection | undefined;
   /**
    * @description [japanese] メディア通信の状態を取得する
@@ -145,7 +147,10 @@ export class RoomPublicationImpl<StreamType extends LocalStream = LocalStream>
     state: TransportConnectionState;
   }>();
 
-  constructor(public _publication: Publication, private _room: Room) {
+  constructor(
+    public _publication: Publication,
+    private _room: Room,
+  ) {
     this.id = _publication.id;
     this.contentType = _publication.contentType;
     this._origin = _publication.origin;
@@ -210,7 +215,7 @@ export class RoomPublicationImpl<StreamType extends LocalStream = LocalStream>
 
   get subscriptions() {
     return this._publication.subscriptions.map((s) =>
-      this._room._getSubscription(s.id)
+      this._room._getSubscription(s.id),
     );
   }
 
@@ -288,7 +293,7 @@ export class RoomPublicationImpl<StreamType extends LocalStream = LocalStream>
 
   readonly replaceStream = (
     stream: LocalAudioStream | LocalVideoStream | LocalCustomVideoStream,
-    options: ReplaceStreamOptions = {}
+    options: ReplaceStreamOptions = {},
   ) => {
     this._preferredPublication.replaceStream(stream, options);
   };
@@ -301,7 +306,7 @@ export class RoomPublicationImpl<StreamType extends LocalStream = LocalStream>
   getStats(selector: string | RoomMember): Promise<WebRTCStats> {
     if (this._origin) {
       const bot = this._origin.subscriptions.find(
-        (s) => s.subscriber.subtype === SFUBotMember.subtype
+        (s) => s.subscriber.subtype === SFUBotMember.subtype,
       )?.subscriber;
       if (!bot) {
         throw createError({
@@ -319,11 +324,11 @@ export class RoomPublicationImpl<StreamType extends LocalStream = LocalStream>
   }
 
   getRTCPeerConnection(
-    selector: string | RoomMember
+    selector: string | RoomMember,
   ): RTCPeerConnection | undefined {
     if (this._origin) {
       const bot = this._origin.subscriptions.find(
-        (s) => s.subscriber.subtype === SFUBotMember.subtype
+        (s) => s.subscriber.subtype === SFUBotMember.subtype,
       )?.subscriber;
       if (!bot) {
         throw createError({
@@ -343,7 +348,7 @@ export class RoomPublicationImpl<StreamType extends LocalStream = LocalStream>
   getConnectionState(selector: string | RoomMember): TransportConnectionState {
     if (this._origin) {
       const bot = this._origin.subscriptions.find(
-        (s) => s.subscriber.subtype === SFUBotMember.subtype
+        (s) => s.subscriber.subtype === SFUBotMember.subtype,
       )?.subscriber;
       if (!bot) {
         throw createError({

@@ -1,4 +1,4 @@
-import { Encoding } from '@skyway-sdk/model';
+import type { Encoding } from '@skyway-sdk/model';
 import { v4 as uuidv4 } from 'uuid';
 
 export type ClientEventType =

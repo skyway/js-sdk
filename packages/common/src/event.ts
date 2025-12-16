@@ -2,9 +2,9 @@ import { Logger } from './logger';
 
 const log = new Logger('packages/common/src/event.ts');
 
-type EventExecute<T extends any> = (arg: T) => void;
+type EventExecute<T> = (arg: T) => void;
 
-export interface EventInterface<T extends any> {
+export interface EventInterface<T> {
   emit: (arg: T) => void;
   removeAllListeners: () => void;
   add: (callback: (args: T) => void) => {
@@ -18,11 +18,11 @@ export interface EventInterface<T extends any> {
   asPromise: (timeLimit?: number) => Promise<T>;
   watch: (
     callback: (arg: T) => boolean | undefined | null,
-    timeLimit?: number
+    timeLimit?: number,
   ) => Promise<T>;
 }
 
-export class Event<T extends any> implements EventInterface<T> {
+export class Event<T> implements EventInterface<T> {
   private _stack: {
     execute: EventExecute<T>;
     id: number;
@@ -94,7 +94,7 @@ export class Event<T extends any> implements EventInterface<T> {
         timeLimit &&
         setTimeout(() => {
           reject(
-            new SerializableError('Event asPromise timeout : ' + timeLimit)
+            new SerializableError(`Event asPromise timeout : ${timeLimit}`),
           );
         }, timeLimit);
       this.once((arg) => {
@@ -110,13 +110,13 @@ export class Event<T extends any> implements EventInterface<T> {
   watch = (
     callback: (arg: T) => boolean | undefined | null,
     /**ms */
-    timeLimit?: number
+    timeLimit?: number,
   ) =>
     new Promise<T>((resolve, reject) => {
       const timeout =
         timeLimit &&
         setTimeout(() => {
-          reject(new SerializableError('Event watch timeout : ' + timeLimit));
+          reject(new SerializableError(`Event watch timeout : ${timeLimit}`));
         }, timeLimit);
 
       const { removeListener } = this.add((arg) => {
@@ -139,14 +139,16 @@ export class Event<T extends any> implements EventInterface<T> {
 export class Events {
   events: Event<any>[] = [];
 
-  make<T extends any>() {
+  make<T>() {
     const event = new Event<T>();
     this.events.push(event);
     return event;
   }
 
   dispose() {
-    this.events.forEach((event) => event.removeAllListeners());
+    this.events.forEach((event) => {
+      event.removeAllListeners();
+    });
     this.events = [];
   }
 }
@@ -166,7 +168,9 @@ export class EventDisposer {
   }
 
   dispose() {
-    this._disposer.forEach((d) => d());
+    this._disposer.forEach((d) => {
+      d();
+    });
     this._disposer = [];
   }
 }

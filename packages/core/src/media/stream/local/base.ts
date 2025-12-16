@@ -1,10 +1,13 @@
 import { Event } from '@skyway-sdk/common';
 import { uuidV4 } from '@skyway-sdk/token';
 
-import { Member } from '../../../member';
-import { RemoteMember } from '../../../member/remoteMember';
-import { Transport, TransportConnectionState } from '../../../plugin/interface';
-import { ContentType, Stream, WebRTCStats } from '../base';
+import type { Member } from '../../../member';
+import type { RemoteMember } from '../../../member/remoteMember';
+import type {
+  Transport,
+  TransportConnectionState,
+} from '../../../plugin/interface';
+import type { ContentType, Stream, WebRTCStats } from '../base';
 
 export interface LocalStreamInterface extends Stream {
   readonly side: 'local';
@@ -60,7 +63,7 @@ export abstract class LocalStreamBase implements Stream {
   /**@internal */
   _setConnectionState(
     remoteMember: RemoteMember,
-    state: TransportConnectionState
+    state: TransportConnectionState,
   ) {
     if (this._connectionState[remoteMember.id] === state) return;
     this._connectionState[remoteMember.id] = state;
@@ -79,13 +82,13 @@ export abstract class LocalStreamBase implements Stream {
       Object.entries(this._getStatsCallbacks).map(async ([key, cb]) => ({
         memberId: key,
         stats: await cb().catch(() => []),
-      }))
+      })),
     );
   }
 
   /**@internal */
   _getRTCPeerConnection(
-    selector: Member | string
+    selector: Member | string,
   ): RTCPeerConnection | undefined {
     return this._getTransport(selector)?.rtcPeerConnection;
   }

@@ -1,9 +1,9 @@
 import { Logger } from '@skyway-sdk/common';
-import model from '@skyway-sdk/model';
+import type model from '@skyway-sdk/model';
 
-import { PersonInit, SkyWayChannelImpl } from '../../channel';
+import type { PersonInit, SkyWayChannelImpl } from '../../channel';
 import { MaxIceParamServerTTL } from '../../const';
-import { SkyWayContext } from '../../context';
+import type { SkyWayContext } from '../../context';
 import { errors } from '../../errors';
 import { IceManager } from '../../external/ice';
 import { setupSignalingSession } from '../../external/signaling';
@@ -22,7 +22,7 @@ export async function createLocalPerson(
     keepaliveIntervalGapSec,
     preventAutoLeaveOnBeforeUnload,
     disableSignaling,
-  }: PersonInit = {}
+  }: PersonInit = {},
 ) {
   log.debug('createLocalPerson', {
     channel,

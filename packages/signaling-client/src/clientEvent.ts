@@ -13,9 +13,16 @@ export class ClientEvent {
 
   data: string;
 
-  constructor(readonly event: ClientEventType, readonly payload: Record<string, unknown> = {}) {
+  constructor(
+    readonly event: ClientEventType,
+    readonly payload: Record<string, unknown> = {},
+  ) {
     this.eventId = uuidv4();
-    this.data = JSON.stringify({ event: this.event, eventId: this.eventId, payload: this.payload });
+    this.data = JSON.stringify({
+      event: this.event,
+      eventId: this.eventId,
+      payload: this.payload,
+    });
     if (this.data.length > MAX_PAYLOAD_LENGTH) {
       throw new Error('payload size exceeds the upper limit');
     }

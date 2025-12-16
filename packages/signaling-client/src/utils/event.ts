@@ -6,7 +6,9 @@ export class Event<T> {
   private _listenerIndex = 0;
 
   emit = (arg: T): void => {
-    this._listeners.forEach((listener) => listener(arg));
+    this._listeners.forEach((listener) => {
+      listener(arg);
+    });
   };
 
   removeAllListeners = (): void => {
@@ -24,7 +26,9 @@ export class Event<T> {
     return { removeListener };
   };
 
-  addOneTimeListener = (listener: EventExecute<T>): { removeListener: () => void } => {
+  addOneTimeListener = (
+    listener: EventExecute<T>,
+  ): { removeListener: () => void } => {
     const off = this.addListener((arg) => {
       off.removeListener();
       listener(arg);

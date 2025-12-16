@@ -1,17 +1,17 @@
-import { Event, Events, Logger } from '@skyway-sdk/common';
-import model from '@skyway-sdk/model';
+import { type Event, Events, Logger } from '@skyway-sdk/common';
+import type model from '@skyway-sdk/model';
 
-import { Channel, SkyWayChannelImpl } from '../channel';
-import { SkyWayContext } from '../context';
+import type { Channel, SkyWayChannelImpl } from '../channel';
+import type { SkyWayContext } from '../context';
 import { errors } from '../errors';
-import { LocalStream } from '../media/stream';
-import {
+import type {
+  LocalStream,
   RemoteAudioStream,
   RemoteDataStream,
   RemoteVideoStream,
 } from '../media/stream';
-import { Publication } from '../publication';
-import { Subscription } from '../subscription';
+import type { Publication } from '../publication';
+import type { Subscription } from '../subscription';
 import { createError, createLogPayload } from '../util';
 
 const log = new Logger('packages/core/src/member/index.ts');
@@ -93,7 +93,7 @@ export abstract class MemberImpl implements Member {
   }
   get subscriptions() {
     return this.channel.subscriptions.filter(
-      (p) => p.subscriber.id === this.id
+      (p) => p.subscriber.id === this.id,
     );
   }
 
@@ -134,7 +134,7 @@ export abstract class MemberImpl implements Member {
       await createLogPayload({
         operationName: 'localPerson.leave',
         channel: this.channel,
-      })
+      }),
     );
     if (this.state === 'left') {
       throw createError({

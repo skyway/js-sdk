@@ -2,11 +2,11 @@ import { Logger, PromiseQueue } from '@skyway-sdk/common';
 
 import { errors } from '../../../errors';
 import { createError } from '../../../util';
-import {
+import type {
   DisplayMediaTrackConstraints,
   VideoMediaTrackConstraints,
 } from '../../factory';
-import { LocalMediaStreamBase, LocalMediaStreamOptions } from './media';
+import { LocalMediaStreamBase, type LocalMediaStreamOptions } from './media';
 
 const log = new Logger('packages/core/src/media/stream/local/video.ts');
 
@@ -19,7 +19,7 @@ export class LocalVideoStream extends LocalMediaStreamBase {
     track: MediaStreamTrack,
     options: VideoMediaTrackConstraints &
       DisplayMediaTrackConstraints &
-      Partial<LocalMediaStreamOptions> = {}
+      Partial<LocalMediaStreamOptions> = {},
   ) {
     super(track, 'video', options);
     if (track.kind !== 'video') {

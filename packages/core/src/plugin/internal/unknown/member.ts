@@ -1,10 +1,10 @@
-import { SkyWayChannelImpl } from '../../../channel';
-import { SkyWayContext } from '../../../context';
+import type { SkyWayChannelImpl } from '../../../channel';
+import type { SkyWayContext } from '../../../context';
 import { MemberImpl } from '../../../member';
-import { LocalPersonImpl } from '../../../member/localPerson';
-import { RemoteMemberImplInterface } from '../../../member/remoteMember';
+import type { LocalPersonImpl } from '../../../member/localPerson';
+import type { RemoteMemberImplInterface } from '../../../member/remoteMember';
 import { UnknownConnection } from './connection';
-import { UnknownPlugin } from './plugin';
+import type { UnknownPlugin } from './plugin';
 
 export class UnknownMemberImpl
   extends MemberImpl
@@ -48,7 +48,7 @@ export class UnknownMemberImpl
 
   private _createConnection(
     localPerson: LocalPersonImpl,
-    endpointMember: RemoteMemberImplInterface
+    endpointMember: RemoteMemberImplInterface,
   ): UnknownConnection {
     return new UnknownConnection(localPerson, endpointMember);
   }

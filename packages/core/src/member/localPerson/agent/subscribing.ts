@@ -1,4 +1,4 @@
-import { SubscriptionImpl } from '../../../subscription';
+import type { SubscriptionImpl } from '../../../subscription';
 import type { LocalPersonImpl } from '../../localPerson';
 
 export class SubscribingAgent {
@@ -21,7 +21,7 @@ export class SubscribingAgent {
       const { removeListener } = subscription._onChangeEncoding.add(
         async () => {
           await connection.changePreferredEncoding?.(subscription);
-        }
+        },
       );
       this._disposers[subscription.id] = removeListener;
     }

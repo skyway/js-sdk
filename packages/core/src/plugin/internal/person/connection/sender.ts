@@ -10,38 +10,37 @@ import isEqual from 'lodash/isEqual';
 import * as sdpTransform from 'sdp-transform';
 import { v4 } from 'uuid';
 
-import { SkyWayContext } from '../../../../context';
+import type { SkyWayContext } from '../../../../context';
 import { errors } from '../../../../errors';
-import { AnalyticsSession } from '../../../../external/analytics';
-import { IceManager } from '../../../../external/ice';
-import { SignalingSession } from '../../../../external/signaling';
-import { Codec } from '../../../../media';
-import { DataStreamSubscriber } from '../../../../media/stream/local/data';
-import {
+import type { AnalyticsSession } from '../../../../external/analytics';
+import type { IceManager } from '../../../../external/ice';
+import type { SignalingSession } from '../../../../external/signaling';
+import type { Codec } from '../../../../media';
+import type {
   LocalAudioStream,
   LocalCustomVideoStream,
   LocalStream,
   LocalVideoStream,
 } from '../../../../media/stream';
-import { LocalPersonImpl } from '../../../../member/localPerson';
-import { RemoteMember } from '../../../../member/remoteMember';
-import { PublicationImpl } from '../../../../publication';
+import type { DataStreamSubscriber } from '../../../../media/stream/local/data';
+import type { LocalPersonImpl } from '../../../../member/localPerson';
+import type { RemoteMember } from '../../../../member/remoteMember';
+import type { PublicationImpl } from '../../../../publication';
 import {
   createError,
   createWarnPayload,
   getParameters,
   statsToArray,
 } from '../../../../util';
-import { TransportConnectionState } from '../../../interface';
-import { isSafari } from '../util';
-import { setEncodingParams } from '../util';
-import { P2PMessage } from '.';
+import type { TransportConnectionState } from '../../../interface';
+import { isSafari, setEncodingParams } from '../util';
+import type { P2PMessage } from '.';
 import { DataChannelNegotiationLabel } from './datachannel';
-import { IceCandidateMessage, Peer } from './peer';
-import { ReceiverAnswerMessage } from './receiver';
+import { type IceCandidateMessage, Peer } from './peer';
+import type { ReceiverAnswerMessage } from './receiver';
 
 const log = new Logger(
-  'packages/core/src/plugin/internal/person/connection/sender.ts'
+  'packages/core/src/plugin/internal/person/connection/sender.ts',
 );
 
 export class Sender extends Peer {
@@ -73,8 +72,9 @@ export class Sender extends Peer {
   private _cleanupStreamCallbacks: {
     [streamId: string]: () => void;
   } = {};
-  
+
   private _endpoint: RemoteMember;
+  private _sendDataQueue = new PromiseQueue();
 
   constructor(
     context: SkyWayContext,
@@ -82,7 +82,7 @@ export class Sender extends Peer {
     signaling: SignalingSession,
     analytics: AnalyticsSession | undefined,
     localPerson: LocalPersonImpl,
-    endpoint: RemoteMember
+    endpoint: RemoteMember,
   ) {
     super(
       context,
@@ -91,7 +91,7 @@ export class Sender extends Peer {
       analytics,
       localPerson,
       endpoint,
-      'sender'
+      'sender',
     );
     this._log.debug('spawned');
 
@@ -113,7 +113,7 @@ export class Sender extends Peer {
                     localPersonId: this.localPerson.id,
                     endpointId: this.endpoint.id,
                     err,
-                  })
+                  }),
                 );
             }
             break;
@@ -139,7 +139,7 @@ export class Sender extends Peer {
               {
                 const e = await this.waitForConnectionState(
                   'connected',
-                  context.config.rtcConfig.iceDisconnectBufferTimeout
+                  context.config.rtcConfig.iceDisconnectBufferTimeout,
                 ).catch((e) => e as SkyWayError);
                 if (e && this._connectionState !== 'reconnecting') {
                   await this.restartIce();
@@ -169,7 +169,7 @@ export class Sender extends Peer {
       'onConnectionStateChanged',
       this.id,
       this._connectionState,
-      state
+      state,
     );
     this._connectionState = state;
     this.onConnectionStateChanged.emit(state);
@@ -185,7 +185,7 @@ export class Sender extends Peer {
           channel: this.localPerson.channel,
           info: { ...errors.internal, detail: 'restartIce limit exceeded' },
           path: log.prefix,
-        })
+        }),
       );
       this._setConnectionState('disconnected');
       return;
@@ -197,7 +197,7 @@ export class Sender extends Peer {
         detail: 'start restartIce',
         channel: this.localPerson.channel,
         payload: { count: this._backoffIceRestarted.count },
-      })
+      }),
     );
 
     const checkNeedEnd = () => {
@@ -209,7 +209,7 @@ export class Sender extends Peer {
             detail: 'endpointMemberLeft',
             channel: this.localPerson.channel,
             payload: { endpointId: this.endpoint.id },
-          })
+          }),
         );
         this._setConnectionState('disconnected');
         return true;
@@ -223,7 +223,7 @@ export class Sender extends Peer {
             detail: 'reconnected',
             channel: this.localPerson.channel,
             payload: { count: this._backoffIceRestarted.count },
-          })
+          }),
         );
         this._backoffIceRestarted.reset();
         this._setConnectionState('connected');
@@ -239,7 +239,7 @@ export class Sender extends Peer {
               type: 'restartIce',
               data: undefined,
               createdAt: Date.now(),
-            }
+            },
           );
         }
         return true;
@@ -261,7 +261,7 @@ export class Sender extends Peer {
           channel: this.localPerson.channel,
           payload: { count: this._backoffIceRestarted.count },
         }),
-        e
+        e,
       );
       await this.restartIce();
       return;
@@ -286,7 +286,7 @@ export class Sender extends Peer {
           detail: 'reconnect signaling service',
           channel: this.localPerson.channel,
           payload: { count: this._backoffIceRestarted.count },
-        })
+        }),
       );
       e = await this.signaling.onConnectionStateChanged
         .watch((s) => s === 'connected', 10_000)
@@ -336,7 +336,7 @@ export class Sender extends Peer {
           channel: this.localPerson.channel,
           payload: { count: this._backoffIceRestarted.count },
         }),
-        e
+        e,
       );
       await this.restartIce();
       return;
@@ -344,7 +344,7 @@ export class Sender extends Peer {
 
     e = await this.waitForConnectionState(
       'connected',
-      this._context.config.rtcConfig.iceDisconnectBufferTimeout
+      this._context.config.rtcConfig.iceDisconnectBufferTimeout,
     ).catch((e) => e);
     if (!e) {
       if (checkNeedEnd()) return;
@@ -364,11 +364,11 @@ export class Sender extends Peer {
 
   private _getMid(
     publication: PublicationImpl,
-    sdpObject: sdpTransform.SessionDescription
+    sdpObject: sdpTransform.SessionDescription,
   ) {
     if (publication.contentType === 'data') {
       const media = sdpObject.media.find((m) => m.type === 'application');
-      if (media?.mid == undefined) {
+      if (media?.mid === undefined) {
         throw createError({
           operationName: 'Sender._getMid',
           info: {
@@ -384,7 +384,7 @@ export class Sender extends Peer {
     } else {
       const transceiver = this.transceivers[publication.id];
       const mid = transceiver.mid;
-      if (mid == undefined) {
+      if (mid === null) {
         throw createError({
           operationName: 'Sender._getMid',
           info: {
@@ -402,7 +402,7 @@ export class Sender extends Peer {
 
   private _listenStreamEnableChange(
     stream: LocalAudioStream | LocalVideoStream | LocalCustomVideoStream,
-    publicationId: string
+    publicationId: string,
   ) {
     if (this._unsubscribeStreamEnableChange[publicationId]) {
       this._unsubscribeStreamEnableChange[publicationId]();
@@ -415,7 +415,7 @@ export class Sender extends Peer {
             detail: '_replaceTrack failed',
             operationName: 'Sender._listenStreamEnableChange',
             payload: e,
-          })
+          }),
         );
       });
     });
@@ -459,7 +459,7 @@ export class Sender extends Peer {
     if (stream.contentType === 'data') {
       const dc = this.pc.createDataChannel(
         new DataChannelNegotiationLabel(publication.id, stream.id).toLabel(),
-        stream.options
+        stream.options,
       );
       const dataStreamSubscriber: DataStreamSubscriber = {
         id: this._endpoint.id,
@@ -468,14 +468,17 @@ export class Sender extends Peer {
 
       dc.onopen = () => {
         stream.onWritable.emit(dataStreamSubscriber);
-      }
+      };
 
       dc.onclose = () => {
         stream.onUnwritable.emit(dataStreamSubscriber);
       };
 
       dc.onerror = (err) => {
-        if ('error' in err && (err as any).error.errorDetail.includes('data-channel')) {
+        if (
+          'error' in err &&
+          (err as any).error.errorDetail.includes('data-channel')
+        ) {
           this._log.error(
             'datachannel.send failed',
             createError({
@@ -484,7 +487,7 @@ export class Sender extends Peer {
               path: log.prefix,
               context: this._context,
               channel: this.localPerson.channel,
-            })
+            }),
           );
         } else {
           this._log.error(
@@ -495,15 +498,32 @@ export class Sender extends Peer {
               path: log.prefix,
               context: this._context,
               channel: this.localPerson.channel,
-            })
+            }),
           );
         }
-      }
+      };
+
+      dc.bufferedAmountLowThreshold = 65536; // 64 KiB
+      let waitForBufferedAmountLowResolve: () => void;
+      let waitForBufferedAmountLow = new Promise<void>((resolve) => {
+        waitForBufferedAmountLowResolve = resolve;
+      });
+      dc.onbufferedamountlow = () => {
+        waitForBufferedAmountLowResolve();
+      };
 
       stream._onWriteData
-        .add((data) => {
+        .add(async (data) => {
           if (dc.readyState === 'open') {
-            dc.send(data as any);
+            await this._sendDataQueue.push(async () => {
+              if (dc.bufferedAmount > dc.bufferedAmountLowThreshold) {
+                await waitForBufferedAmountLow;
+                waitForBufferedAmountLow = new Promise<void>((resolve) => {
+                  waitForBufferedAmountLowResolve = resolve;
+                });
+              }
+              dc.send(data as any);
+            });
           } else {
             this._log.error(
               'datachannel.send failed',
@@ -513,7 +533,7 @@ export class Sender extends Peer {
                 path: log.prefix,
                 context: this._context,
                 channel: this.localPerson.channel,
-              })
+              }),
             );
           }
         })
@@ -526,7 +546,7 @@ export class Sender extends Peer {
           newStream._replacingTrack = true;
           this._listenStreamEnableChange(
             newStream as LocalAudioStream,
-            publication.id
+            publication.id,
           );
           if (this._cleanupStreamCallbacks[oldStream.id]) {
             this._cleanupStreamCallbacks[oldStream.id]();
@@ -594,7 +614,7 @@ export class Sender extends Peer {
       applyCodecCapabilities(
         publication.codecCapabilities ?? [],
         mid,
-        sdpObject
+        sdpObject,
       );
       const offerSdp = sdpTransform.write(sdpObject);
       await this.pc.setLocalDescription({ type: 'offer', sdp: offerSdp });
@@ -603,7 +623,7 @@ export class Sender extends Peer {
       if (publication.encodings?.length > 0) {
         if (isSafari()) {
           this._safariSetupEncoding(
-            publication as PublicationImpl<LocalVideoStream>
+            publication as PublicationImpl<LocalVideoStream>,
           );
         } else {
           const transceiver = this.transceivers[publication.id];
@@ -683,7 +703,7 @@ export class Sender extends Peer {
                 skywayConnectionState: state,
               },
               createdAt: Date.now(),
-            }
+            },
           );
         }
       })
@@ -703,7 +723,7 @@ export class Sender extends Peer {
           detail: 'publication already removed',
           channel: this.localPerson.channel,
           payload: { publicationId },
-        })
+        }),
       );
       return;
     }
@@ -802,7 +822,7 @@ export class Sender extends Peer {
 
   private async _replaceTrack(
     publicationId: string,
-    track: MediaStreamTrack | null
+    track: MediaStreamTrack | null,
   ) {
     const transceiver = this.transceivers[publicationId];
     if (!transceiver) {
@@ -813,7 +833,7 @@ export class Sender extends Peer {
           detail: 'transceiver already removed',
           channel: this.localPerson.channel,
           payload: { publicationId },
-        })
+        }),
       );
       return;
     }
@@ -868,7 +888,7 @@ export class Sender extends Peer {
     await this._resolvePendingSender();
     this._log.debug(
       '<handleReceiverAnswer> _resolvePendingSender',
-      this._pendingPublications.length
+      this._pendingPublications.length,
     );
 
     this._log.debug('<handleReceiverAnswer> [end]');
@@ -884,7 +904,7 @@ export class Sender extends Peer {
       cb: (stats) => {
         const outbound = stats.find(
           (s) =>
-            s.id.includes('RTCOutboundRTP') || s.type.includes('outbound-rtp')
+            s.id.includes('RTCOutboundRTP') || s.type.includes('outbound-rtp'),
         );
         if (outbound?.keyFramesEncoded > 0) return true;
         return false;
@@ -897,7 +917,7 @@ export class Sender extends Peer {
         setEncodingParams(transceiver.sender, [publication.encodings[0]]).catch(
           (e) => {
             this._log.error('setEncodingParams failed', e);
-          }
+          },
         );
       })
       .catch((e) => {
@@ -923,7 +943,9 @@ export class Sender extends Peer {
     this._log.debug('closed');
 
     this.unSetPeerConnectionListener();
-    Object.values(this._unsubscribeStreamEnableChange).forEach((f) => f());
+    Object.values(this._unsubscribeStreamEnableChange).forEach((f) => {
+      f();
+    });
     this.pc.close();
     this._setConnectionState('disconnected');
 
@@ -934,7 +956,7 @@ export class Sender extends Peer {
 export function applyCodecCapabilities(
   codecCapabilities: Codec[],
   mid: string,
-  sdpObject: sdpTransform.SessionDescription
+  sdpObject: sdpTransform.SessionDescription,
 ) {
   const media = sdpObject.media.find((m) => m.mid?.toString() === mid);
   if (!media) {
@@ -966,7 +988,7 @@ export function applyCodecCapabilities(
   const findCodecFromCodecCapability = (
     cap: Codec,
     rtp: sdpTransform.MediaAttributes['rtp'],
-    fmtp: sdpTransform.MediaAttributes['fmtp']
+    fmtp: sdpTransform.MediaAttributes['fmtp'],
   ): sdpTransform.MediaAttributes['rtp'][number] | undefined => {
     const rtpList = rtp.map((r) => ({
       ...r,
@@ -1000,12 +1022,12 @@ export function applyCodecCapabilities(
 
   const preferredCodecs = codecCapabilities
     .map((cap) => findCodecFromCodecCapability(cap, media.rtp, media.fmtp))
-    .filter((v): v is NonNullable<typeof v> => v != undefined);
+    .filter((v): v is NonNullable<typeof v> => v !== undefined);
 
   const sorted = [
     ...preferredCodecs,
     ...media.rtp.filter(
-      (rtp) => !preferredCodecs.find((p) => p.payload === rtp.payload)
+      (rtp) => !preferredCodecs.find((p) => p.payload === rtp.payload),
     ),
   ];
 
@@ -1013,12 +1035,12 @@ export function applyCodecCapabilities(
   for (const fmtp of media.fmtp) {
     const payloadType = fmtp.payload;
     const targetCodecWithPayload = sorted.find(
-      (c) => c.payload === payloadType
+      (c) => c.payload === payloadType,
     );
 
     if (targetCodecWithPayload) {
       const targetCodecCapability = codecCapabilities.find((c) =>
-        findCodecFromCodecCapability(c, [targetCodecWithPayload], media.fmtp)
+        findCodecFromCodecCapability(c, [targetCodecWithPayload], media.fmtp),
       );
       if (targetCodecCapability) {
         if (
@@ -1037,7 +1059,7 @@ export function applyCodecCapabilities(
               } else {
                 fmtp.config = `${key}=${value}`;
               }
-            }
+            },
           );
         }
       }
@@ -1046,7 +1068,7 @@ export function applyCodecCapabilities(
     // opusDtxはデフォルトで有効に設定する
     const opus = sorted.find((rtp) => rtp.codec.toLowerCase() === 'opus');
     const opusDtx = codecCapabilities.find(
-      (f) => mimeTypeToCodec(f.mimeType).toLowerCase() === 'opus'
+      (f) => mimeTypeToCodec(f.mimeType).toLowerCase() === 'opus',
     )?.parameters?.usedtx;
     if (
       opus &&

@@ -1,21 +1,21 @@
 import { Logger } from '@skyway-sdk/common';
 
 import { detectDevice } from '../../../util';
-import { TransportConnectionState } from '../../interface';
+import type { TransportConnectionState } from '../../interface';
 
 const log = new Logger('packages/core/src/plugin/internal/person/util.ts');
 
 /**@internal */
 export const setEncodingParams = async (
   sender: RTCRtpSender,
-  newEncodings: RTCRtpEncodingParameters[]
+  newEncodings: RTCRtpEncodingParameters[],
 ) => {
   const info = log.createBlock({ label: 'setEncodingParams' });
 
   const params = sender.getParameters();
   info.debug('getParameters', { params, newEncodings });
 
-  if (params.encodings == undefined) {
+  if (params.encodings === undefined || params.encodings === null) {
     params.encodings = [];
   }
   params.encodings = newEncodings.map((encoding, i) => ({
@@ -32,7 +32,7 @@ export const isSafari = () =>
 
 /**@internal */
 export function convertConnectionState(
-  state: RTCPeerConnectionState | 'reconnecting'
+  state: RTCPeerConnectionState | 'reconnecting',
 ): TransportConnectionState {
   switch (state) {
     case 'closed':

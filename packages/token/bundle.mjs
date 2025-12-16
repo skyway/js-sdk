@@ -3,6 +3,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 
 import { appendLicenses, createLicenses } from '../../bundler/license.mjs';
+
 const pkg = require('./package.json');
 
 const globalName = 'skyway_token';

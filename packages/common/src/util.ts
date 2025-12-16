@@ -9,7 +9,7 @@ export class BackOff {
 
   /**20.4 sec {var sum=0;for(i=0;i<=8;i++){sum +=i ** 2 * 100}} */
   constructor(
-    props: Partial<Pick<BackOff, 'times' | 'interval' | 'jitter'>> = {}
+    props: Partial<Pick<BackOff, 'times' | 'interval' | 'jitter'>> = {},
   ) {
     Object.assign(this, props);
   }

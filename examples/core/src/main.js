@@ -53,14 +53,12 @@ const token = new SkyWayAuthToken({
   },
 }).encode(secret);
 
-(async () => {
+void (async () => {
   const localVideo = document.getElementById('local-video');
   const buttonArea = document.getElementById('button-area');
   const remoteMediaArea = document.getElementById('remote-media-area');
   const channelNameInput = document.getElementById('channel-name');
-
   const dataStreamInput = document.getElementById('data-stream');
-
   const myId = document.getElementById('my-id');
   const joinButton = document.getElementById('join');
   const writeButton = document.getElementById('write');
@@ -125,7 +123,7 @@ const token = new SkyWayAuthToken({
             remoteMediaArea.appendChild(elm);
             elm.innerText = 'data\n';
             stream.onData.add((data) => {
-              elm.innerText += data + '\n';
+              elm.innerText += `${data}\n`;
             });
           }
         }

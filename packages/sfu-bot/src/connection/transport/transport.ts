@@ -1,30 +1,31 @@
-import { BackOff, Event, SkyWayError } from '@skyway-sdk/common';
+import { BackOff, Event, type SkyWayError } from '@skyway-sdk/common';
 import {
-  AnalyticsSession,
+  type AnalyticsSession,
   createError,
   createLogPayload,
-  IceManager,
+  type IceManager,
   Logger,
-  SkyWayContext,
-  TransportConnectionState,
+  type SkyWayContext,
+  type TransportConnectionState,
 } from '@skyway-sdk/core';
-import { SFURestApiClient } from '@skyway-sdk/sfu-api-client';
-import { DataProducerOptions } from 'mediasoup-client/lib/DataProducer';
-import { MediaKind, RtpParameters } from 'mediasoup-client/lib/RtpParameters';
-import {
+import type { SFURestApiClient } from '@skyway-sdk/sfu-api-client';
+import type { DataProducerOptions } from 'mediasoup-client/lib/DataProducer';
+import type {
+  MediaKind,
+  RtpParameters,
+} from 'mediasoup-client/lib/RtpParameters';
+import type {
   ConnectionState,
   DtlsParameters,
   Transport,
 } from 'mediasoup-client/lib/Transport';
 
 import { errors } from '../../errors';
-import { SFUBotMember } from '../../member';
-import { SFUBotPluginOptions } from '../../option';
-import { SFUBotPlugin } from '../../plugin';
+import type { SFUBotMember } from '../../member';
 import { createWarnPayload } from '../../util';
 
 const log = new Logger(
-  'packages/sfu-bot/src/connection/transport/transport.ts'
+  'packages/sfu-bot/src/connection/transport/transport.ts',
 );
 
 export class SFUTransport {
@@ -34,7 +35,6 @@ export class SFUTransport {
     jitter: 100,
   });
   private _connectionState: TransportConnectionState = 'new';
-  private _options: SFUBotPluginOptions;
 
   readonly onProduce = new Event<{
     producerOptions: {
@@ -71,24 +71,19 @@ export class SFUTransport {
     private _iceManager: IceManager,
     private _sfuApi: SFURestApiClient,
     private _context: SkyWayContext,
-    private _analyticsSession?: AnalyticsSession
+    private _analyticsSession?: AnalyticsSession,
   ) {
-    const sfuPlugin = _context.plugins.find(
-      (p) => p.subtype === SFUBotPlugin.subtype
-    ) as SFUBotPlugin;
-    this._options = sfuPlugin.options;
-
     log.debug('peerConfig', this.pc?.getConfiguration?.() ?? {});
 
-    msTransport.on('connect', (params, callback, errback) =>
-      this._onConnect(msTransport.id)(
+    msTransport.on('connect', (params, callback, errback) => {
+      return this._onConnect(msTransport.id)(
         params as {
           dtlsParameters: DtlsParameters;
         },
         callback as any,
-        errback!
-      )
-    );
+        errback!,
+      );
+    });
     msTransport.on('connectionstatechange', (e) => {
       this.onMediasoupConnectionStateChanged.emit(e);
 
@@ -108,15 +103,15 @@ export class SFUTransport {
     msTransport.on('produce', (producerOptions, callback, errback) => {
       this.onProduce.emit({
         producerOptions,
-        callback: callback!,
-        errback: errback!,
+        callback,
+        errback,
       });
     });
     msTransport.on('producedata', (producerOptions, callback, errback) => {
       this.onProduceData.emit({
         producerOptions,
-        callback: callback!,
-        errback: errback!,
+        callback,
+        errback,
       });
     });
 
@@ -140,7 +135,7 @@ export class SFUTransport {
               }
               const e = await this._waitForMsConnectionState(
                 'connected',
-                _context.config.rtcConfig.iceDisconnectBufferTimeout
+                _context.config.rtcConfig.iceDisconnectBufferTimeout,
               ).catch((e) => e as SkyWayError);
               if (
                 e &&
@@ -161,7 +156,7 @@ export class SFUTransport {
             break;
         }
         log.debug('onMediasoupConnectionStateChanged', this);
-      }
+      },
     );
   }
 
@@ -211,7 +206,7 @@ export class SFUTransport {
           context: this._context,
           info: errors.netWorkError,
           path: log.prefix,
-        })
+        }),
       );
       this._setConnectionState('disconnected');
       return;
@@ -223,7 +218,7 @@ export class SFUTransport {
         detail: 'start restartIce',
         operationName: 'SFUTransport.restartIce',
         payload: { count: this._backoffIceRestart.count, transport: this },
-      })
+      }),
     );
 
     const checkNeedEnd = () => {
@@ -238,7 +233,7 @@ export class SFUTransport {
             detail: 'end restartIce',
             operationName: 'SFUTransport.restartIce',
             payload: { count: this._backoffIceRestart.count, transport: this },
-          })
+          }),
         );
         return true;
       }
@@ -254,7 +249,7 @@ export class SFUTransport {
             detail: 'end restartIce',
             operationName: 'SFUTransport.restartIce',
             payload: { count: this._backoffIceRestart.count, transport: this },
-          })
+          }),
         );
 
         if (this._analyticsSession && !this._analyticsSession.isClosed()) {
@@ -288,7 +283,7 @@ export class SFUTransport {
           bot: this._bot,
           payload: { transport: this },
         }),
-        e
+        e,
       );
       await this.restartIce();
       return;
@@ -305,7 +300,7 @@ export class SFUTransport {
 
     e = await this._waitForMsConnectionState(
       'connected',
-      this._context.config.rtcConfig.iceDisconnectBufferTimeout
+      this._context.config.rtcConfig.iceDisconnectBufferTimeout,
     ).catch((e) => e);
     if (!e && checkNeedEnd()) {
       return iceParameters;
@@ -330,7 +325,7 @@ export class SFUTransport {
           bot: this._bot,
           payload: { transport: this },
         }),
-        iceParameters
+        iceParameters,
       );
       await this.restartIce();
       return;
@@ -342,7 +337,7 @@ export class SFUTransport {
   private _waitForMsConnectionState = async (
     state: ConnectionState,
     /**ms */
-    timeout = 10_000
+    timeout = 10_000,
   ) => {
     if (state === this.msTransport.connectionState) return;
     await this.onMediasoupConnectionStateChanged
@@ -367,7 +362,7 @@ export class SFUTransport {
         dtlsParameters: DtlsParameters;
       },
       callback: () => void,
-      errback: (err: any) => void
+      errback: (err: any) => void,
     ) => {
       try {
         log.debug('[start] transport connect', { transportId });

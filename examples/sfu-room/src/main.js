@@ -4,8 +4,8 @@ import {
   SkyWayContext,
   SkyWayRoom,
   SkyWayStreamFactory,
-  uuidV4 } from
-'@skyway-sdk/room';
+  uuidV4,
+} from '@skyway-sdk/room';
 
 import { appId, secret } from '../../../env';
 
@@ -17,36 +17,35 @@ const token = new SkyWayAuthToken({
   scope: {
     appId: appId,
     rooms: [
-    {
-      name: "*",
-      methods: ["create", "close", "updateMetadata"],
-      member: {
-        name: "*",
-        methods: ["publish", "subscribe", "updateMetadata"]
+      {
+        name: '*',
+        methods: ['create', 'close', 'updateMetadata'],
+        member: {
+          name: '*',
+          methods: ['publish', 'subscribe', 'updateMetadata'],
+        },
+        sfu: {
+          enabled: true,
+        },
       },
-      sfu: {
-        enabled: true
-      }
-    }],
+    ],
 
     turn: {
-      enabled: true
-    }
-  }
+      enabled: true,
+    },
+  },
 }).encode(secret);
 
 void (async () => {
   const localVideo = document.getElementById('local-video');
   const buttonArea = document.getElementById('button-area');
   const remoteMediaArea = document.getElementById('remote-media-area');
-  const channelNameInput = document.getElementById(
-    'channel-name'
-  );
+  const channelNameInput = document.getElementById('channel-name');
   const myId = document.getElementById('my-id');
   const joinButton = document.getElementById('join');
 
   const { audio, video } =
-  await SkyWayStreamFactory.createMicrophoneAudioAndCameraStream();
+    await SkyWayStreamFactory.createMicrophoneAudioAndCameraStream();
   video.attach(localVideo);
   await localVideo.play();
 
@@ -56,7 +55,7 @@ void (async () => {
     const context = await SkyWayContext.Create(token);
     const channel = await SkyWayRoom.FindOrCreate(context, {
       type: 'sfu',
-      name: channelNameInput.value
+      name: channelNameInput.value,
     });
     const me = await channel.join();
 
@@ -65,9 +64,9 @@ void (async () => {
     await me.publish(audio);
     await me.publish(video, {
       encodings: [
-      { maxBitrate: 80_000, id: 'low' },
-      { maxBitrate: 400_000, id: 'high' }]
-
+        { maxBitrate: 80_000, id: 'low' },
+        { maxBitrate: 400_000, id: 'high' },
+      ],
     });
 
     const subscribeAndAttach = (publication) => {

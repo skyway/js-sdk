@@ -1,6 +1,6 @@
-import { ErrorInfo, Logger } from '@skyway-sdk/common';
-import { Event, SkyWayError } from '@skyway-sdk/common';
-import {
+import type { Event, SkyWayError } from '@skyway-sdk/common';
+import { type ErrorInfo, Logger } from '@skyway-sdk/common';
+import type {
   LocalPerson,
   LocalPersonAdapter,
   LocalStream,
@@ -10,12 +10,12 @@ import {
   SubscriptionOptions,
 } from '@skyway-sdk/core';
 
-import { RoomPublication } from '../../publication';
-import { Room, RoomImpl } from '../../room/default';
-import { RoomSubscription } from '../../subscription';
+import type { RoomPublication } from '../../publication';
+import type { Room, RoomImpl } from '../../room/default';
+import type { RoomSubscription } from '../../subscription';
 import { createError } from '../../util';
-import { RoomMember } from '..';
-import { LocalRoomMemberBase, RoomPublicationOptions } from './base';
+import type { RoomMember } from '..';
+import { LocalRoomMemberBase, type RoomPublicationOptions } from './base';
 
 const log = new Logger('packages/room/src/member/local/default.ts');
 
@@ -58,7 +58,7 @@ export interface LocalRoomMember extends RoomMember {
    */
   publish: <T extends LocalStream = LocalStream>(
     stream: T,
-    options?: RoomPublicationOptions
+    options?: RoomPublicationOptions,
   ) => Promise<RoomPublication<T>>;
   /**
    * @description [japanese] StreamのPublicationをUnpublishする
@@ -68,10 +68,10 @@ export interface LocalRoomMember extends RoomMember {
    * @description [japanese] StreamのPublicationをSubscribeする
    */
   subscribe: <
-    T extends RemoteVideoStream | RemoteAudioStream | RemoteDataStream
+    T extends RemoteVideoStream | RemoteAudioStream | RemoteDataStream,
   >(
     publicationId: string | RoomPublication,
-    options?: SubscriptionOptions
+    options?: SubscriptionOptions,
   ) => Promise<{ subscription: RoomSubscription<T>; stream: T }>;
   /**
    * @description [japanese] StreamのSubscriptionをUnsubscribeする
@@ -88,6 +88,7 @@ export class LocalRoomMemberImpl
   implements LocalRoomMember
 {
   /**@private */
+  // biome-ignore lint/complexity/noUselessConstructor: Private constructor is intentional to control instantiation
   constructor(member: LocalPersonAdapter, room: RoomImpl) {
     super(member, room);
   }
@@ -97,7 +98,7 @@ export class LocalRoomMemberImpl
    */
   async publish<T extends LocalStream = LocalStream>(
     stream: LocalStream,
-    options: RoomPublicationOptions = {}
+    options: RoomPublicationOptions = {},
   ): Promise<RoomPublication<T>> {
     if (!options.type) {
       options.type = 'p2p';
@@ -114,7 +115,7 @@ export class LocalRoomMemberImpl
             info: errorInfo,
             path: log.prefix,
           });
-        }
+        },
       );
     } else {
       roomPublication = await this._publishAsP2P(stream, options);

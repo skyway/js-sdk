@@ -1,8 +1,11 @@
 import { Event } from '@skyway-sdk/common';
 
 import type { Codec } from '../../../media';
-import { Transport, TransportConnectionState } from '../../../plugin/interface';
-import { ContentType, Stream, WebRTCStats } from '../base';
+import type {
+  Transport,
+  TransportConnectionState,
+} from '../../../plugin/interface';
+import type { ContentType, Stream, WebRTCStats } from '../base';
 
 export abstract class RemoteStreamBase implements Stream {
   readonly side = 'remote';
@@ -12,7 +15,10 @@ export abstract class RemoteStreamBase implements Stream {
   private _connectionState: TransportConnectionState = 'new';
 
   /**@internal */
-  constructor(readonly id: string, readonly contentType: ContentType) {}
+  constructor(
+    readonly id: string,
+    readonly contentType: ContentType,
+  ) {}
 
   /**@internal */
   _setConnectionState(state: TransportConnectionState) {

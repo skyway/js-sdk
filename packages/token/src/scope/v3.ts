@@ -31,12 +31,14 @@ const memberScopeV3Schema = z.intersection(
        */
       methods: z.array(
         // 型補完のため enum で定義しておく
-        z.enum(memberMethods).refine((arg) => {
-          return typeof arg === 'string'; // バリデーションとしては MemberMethod 以外の文字列も許容する
-        })
+        z
+          .enum(memberMethods)
+          .refine((arg) => {
+            return typeof arg === 'string'; // バリデーションとしては MemberMethod 以外の文字列も許容する
+          }),
       ),
     })
-    .passthrough()
+    .passthrough(),
 );
 export type MemberScopeV3 = z.input<typeof memberScopeV3Schema>;
 
@@ -72,9 +74,11 @@ const roomScopeV3Schema = z.intersection(
        */
       methods: z.array(
         // 型補完のため enum で定義しておく
-        z.enum(roomMethods).refine((arg) => {
-          return typeof arg === 'string'; // バリデーションとしては RoomMethod 以外の文字列も許容する
-        })
+        z
+          .enum(roomMethods)
+          .refine((arg) => {
+            return typeof arg === 'string'; // バリデーションとしては RoomMethod 以外の文字列も許容する
+          }),
       ),
       /** memberリソースに関するオブジェクトを指定 */
       member: memberScopeV3Schema.optional(),
@@ -87,7 +91,7 @@ const roomScopeV3Schema = z.intersection(
         })
         .optional(),
     })
-    .passthrough()
+    .passthrough(),
 );
 export type RoomScopeV3 = z.input<typeof roomScopeV3Schema>;
 

@@ -1,15 +1,14 @@
 import {
   BackOff,
   HttpClient,
-  HttpResponse,
-  LogFormat,
+  type HttpResponse,
+  type LogFormat,
   Logger,
-  LogLevel,
+  type LogLevel,
 } from '@skyway-sdk/common';
-import { ConsumerOptions } from 'mediasoup-client/lib/Consumer';
-import { DataConsumerOptions } from 'mediasoup-client/lib/DataConsumer';
-import { RtpCapabilities } from 'mediasoup-client/lib/RtpParameters';
-import {
+import type { ConsumerOptions } from 'mediasoup-client/lib/Consumer';
+import type { RtpCapabilities } from 'mediasoup-client/lib/RtpParameters';
+import type {
   IceParameters,
   TransportOptions,
 } from 'mediasoup-client/lib/Transport';
@@ -28,7 +27,7 @@ export class SFURestApiClient {
 
   constructor(
     private _token: string,
-    _options: Partial<SFUApiOptions> & Pick<SFUApiOptions, 'log'>
+    _options: Partial<SFUApiOptions> & Pick<SFUApiOptions, 'log'>,
   ) {
     this.options = {
       ...defaultSFUApiOptions,
@@ -104,7 +103,7 @@ export class SFURestApiClient {
           appId,
           channelId,
         },
-        { headers: { authorization: `Bearer ${this._token}` } }
+        { headers: { authorization: `Bearer ${this._token}` } },
       )
       .catch((e: HttpResponse) => {
         throw this._commonErrorHandler(e, 'SFURestApiClient.createBot');
@@ -174,7 +173,7 @@ export class SFURestApiClient {
           botId,
           memberId: publisherId,
           payload: { publicationId, count: backOff.count },
-        })
+        }),
       );
     }
 
@@ -203,7 +202,7 @@ export class SFURestApiClient {
           retry: async () => {
             return await backOff.wait();
           },
-        }
+        },
       )
       .catch((e: HttpResponse) => {
         throw this._commonErrorHandler(e, 'SFURestApiClient.createProducer');
@@ -217,7 +216,7 @@ export class SFURestApiClient {
           detail: 'success to retry createProducer',
           botId,
           payload: { forwardingId, transportId, count: backOff.count },
-        })
+        }),
       );
     }
 
@@ -281,7 +280,7 @@ export class SFURestApiClient {
             return await backOff.wait();
           },
           headers: { authorization: `Bearer ${this._token}` },
-        }
+        },
       )
       .catch((e: HttpResponse) => {
         if (e.status === 429) {
@@ -311,7 +310,7 @@ export class SFURestApiClient {
           detail: 'success to retry createConsumer',
           botId,
           payload: { forwardingId, count: backOff.count },
-        })
+        }),
       );
     }
     log.debug('response of createConsumer', res);
@@ -347,7 +346,7 @@ export class SFURestApiClient {
           operationName: 'SFURestApiClient.connect',
           detail: 'success to retry connect',
           payload: { transportId, count: backOff.count },
-        })
+        }),
       );
     }
 
@@ -371,12 +370,12 @@ export class SFURestApiClient {
         { transportId, spatialLayer, publicationId },
         {
           headers: { authorization: `Bearer ${this._token}` },
-        }
+        },
       )
       .catch((e: HttpResponse) => {
         throw this._commonErrorHandler(
           e,
-          'SFURestApiClient.changeConsumerLayer'
+          'SFURestApiClient.changeConsumerLayer',
         );
       });
 
@@ -410,7 +409,7 @@ export class SFURestApiClient {
       .put<{ iceParameters: IceParameters }>(
         `/transports/connections/ice`,
         { transportId },
-        { headers: this._headers }
+        { headers: this._headers },
       )
       .catch((e: HttpResponse) => {
         throw this._commonErrorHandler(e, 'SFURestApiClient.iceRestart');
@@ -440,12 +439,12 @@ export class SFURestApiClient {
           retry: async () => {
             return await backOff.wait();
           },
-        }
+        },
       )
       .catch((e: HttpResponse) => {
         throw this._commonErrorHandler(
           e,
-          'SFURestApiClient.getRtpCapabilities'
+          'SFURestApiClient.getRtpCapabilities',
         );
       });
 
@@ -457,7 +456,7 @@ export class SFURestApiClient {
           detail: 'getCapabilities to retry connect',
           botId,
           payload: { forwardingId, count: backOff.count },
-        })
+        }),
       );
     }
 
@@ -493,7 +492,7 @@ export class SFURestApiClient {
       .catch((e: HttpResponse) => {
         throw this._commonErrorHandler(
           e,
-          'SFURestApiClient.confirmSubscription'
+          'SFURestApiClient.confirmSubscription',
         );
       });
     log.debug('response of confirmSubscription', res);

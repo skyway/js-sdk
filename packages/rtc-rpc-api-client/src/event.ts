@@ -1,6 +1,4 @@
-import { Subscription } from '@skyway-sdk/model';
-import { Publication } from '@skyway-sdk/model';
-import { Member } from '@skyway-sdk/model';
+import type { Member, Publication, Subscription } from '@skyway-sdk/model';
 
 export type ChannelEvent =
   | ChannelCreatedEvent

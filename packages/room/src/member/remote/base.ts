@@ -1,16 +1,16 @@
 import { Event, EventDisposer, Logger } from '@skyway-sdk/common';
 import {
-  Member,
-  RemoteAudioStream,
-  RemoteDataStream,
+  type Member,
+  type RemoteAudioStream,
+  type RemoteDataStream,
   RemotePersonImpl,
-  RemoteVideoStream,
+  type RemoteVideoStream,
 } from '@skyway-sdk/core';
 
 import { errors } from '../../errors';
-import { RoomMember, RoomMemberImpl } from '../../member';
-import { Room } from '../../room/default';
-import { RoomSubscription } from '../../subscription';
+import { type RoomMember, RoomMemberImpl } from '../../member';
+import type { Room } from '../../room/default';
+import type { RoomSubscription } from '../../subscription';
 import { createError } from '../../util';
 
 const log = new Logger('packages/room/src/member/remote/base.ts');
@@ -27,7 +27,7 @@ export interface RemoteRoomMember extends RoomMember {
   readonly onPublicationListChanged: Event<void>;
   /**@description [japanese] この RemoteRoomMember にPublicationをSubscribeさせる */
   subscribe: (
-    publicationId: string
+    publicationId: string,
   ) => Promise<{ subscription: RoomSubscription }>;
   /**@description [japanese] この RemoteRoomMember にPublicationをUnsubscribeさせる */
   unsubscribe: (subscriptionId: string) => Promise<void>;
@@ -86,9 +86,9 @@ export class RemoteRoomMemberImpl
   }
 
   subscribe = <
-    T extends RemoteVideoStream | RemoteAudioStream | RemoteDataStream
+    T extends RemoteVideoStream | RemoteAudioStream | RemoteDataStream,
   >(
-    publicationId: string
+    publicationId: string,
   ) =>
     new Promise<{ subscription: RoomSubscription<T> }>((r, f) => {
       if (!(this.member instanceof RemotePersonImpl)) {
@@ -99,7 +99,7 @@ export class RemoteRoomMemberImpl
             room: this.room,
             info: errors.subscribeOtherMemberType,
             path: log.prefix,
-          })
+          }),
         );
         return;
       }
@@ -128,7 +128,7 @@ export class RemoteRoomMemberImpl
             room: this.room,
             info: errors.subscribeOtherMemberType,
             path: log.prefix,
-          })
+          }),
         );
         return;
       }

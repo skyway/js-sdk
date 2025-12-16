@@ -1,22 +1,26 @@
-import { OnLogForAnalyticsProps } from '@skyway-sdk/common';
-import { ContentType } from '@skyway-sdk/model';
+import type { OnLogForAnalyticsProps } from '@skyway-sdk/common';
+import type { ContentType } from '@skyway-sdk/model';
 
 import {
-  BindingRtcPeerConnectionToSubscriptionClientEvent,
+  type BindingRtcPeerConnectionToSubscriptionClientEvent,
   ClientEvent,
-  JoinReportClientEvent,
-  MediaDeviceReportClientEvent,
-  PublicationUpdateEncodingsReportClientEvent,
-  RtcPeerConnectionEventReportClientEvent,
-  SubscriptionStats,
-  SubscriptionStatsReportClientEvent,
-  SubscriptionUpdatePreferredEncodingReportClientEvent,
+  type JoinReportClientEvent,
+  type MediaDeviceReportClientEvent,
+  type PublicationUpdateEncodingsReportClientEvent,
+  type RtcPeerConnectionEventReportClientEvent,
+  type SubscriptionStats,
+  type SubscriptionStatsReportClientEvent,
+  type SubscriptionUpdatePreferredEncodingReportClientEvent,
 } from './clientEvent';
-import { AcknowledgePayload, ConnectionFailedEventPayload, isAcknowledgePayload } from './payloadTypes';
-import { ConnectionState, ServerEvent, Socket } from './socket';
+import {
+  type AcknowledgePayload,
+  type ConnectionFailedEventPayload,
+  isAcknowledgePayload,
+} from './payloadTypes';
+import { type ConnectionState, type ServerEvent, Socket } from './socket';
 import { BackOff } from './utils/backoff';
 import { Event } from './utils/event';
-import { Logger } from './utils/logger';
+import type { Logger } from './utils/logger';
 
 const ANALYTICS_LOGGING_SERVER_DOMAIN = 'analytics-logging.skyway.ntt.com';
 const API_VERSION = 'v2';
@@ -36,11 +40,15 @@ type AnalyticsClientOptions = {
 
 type AnalyticsClientInternalOptions = Required<AnalyticsClientOptions>;
 type MediaDeviceReport = MediaDeviceReportClientEvent['payload'];
-type BindingRtcPeerConnectionToSubscription = BindingRtcPeerConnectionToSubscriptionClientEvent['payload'];
+type BindingRtcPeerConnectionToSubscription =
+  BindingRtcPeerConnectionToSubscriptionClientEvent['payload'];
 type SubscriptionStatsReport = SubscriptionStatsReportClientEvent['payload'];
-type RtcPeerConnectionEventReport = RtcPeerConnectionEventReportClientEvent['payload'];
-type PublicationUpdateEncodingsReport = PublicationUpdateEncodingsReportClientEvent['payload'];
-type SubscriptionUpdatePreferredEncodingReport = SubscriptionUpdatePreferredEncodingReportClientEvent['payload'];
+type RtcPeerConnectionEventReport =
+  RtcPeerConnectionEventReportClientEvent['payload'];
+type PublicationUpdateEncodingsReport =
+  PublicationUpdateEncodingsReportClientEvent['payload'];
+type SubscriptionUpdatePreferredEncodingReport =
+  SubscriptionUpdatePreferredEncodingReportClientEvent['payload'];
 type JoinReport = JoinReportClientEvent['payload'];
 
 export class AnalyticsClient {
@@ -54,7 +62,8 @@ export class AnalyticsClient {
 
   readonly onConnectionFailed = new Event<void>();
 
-  readonly onAnalyticsNotEnabledError = new Event<ConnectionFailedEventPayload>();
+  readonly onAnalyticsNotEnabledError =
+    new Event<ConnectionFailedEventPayload>();
 
   private _token: string;
 
@@ -66,9 +75,15 @@ export class AnalyticsClient {
 
   private _isClosed = false;
 
-  private _responseCallbacks: Map<string, (data: Record<string, unknown>) => void> = new Map();
+  private _responseCallbacks: Map<
+    string,
+    (data: Record<string, unknown>) => void
+  > = new Map();
 
-  private _acknowledgeCallbacks: Map<string, (data: AcknowledgePayload) => void> = new Map();
+  private _acknowledgeCallbacks: Map<
+    string,
+    (data: AcknowledgePayload) => void
+  > = new Map();
 
   private _mediaDeviceVersion: Map<string, number> = new Map();
 
@@ -76,7 +91,10 @@ export class AnalyticsClient {
 
   private _preferredEncodingVersion: Map<string, number> = new Map();
 
-  private _previousSubscriptionStats: Map<string, { stats: RTCStatsReport; createdAt: number }> = new Map();
+  private _previousSubscriptionStats: Map<
+    string,
+    { stats: RTCStatsReport; createdAt: number }
+  > = new Map();
 
   private _statsRequest: {
     intervalSec: number;
@@ -102,7 +120,10 @@ export class AnalyticsClient {
 
   private static readonly MAX_PENDING_SDK_LOGS = 50;
 
-  constructor({ token, sdkVersion, contextId }: AnalyticsClientParams, options?: AnalyticsClientOptions) {
+  constructor(
+    { token, sdkVersion, contextId }: AnalyticsClientParams,
+    options?: AnalyticsClientOptions,
+  ) {
     this._token = token;
     this._newToken = undefined;
     this._sdkVersion = sdkVersion;
@@ -130,7 +151,10 @@ export class AnalyticsClient {
 
     this._sdkLogTimer = setInterval(() => {
       if (this._pendingSdkLogs.length > 0) {
-        const logs = this._pendingSdkLogs.splice(0, this._pendingSdkLogs.length);
+        const logs = this._pendingSdkLogs.splice(
+          0,
+          this._pendingSdkLogs.length,
+        );
         this.sendSdkLogReport(logs).catch((err) => {
           this._logger.warn('sendSdkLogReport (interval) failed', err);
         });
@@ -145,7 +169,9 @@ export class AnalyticsClient {
   async connect(): Promise<void> {
     const WSProtocol = this._options.secure ? 'wss' : 'ws';
 
-    const analyticsLoggingServerDomain = this._options.analyticsLoggingServerDomain || ANALYTICS_LOGGING_SERVER_DOMAIN;
+    const analyticsLoggingServerDomain =
+      this._options.analyticsLoggingServerDomain ||
+      ANALYTICS_LOGGING_SERVER_DOMAIN;
 
     this._socket = new Socket({
       sessionEndpoint: `${WSProtocol}://${analyticsLoggingServerDomain}/${API_VERSION}/client/ws`,
@@ -190,7 +216,10 @@ export class AnalyticsClient {
       this._statsRequest = openServerEventPayload.statsRequest;
       return;
     } else {
-      this._logger.error('First time connection payload is undefined', new Error());
+      this._logger.error(
+        'First time connection payload is undefined',
+        new Error(),
+      );
       this.onConnectionFailed.emit();
       return;
     }
@@ -200,7 +229,10 @@ export class AnalyticsClient {
     const shouldImmediateSend = log.level === 'warn' || log.level === 'error';
     this._pendingSdkLogs.push(log);
 
-    if (shouldImmediateSend || this._pendingSdkLogs.length >= AnalyticsClient.MAX_PENDING_SDK_LOGS) {
+    if (
+      shouldImmediateSend ||
+      this._pendingSdkLogs.length >= AnalyticsClient.MAX_PENDING_SDK_LOGS
+    ) {
       const logsToSend = [...this._pendingSdkLogs];
       this._pendingSdkLogs.length = 0;
       this.sendSdkLogReport(logsToSend).catch((err) => {
@@ -240,14 +272,21 @@ export class AnalyticsClient {
     this._acknowledgeCallbacks.clear();
   }
 
-  async sendMediaDeviceReport(report: Omit<MediaDeviceReport, 'mediaDeviceVersion'>): Promise<void> {
-    let currentMediaDeviceVersion = this._mediaDeviceVersion.get(report.publicationId);
+  async sendMediaDeviceReport(
+    report: Omit<MediaDeviceReport, 'mediaDeviceVersion'>,
+  ): Promise<void> {
+    let currentMediaDeviceVersion = this._mediaDeviceVersion.get(
+      report.publicationId,
+    );
     if (currentMediaDeviceVersion === undefined) {
       currentMediaDeviceVersion = 0;
     } else {
       currentMediaDeviceVersion++;
     }
-    this._mediaDeviceVersion.set(report.publicationId, currentMediaDeviceVersion);
+    this._mediaDeviceVersion.set(
+      report.publicationId,
+      currentMediaDeviceVersion,
+    );
     const payload: MediaDeviceReport = {
       publicationId: report.publicationId,
       mediaDeviceName: report.mediaDeviceName,
@@ -259,7 +298,10 @@ export class AnalyticsClient {
     const clientEvent = new ClientEvent('MediaDeviceReport', payload);
 
     await this._sendClientEvent(clientEvent).catch((err) => {
-      this._logger.warn('_sendClientEvent in sendMediaDeviceReport is failed', err);
+      this._logger.warn(
+        '_sendClientEvent in sendMediaDeviceReport is failed',
+        err,
+      );
     });
   }
 
@@ -269,7 +311,9 @@ export class AnalyticsClient {
       timestamp: l.timestamp,
       level: l.level,
       message: Array.isArray(l.message)
-        ? l.message.map((m) => (typeof m === 'string' ? m : JSON.stringify(m))).join(',')
+        ? l.message
+            .map((m) => (typeof m === 'string' ? m : JSON.stringify(m)))
+            .join(',')
         : String(l.message),
     }));
     const clientEvent = new ClientEvent('SdkLog', {
@@ -282,11 +326,19 @@ export class AnalyticsClient {
     });
   }
 
-  async sendBindingRtcPeerConnectionToSubscription(bindingData: BindingRtcPeerConnectionToSubscription): Promise<void> {
-    const clientEvent = new ClientEvent('BindingRtcPeerConnectionToSubscription', bindingData);
+  async sendBindingRtcPeerConnectionToSubscription(
+    bindingData: BindingRtcPeerConnectionToSubscription,
+  ): Promise<void> {
+    const clientEvent = new ClientEvent(
+      'BindingRtcPeerConnectionToSubscription',
+      bindingData,
+    );
 
     await this._sendClientEvent(clientEvent).catch((err) => {
-      this._logger.warn('_sendClientEvent in sendBindingRtcPeerConnectionToSubscription is failed', err);
+      this._logger.warn(
+        '_sendClientEvent in sendBindingRtcPeerConnectionToSubscription is failed',
+        err,
+      );
     });
   }
 
@@ -302,7 +354,9 @@ export class AnalyticsClient {
      * 代わりにcandidate-pairにselectedが含まれているのでFFではこれを利用する。
      */
     const connectedTransport = Array.from(report.values()).find(
-      (rtcStatsReportValue) => rtcStatsReportValue.type === 'transport' && rtcStatsReportValue.dtlsState === 'connected'
+      (rtcStatsReportValue) =>
+        rtcStatsReportValue.type === 'transport' &&
+        rtcStatsReportValue.dtlsState === 'connected',
     );
     const candidatePairKeys = [];
     if (connectedTransport) {
@@ -314,14 +368,15 @@ export class AnalyticsClient {
         (rtcStatsReportValue) =>
           rtcStatsReportValue.type === 'candidate-pair' &&
           rtcStatsReportValue.nominated &&
-          rtcStatsReportValue.id === connectedTransport?.selectedCandidatePairId
+          rtcStatsReportValue.id ===
+            connectedTransport?.selectedCandidatePairId,
       );
       if (nominatedCandidatePair) {
         candidatePairKeys.push(
           nominatedCandidatePair.id,
           nominatedCandidatePair.localCandidateId,
           nominatedCandidatePair.remoteCandidateId,
-          nominatedCandidatePair.transportId
+          nominatedCandidatePair.transportId,
         );
       }
     } else {
@@ -331,20 +386,27 @@ export class AnalyticsClient {
        */
       const nominatedCandidatePair = Array.from(report.values()).find(
         (rtcStatsReportValue) =>
-          rtcStatsReportValue.type === 'candidate-pair' && rtcStatsReportValue.nominated && rtcStatsReportValue.selected
+          rtcStatsReportValue.type === 'candidate-pair' &&
+          rtcStatsReportValue.nominated &&
+          rtcStatsReportValue.selected,
       );
       if (nominatedCandidatePair) {
         candidatePairKeys.push(
           nominatedCandidatePair.id,
           nominatedCandidatePair.localCandidateId,
           nominatedCandidatePair.remoteCandidateId,
-          nominatedCandidatePair.transportId
+          nominatedCandidatePair.transportId,
         );
       }
     }
 
     const filteredReport: Map<string, object> = new Map();
-    const duplicatableTypes = ['candidate-pair', 'local-candidate', 'remote-candidate', 'transport'];
+    const duplicatableTypes = [
+      'candidate-pair',
+      'local-candidate',
+      'remote-candidate',
+      'transport',
+    ];
     for (const [key, rtcStatsReportValue] of report.entries()) {
       if (duplicatableTypes.includes(rtcStatsReportValue.type)) {
         // 重複し得るstats typeはnominateされたcandidate-pairから選出する
@@ -358,7 +420,9 @@ export class AnalyticsClient {
     return filteredReport as RTCStatsReport;
   }
 
-  private bundleStatsReportByStatsType(report: RTCStatsReport): Record<string, Record<string, unknown>> {
+  private bundleStatsReportByStatsType(
+    report: RTCStatsReport,
+  ): Record<string, Record<string, unknown>> {
     const stats: SubscriptionStats = {};
     for (const v of report.values()) {
       stats[v.type] = v;
@@ -368,9 +432,13 @@ export class AnalyticsClient {
 
   async sendSubscriptionStatsReport(
     report: RTCStatsReport,
-    subscriptionParams: Omit<SubscriptionStatsReport, 'stats'> & { contentType: ContentType }
+    subscriptionParams: Omit<SubscriptionStatsReport, 'stats'> & {
+      contentType: ContentType;
+    },
   ): Promise<void> {
-    const previousSubscriptionStat = this._previousSubscriptionStats.get(subscriptionParams.subscriptionId);
+    const previousSubscriptionStat = this._previousSubscriptionStats.get(
+      subscriptionParams.subscriptionId,
+    );
     this._previousSubscriptionStats.set(subscriptionParams.subscriptionId, {
       stats: report,
       createdAt: subscriptionParams.createdAt,
@@ -380,22 +448,32 @@ export class AnalyticsClient {
       // 初回の場合は時間あたりの値が出せないので送信しない
       return;
     }
-    const filteredPreviousSubscriptionStats = this.filterStatsReport(previousSubscriptionStat.stats);
-    const prevBundledSubscriptionStats = this.bundleStatsReportByStatsType(filteredPreviousSubscriptionStats);
+    const filteredPreviousSubscriptionStats = this.filterStatsReport(
+      previousSubscriptionStat.stats,
+    );
+    const prevBundledSubscriptionStats = this.bundleStatsReportByStatsType(
+      filteredPreviousSubscriptionStats,
+    );
 
     const previousCreatedAt = previousSubscriptionStat.createdAt;
     const duration = (subscriptionParams.createdAt - previousCreatedAt) / 1000; // mills to sec.
     if (duration <= 0) {
-      throw new Error('duration must be greater than 0. also sendSubscriptionStatsReport was duplicated.');
+      throw new Error(
+        'duration must be greater than 0. also sendSubscriptionStatsReport was duplicated.',
+      );
     }
 
     const filteredStatsReport = this.filterStatsReport(report);
-    const bundledStatsReport = this.bundleStatsReportByStatsType(filteredStatsReport);
+    const bundledStatsReport =
+      this.bundleStatsReportByStatsType(filteredStatsReport);
 
     // StatsReportから必要な値だけを抽出してSubscriptionStatsに格納する
     const subscriptionStats: SubscriptionStats = {};
     for (const { type, properties } of this._statsRequest.types) {
-      for (const [prop, { normalization: normRequired, outputKey, contentType }] of Object.entries(properties)) {
+      for (const [
+        prop,
+        { normalization: normRequired, outputKey, contentType },
+      ] of Object.entries(properties)) {
         if (!contentType.includes(subscriptionParams.contentType)) {
           continue;
         }
@@ -410,7 +488,8 @@ export class AnalyticsClient {
             continue;
           }
 
-          const perSecondValue = (Number(statsReport[prop]) - Number(previousValue)) / duration;
+          const perSecondValue =
+            (Number(statsReport[prop]) - Number(previousValue)) / duration;
           subscriptionStats[type] = {
             ...subscriptionStats[type],
             [outputKey]: String(perSecondValue),
@@ -433,22 +512,32 @@ export class AnalyticsClient {
     const clientEvent = new ClientEvent('SubscriptionStatsReport', payload);
 
     await this._sendClientEvent(clientEvent).catch((err) => {
-      this._logger.warn('_sendClientEvent in sendSubscriptionStatsReport is failed', err);
+      this._logger.warn(
+        '_sendClientEvent in sendSubscriptionStatsReport is failed',
+        err,
+      );
     });
   }
 
-  async sendRtcPeerConnectionEventReport(report: RtcPeerConnectionEventReport): Promise<void> {
+  async sendRtcPeerConnectionEventReport(
+    report: RtcPeerConnectionEventReport,
+  ): Promise<void> {
     const clientEvent = new ClientEvent('RtcPeerConnectionEventReport', report);
 
     await this._sendClientEvent(clientEvent).catch((err) => {
-      this._logger.warn('_sendClientEvent in sendRtcPeerConnectionEventReport is failed', err);
+      this._logger.warn(
+        '_sendClientEvent in sendRtcPeerConnectionEventReport is failed',
+        err,
+      );
     });
   }
 
   async sendPublicationUpdateEncodingsReport(
-    report: Omit<PublicationUpdateEncodingsReport, 'encodingsVersion'>
+    report: Omit<PublicationUpdateEncodingsReport, 'encodingsVersion'>,
   ): Promise<void> {
-    let currentEncodingsVersion = this._encodingsVersion.get(report.publicationId);
+    let currentEncodingsVersion = this._encodingsVersion.get(
+      report.publicationId,
+    );
     if (currentEncodingsVersion === undefined) {
       currentEncodingsVersion = 0;
     } else {
@@ -462,23 +551,37 @@ export class AnalyticsClient {
       updatedAt: report.updatedAt,
     };
 
-    const clientEvent = new ClientEvent('PublicationUpdateEncodingsReport', payload);
+    const clientEvent = new ClientEvent(
+      'PublicationUpdateEncodingsReport',
+      payload,
+    );
 
     await this._sendClientEvent(clientEvent).catch((err) => {
-      this._logger.warn('_sendClientEvent in sendPublicationUpdateEncodingsReport is failed', err);
+      this._logger.warn(
+        '_sendClientEvent in sendPublicationUpdateEncodingsReport is failed',
+        err,
+      );
     });
   }
 
   async sendSubscriptionUpdatePreferredEncodingReport(
-    report: Omit<SubscriptionUpdatePreferredEncodingReport, 'preferredEncodingVersion'>
+    report: Omit<
+      SubscriptionUpdatePreferredEncodingReport,
+      'preferredEncodingVersion'
+    >,
   ): Promise<void> {
-    let currentPreferredEncodingVersion = this._preferredEncodingVersion.get(report.subscriptionId);
+    let currentPreferredEncodingVersion = this._preferredEncodingVersion.get(
+      report.subscriptionId,
+    );
     if (currentPreferredEncodingVersion === undefined) {
       currentPreferredEncodingVersion = 0;
     } else {
       currentPreferredEncodingVersion++;
     }
-    this._preferredEncodingVersion.set(report.subscriptionId, currentPreferredEncodingVersion);
+    this._preferredEncodingVersion.set(
+      report.subscriptionId,
+      currentPreferredEncodingVersion,
+    );
     const payload: SubscriptionUpdatePreferredEncodingReport = {
       subscriptionId: report.subscriptionId,
       preferredEncodingIndex: report.preferredEncodingIndex,
@@ -486,10 +589,16 @@ export class AnalyticsClient {
       updatedAt: report.updatedAt,
     };
 
-    const clientEvent = new ClientEvent('SubscriptionUpdatePreferredEncodingReport', payload);
+    const clientEvent = new ClientEvent(
+      'SubscriptionUpdatePreferredEncodingReport',
+      payload,
+    );
 
     await this._sendClientEvent(clientEvent).catch((err) => {
-      this._logger.warn('_sendClientEvent in sendSubscriptionUpdatePreferredEncodingReport is failed', err);
+      this._logger.warn(
+        '_sendClientEvent in sendSubscriptionUpdatePreferredEncodingReport is failed',
+        err,
+      );
     });
   }
 
@@ -502,8 +611,11 @@ export class AnalyticsClient {
   }
 
   private async _sendClientEvent(clientEvent: ClientEvent): Promise<void> {
-    return new Promise(async (resolve, reject) => {
-      if (this._socket === undefined || this._socket.connectionState === 'closed') {
+    return new Promise((resolve, reject) => {
+      if (
+        this._socket === undefined ||
+        this._socket.connectionState === 'closed'
+      ) {
         reject(new Error('websocket is not connected'));
         return;
       }
@@ -511,84 +623,107 @@ export class AnalyticsClient {
       // 初回の接続に時間がかかっている場合はここで再送用のキューとacknowledgeのリストに入れる
       if (this._socket.connectionState === 'connecting') {
         this._socket.pushResendClientEventsQueue(clientEvent);
-        this._setAcknowledgeCallback(clientEvent.id, async (data: AcknowledgePayload) => {
-          if (data.ok) {
-            this._acknowledgeCallbacks.delete(clientEvent.id);
-            resolve();
-          } else {
-            this._acknowledgeCallbacks.delete(clientEvent.id);
-            reject(data);
-          }
-        });
-        this._logger.debug(`pushResendClientEventsQueue and setAcknowledgeCallback. clientEvent.id: ${clientEvent.id}`);
+        this._setAcknowledgeCallback(
+          clientEvent.id,
+          async (data: AcknowledgePayload) => {
+            if (data.ok) {
+              this._acknowledgeCallbacks.delete(clientEvent.id);
+              resolve();
+            } else {
+              this._acknowledgeCallbacks.delete(clientEvent.id);
+              reject(data);
+            }
+          },
+        );
+        this._logger.debug(
+          `pushResendClientEventsQueue and setAcknowledgeCallback. clientEvent.id: ${clientEvent.id}`,
+        );
         reject(new Error('websocket is connecting now'));
         return;
       }
 
-      const backoff = new BackOff({ times: 6, interval: 500, jitter: 100 });
-      for (; !backoff.exceeded; ) {
-        const timer = setTimeout(async () => {
-          if (this._socket === undefined) {
+      const executeAsync = async () => {
+        const backoff = new BackOff({ times: 6, interval: 500, jitter: 100 });
+        for (; !backoff.exceeded; ) {
+          const timer = setTimeout(async () => {
+            if (this._socket === undefined) {
+              this._acknowledgeCallbacks.delete(clientEvent.id);
+              reject(new Error('Socket closed when trying to resend'));
+              return;
+            } else {
+              this._socket.resendAfterReconnect(clientEvent);
+            }
+            reject(new Error('Timeout to send data'));
+            return;
+          }, TIMEOUT_SEC * 1000);
+
+          // 送信に失敗した際の再送ロジックはsend()内で処理される
+          this._logger.debug(
+            `send clientEvent, ${JSON.stringify(clientEvent)}`,
+          );
+          if (this._socket) {
+            this._socket.send(clientEvent).catch((err) => {
+              this._acknowledgeCallbacks.delete(clientEvent.id);
+              clearTimeout(timer);
+              reject(err);
+              return;
+            });
+          } else {
             this._acknowledgeCallbacks.delete(clientEvent.id);
-            reject(new Error('Socket closed when trying to resend'));
+            clearTimeout(timer);
+            reject(new Error('Socket is undefined'));
             return;
-          } else {
-            this._socket.resendAfterReconnect(clientEvent);
           }
-          reject(new Error('Timeout to send data'));
-          return;
-        }, TIMEOUT_SEC * 1000);
 
-        // 送信に失敗した際の再送ロジックはsend()内で処理される
-        this._logger.debug(`send clientEvent, ${JSON.stringify(clientEvent)}`);
-        this._socket.send(clientEvent).catch((err) => {
-          this._acknowledgeCallbacks.delete(clientEvent.id);
+          /**
+           * _waitForAcknowledgeはresultに次の2種類の値を返す
+           * 1. undefined: 送信が成功し、undefinedでresolveされた場合
+           * 2. AcknowledgePayload型の値:送信は成功したがサーバーから ok: false のacknowledgeが返されたため、acknowledge payloadでrejectされた場合
+           * 何らかのエラーによってrejectされた場合:
+           * これは_messageHandlerで弾かれるので考慮しなくて良い．
+           */
+          const result = await this._waitForAcknowledge(clientEvent.id).catch(
+            (err) => {
+              return err;
+            },
+          );
           clearTimeout(timer);
-          reject(err);
-          return;
-        });
 
-        /**
-         * _waitForAcknowledgeはresultに次の2種類の値を返す
-         * 1. undefined: 送信が成功し、undefinedでresolveされた場合
-         * 2. AcknowledgePayload型の値:送信は成功したがサーバーから ok: false のacknowledgeが返されたため、acknowledge payloadでrejectされた場合
-         * 何らかのエラーによってrejectされた場合:
-         * これは_messageHandlerで弾かれるので考慮しなくて良い．
-         */
-        const result = await this._waitForAcknowledge(clientEvent.id).catch((err) => {
-          return err;
-        });
-        clearTimeout(timer);
-
-        if (isAcknowledgePayload(result)) {
-          if (result.reason === 'unexpected') {
-            await backoff.wait();
+          if (isAcknowledgePayload(result)) {
+            if (result.reason === 'unexpected') {
+              await backoff.wait();
+            } else {
+              reject(result);
+              return;
+            }
           } else {
-            reject(result);
+            resolve();
             return;
           }
-        } else {
-          resolve();
-          return;
         }
-      }
 
-      reject(new Error('unexpected has occurred at server'));
-      return;
+        reject(new Error('unexpected has occurred at server'));
+        return;
+      };
+
+      executeAsync().catch(reject);
     });
   }
 
   private async _waitForAcknowledge(clientEventId: string): Promise<void> {
     return new Promise((resolve, reject) => {
-      this._setAcknowledgeCallback(clientEventId, async (data: AcknowledgePayload) => {
-        if (data.ok) {
-          this._acknowledgeCallbacks.delete(clientEventId);
-          resolve();
-        } else {
-          this._acknowledgeCallbacks.delete(clientEventId);
-          reject(data);
-        }
-      });
+      this._setAcknowledgeCallback(
+        clientEventId,
+        async (data: AcknowledgePayload) => {
+          if (data.ok) {
+            this._acknowledgeCallbacks.delete(clientEventId);
+            resolve();
+          } else {
+            this._acknowledgeCallbacks.delete(clientEventId);
+            reject(data);
+          }
+        },
+      );
     });
   }
 
@@ -636,7 +771,10 @@ export class AnalyticsClient {
     }
   }
 
-  private _setAcknowledgeCallback(eventId: string, callback: (data: AcknowledgePayload) => Promise<void>) {
+  private _setAcknowledgeCallback(
+    eventId: string,
+    callback: (data: AcknowledgePayload) => Promise<void>,
+  ) {
     this._acknowledgeCallbacks.set(eventId, callback);
   }
 
@@ -652,7 +790,11 @@ export class AnalyticsClient {
   }
 
   isConnectionEstablished() {
-    if (!this._socket || this._socket.connectionState === 'connecting' || this._socket.connectionState === 'closed') {
+    if (
+      !this._socket ||
+      this._socket.connectionState === 'connecting' ||
+      this._socket.connectionState === 'closed'
+    ) {
       return false;
     } else {
       return true;

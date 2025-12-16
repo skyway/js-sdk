@@ -1,9 +1,12 @@
 import { EventDisposer, Logger } from '@skyway-sdk/common';
 
-import { MessageEvent, SignalingSession } from '../../../../external/signaling';
+import type {
+  MessageEvent,
+  SignalingSession,
+} from '../../../../external/signaling';
 
 const log = new Logger(
-  'packages/core/src/plugin/internal/person/connection/messageBuffer.ts'
+  'packages/core/src/plugin/internal/person/connection/messageBuffer.ts',
 );
 
 /*

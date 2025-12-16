@@ -1,8 +1,8 @@
 import {
   nowInSec,
-  SFUFindOptions,
+  type SFUBotPluginOptions,
   SkyWayAuthToken,
-  SkyWayConfigOptions,
+  type SkyWayConfigOptions,
   uuidV4,
 } from '@skyway-sdk/room';
 
@@ -17,11 +17,11 @@ const testToken = new SkyWayAuthToken({
     appId: appId,
     rooms: [
       {
-        name: "*",
-        methods: ["create", "close", "updateMetadata"],
+        name: '*',
+        methods: ['create', 'close', 'updateMetadata'],
         member: {
-          name: "*",
-          methods: ["publish", "subscribe", "updateMetadata"],
+          name: '*',
+          methods: ['publish', 'subscribe', 'updateMetadata'],
         },
         sfu: {
           enabled: true,
@@ -29,7 +29,7 @@ const testToken = new SkyWayAuthToken({
       },
     ],
     turn: {
-      enabled: true
+      enabled: true,
     },
   },
 });
@@ -37,4 +37,4 @@ export const tokenString = testToken.encode(secret);
 export const contextOptions: Partial<SkyWayConfigOptions> = {
   log: { level: 'debug' },
 };
-export const sfuOptions: Partial<SFUFindOptions> = {};
+export const sfuOptions: Partial<SFUBotPluginOptions> = {};

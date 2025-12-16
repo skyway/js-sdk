@@ -1,6 +1,6 @@
 import { Event } from '@skyway-sdk/common';
 
-import { DataStreamMessageType, objectFlag } from '../local/data';
+import { type DataStreamMessageType, objectFlag } from '../local/data';
 import { RemoteStreamBase } from './base';
 
 export class RemoteDataStream extends RemoteStreamBase {
@@ -12,7 +12,7 @@ export class RemoteDataStream extends RemoteStreamBase {
   constructor(
     id: string,
     /**@internal */
-    public _datachannel: RTCDataChannel
+    public _datachannel: RTCDataChannel,
   ) {
     super(id, 'data');
 

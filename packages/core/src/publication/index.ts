@@ -1,29 +1,28 @@
-import { EventDisposer, Events, Logger } from '@skyway-sdk/common';
-import { Event } from '@skyway-sdk/common';
-import { Encoding } from '@skyway-sdk/model';
+import { Event, EventDisposer, Events, Logger } from '@skyway-sdk/common';
+import type { Encoding } from '@skyway-sdk/model';
 
-import { SkyWayChannelImpl } from '../channel';
-import {
+import type { SkyWayChannelImpl } from '../channel';
+import type {
   StreamSubscribedEvent,
   StreamUnsubscribedEvent,
 } from '../channel/event';
-import { SkyWayContext } from '../context';
+import type { SkyWayContext } from '../context';
 import { errors } from '../errors';
-import { AnalyticsSession } from '../external/analytics';
-import { Codec, EncodingParameters } from '../media';
-import { ContentType, WebRTCStats } from '../media/stream';
-import { LocalMediaStreamBase, LocalStream } from '../media/stream/local';
-import { LocalAudioStream } from '../media/stream/local/audio';
-import { LocalCustomVideoStream } from '../media/stream/local/customVideo';
+import type { AnalyticsSession } from '../external/analytics';
+import type { Codec, EncodingParameters } from '../media';
+import type { ContentType, WebRTCStats } from '../media/stream';
+import type { LocalMediaStreamBase, LocalStream } from '../media/stream/local';
+import type { LocalAudioStream } from '../media/stream/local/audio';
+import type { LocalCustomVideoStream } from '../media/stream/local/customVideo';
 import { LocalDataStream } from '../media/stream/local/data';
-import { LocalVideoStream } from '../media/stream/local/video';
-import { Member } from '../member';
-import {
+import type { LocalVideoStream } from '../media/stream/local/video';
+import type { Member } from '../member';
+import type {
   RemoteMember,
   RemoteMemberImplInterface,
 } from '../member/remoteMember';
-import { TransportConnectionState } from '../plugin/interface';
-import { Subscription } from '../subscription';
+import type { TransportConnectionState } from '../plugin/interface';
+import type { Subscription } from '../subscription';
 import { createError, createLogPayload, createWarnPayload } from '../util';
 
 export * from './factory';
@@ -93,7 +92,7 @@ export interface Publication<T extends LocalStream = LocalStream> {
    */
   replaceStream: (
     stream: LocalAudioStream | LocalVideoStream | LocalCustomVideoStream,
-    options?: ReplaceStreamOptions
+    options?: ReplaceStreamOptions,
   ) => void;
   /**
    * @experimental
@@ -109,7 +108,7 @@ export interface Publication<T extends LocalStream = LocalStream> {
    * @param selector [japanese] 接続相手
    */
   getRTCPeerConnection(
-    selector: Member | string
+    selector: Member | string,
   ): RTCPeerConnection | undefined;
   /**
    * @description [japanese] メディア通信の状態を取得する
@@ -243,7 +242,7 @@ export class PublicationImpl<T extends LocalStream = LocalStream>
 
   get subscriptions(): Subscription[] {
     return this._channel.subscriptions.filter(
-      (s) => s.publication.id === this.id
+      (s) => s.publication.id === this.id,
     );
   }
 
@@ -298,53 +297,59 @@ export class PublicationImpl<T extends LocalStream = LocalStream>
   }
 
   updateMetadata = (metadata: string) =>
-    new Promise<void>(async (r, f) => {
-      const timestamp = log.info(
-        '[start] updateMetadata',
-        await createLogPayload({
-          operationName: 'Publication.updateMetadata',
-          channel: this._channel,
-        }),
-        this
-      );
+    new Promise<void>((r, f) => {
+      const executeUpdate = async () => {
+        const timestamp = log.info(
+          '[start] updateMetadata',
+          await createLogPayload({
+            operationName: 'Publication.updateMetadata',
+            channel: this._channel,
+          }),
+          this,
+        );
 
-      let failed = false;
-      this._channel._updatePublicationMetadata(this.id, metadata).catch((e) => {
-        failed = true;
-        f(e);
-      });
-      this.onMetadataUpdated
-        .watch(
-          (e) => e.metadata === metadata,
-          this._context.config.rtcApi.timeout
-        )
-        .then(async () => {
-          r();
-          log.elapsed(
-            timestamp,
-            '[end] updateMetadata',
-            await createLogPayload({
-              operationName: 'Publication.updateMetadata',
-              channel: this._channel,
-            }),
-            this
-          );
-        })
-        .catch((error) => {
-          if (!failed) {
-            throw createError({
-              operationName: 'PublicationImpl.updateMetadata',
-              info: {
-                ...errors.timeout,
-                detail: 'publication onMetadataUpdated',
-              },
-              path: log.prefix,
-              context: this._context,
-              channel: this._channel,
-              error,
-            });
-          }
-        });
+        let failed = false;
+        this._channel
+          ._updatePublicationMetadata(this.id, metadata)
+          .catch((e) => {
+            failed = true;
+            f(e);
+          });
+        this.onMetadataUpdated
+          .watch(
+            (e) => e.metadata === metadata,
+            this._context.config.rtcApi.timeout,
+          )
+          .then(async () => {
+            r();
+            log.elapsed(
+              timestamp,
+              '[end] updateMetadata',
+              await createLogPayload({
+                operationName: 'Publication.updateMetadata',
+                channel: this._channel,
+              }),
+              this,
+            );
+          })
+          .catch((error) => {
+            if (!failed) {
+              throw createError({
+                operationName: 'PublicationImpl.updateMetadata',
+                info: {
+                  ...errors.timeout,
+                  detail: 'publication onMetadataUpdated',
+                },
+                path: log.prefix,
+                context: this._context,
+                channel: this._channel,
+                error,
+              });
+            }
+          });
+      };
+
+      executeUpdate().catch(f);
     });
 
   updateEncodings(encodings: EncodingParameters[]) {
@@ -363,48 +368,52 @@ export class PublicationImpl<T extends LocalStream = LocalStream>
   }
 
   disable = () =>
-    new Promise<void>(async (r, f) => {
+    new Promise<void>((r, f) => {
       // すでに disabled の場合は何もしない
       if (this.state === 'disabled') {
         r();
         return;
       }
 
-      const timestamp = log.info(
-        '[start] disable',
-        await createLogPayload({
-          operationName: 'Publication.disable',
-          channel: this._channel,
-        }),
-        this
-      );
+      const executeDisable = async () => {
+        const timestamp = log.info(
+          '[start] disable',
+          await createLogPayload({
+            operationName: 'Publication.disable',
+            channel: this._channel,
+          }),
+          this,
+        );
 
-      await this._disableStream();
+        await this._disableStream();
 
-      let failed = false;
-      this._channel._disablePublication(this.id).catch((e) => {
-        failed = true;
-        f(e);
-      });
-      this.onDisabled
-        .asPromise(this._context.config.rtcApi.timeout)
-        .then(async () => {
-          r();
-          log.elapsed(
-            timestamp,
-            '[end] disable',
-            await createLogPayload({
-              operationName: 'Publication.disable',
-              channel: this._channel,
-            }),
-            this
-          );
-        })
-        .catch((e) => {
-          if (!failed) {
-            f(e);
-          }
+        let failed = false;
+        this._channel._disablePublication(this.id).catch((e) => {
+          failed = true;
+          f(e);
         });
+        this.onDisabled
+          .asPromise(this._context.config.rtcApi.timeout)
+          .then(async () => {
+            r();
+            log.elapsed(
+              timestamp,
+              '[end] disable',
+              await createLogPayload({
+                operationName: 'Publication.disable',
+                channel: this._channel,
+              }),
+              this,
+            );
+          })
+          .catch((e) => {
+            if (!failed) {
+              f(e);
+            }
+          });
+      };
+
+      executeDisable().catch(f);
     });
 
   private async _disableStream() {
@@ -426,7 +435,7 @@ export class PublicationImpl<T extends LocalStream = LocalStream>
             operationName: 'Publication._disableStream',
             payload: e,
             detail: 'setEnabled failed',
-          })
+          }),
         );
       });
     }
@@ -436,21 +445,21 @@ export class PublicationImpl<T extends LocalStream = LocalStream>
       channel: this._channel,
     })
       .then((p) =>
-        log.info('publication _disableStream', p, { publication: this })
+        log.info('publication _disableStream', p, { publication: this }),
       )
       .catch(() => {});
   }
 
   enable = () =>
-    new Promise<void>(async (r, f) => {
-      if (this.stream == undefined) {
+    new Promise<void>((r, f) => {
+      if (this.stream === undefined) {
         f(
           createError({
             operationName: 'Publication.enable',
             context: this._context,
             info: errors.canNotEnableRemotePublication,
             path: log.prefix,
-          })
+          }),
         );
         return;
       }
@@ -461,45 +470,49 @@ export class PublicationImpl<T extends LocalStream = LocalStream>
         return;
       }
 
-      const timestamp = log.info(
-        '[start] enable',
-        await createLogPayload({
-          operationName: 'Publication.enable',
-          channel: this._channel,
-        }),
-        this
-      );
+      const executeEnable = async () => {
+        const timestamp = log.info(
+          '[start] enable',
+          await createLogPayload({
+            operationName: 'Publication.enable',
+            channel: this._channel,
+          }),
+          this,
+        );
 
-      let failed = false;
-      this._channel._enablePublication(this.id).catch((e) => {
-        failed = true;
-        f(e);
-      });
-      this._onEnabled
-        .asPromise(this._context.config.rtcApi.timeout)
-        .then(async () => {
-          await this._enableStream();
-
-          this.onEnabled.emit();
-          this.onStateChanged.emit();
-
-          log.elapsed(
-            timestamp,
-            '[end] enable',
-            await createLogPayload({
-              operationName: 'Publication.enable',
-              channel: this._channel,
-            }),
-            this
-          );
-
-          r();
-        })
-        .catch((e) => {
-          if (!failed) {
-            f(e);
-          }
+        let failed = false;
+        this._channel._enablePublication(this.id).catch((e) => {
+          failed = true;
+          f(e);
         });
+        this._onEnabled
+          .asPromise(this._context.config.rtcApi.timeout)
+          .then(async () => {
+            await this._enableStream();
+
+            this.onEnabled.emit();
+            this.onStateChanged.emit();
+
+            log.elapsed(
+              timestamp,
+              '[end] enable',
+              await createLogPayload({
+                operationName: 'Publication.enable',
+                channel: this._channel,
+              }),
+              this,
+            );
+
+            r();
+          })
+          .catch((e) => {
+            if (!failed) {
+              f(e);
+            }
+          });
+      };
+
+      executeEnable().catch(f);
     });
 
   private async _enableStream() {
@@ -516,7 +529,7 @@ export class PublicationImpl<T extends LocalStream = LocalStream>
       channel: this._channel,
     })
       .then((p) =>
-        log.info('publication _enableStream', p, { publication: this })
+        log.info('publication _enableStream', p, { publication: this }),
       )
       .catch(() => {});
 
@@ -530,7 +543,7 @@ export class PublicationImpl<T extends LocalStream = LocalStream>
             operationName: 'Publication._disableStream',
             payload: e,
             detail: 'setEnabled failed',
-          })
+          }),
         );
       });
     }
@@ -538,7 +551,7 @@ export class PublicationImpl<T extends LocalStream = LocalStream>
 
   replaceStream(
     stream: LocalAudioStream | LocalVideoStream | LocalCustomVideoStream,
-    options: ReplaceStreamOptions = {}
+    options: ReplaceStreamOptions = {},
   ) {
     log.info('replaceStream', { stream, options }, this);
 
@@ -606,7 +619,7 @@ export class PublicationImpl<T extends LocalStream = LocalStream>
   }
 
   getRTCPeerConnection(
-    selector: string | Member
+    selector: string | Member,
   ): RTCPeerConnection | undefined {
     if (!this.stream) {
       throw createError({
@@ -663,7 +676,7 @@ export type PublicationState = 'enabled' | 'disabled' | 'canceled';
 
 /**@internal */
 export const normalizeEncodings = (
-  encodings: EncodingParameters[]
+  encodings: EncodingParameters[],
 ): Encoding[] =>
   encodings.map((e, i) => ({
     ...e,
@@ -671,20 +684,22 @@ export const normalizeEncodings = (
   }));
 
 export const sortEncodingParameters = (
-  encodings: EncodingParameters[]
+  encodings: EncodingParameters[],
 ): EncodingParameters[] => {
   const [encode] = encodings;
   if (encode.maxBitrate) {
     // 小から大
-    return encodings.sort((a, b) => a.maxBitrate! - b.maxBitrate!);
+    return encodings.sort((a, b) => (a.maxBitrate ?? 0) - (b.maxBitrate ?? 0));
   } else if (encode.scaleResolutionDownBy) {
     //大から小
     return encodings.sort(
-      (a, b) => b.scaleResolutionDownBy! - a.scaleResolutionDownBy!
+      (a, b) => (b.scaleResolutionDownBy ?? 0) - (a.scaleResolutionDownBy ?? 0),
     );
   } else if (encode.maxFramerate) {
     // 小から大
-    return encodings.sort((a, b) => a.maxFramerate! - b.maxFramerate!);
+    return encodings.sort(
+      (a, b) => (a.maxFramerate ?? 0) - (b.maxFramerate ?? 0),
+    );
   }
   return encodings;
 };

@@ -18,21 +18,23 @@ const token = new SkyWayAuthToken({
   scope: {
     appId: appId,
     rooms: [
-    {
-      name: "*",
-      methods: ["create", "close", "updateMetadata"],
-      member: {
-        name: "*",
-        methods: ["publish", "subscribe", "updateMetadata"]
+      {
+        name: '*',
+        methods: ['create', 'close', 'updateMetadata'],
+        member: {
+          name: '*',
+          methods: ['publish', 'subscribe', 'updateMetadata'],
+        },
+        sfu: {
+          enabled: true,
+        },
       },
-      sfu: {
-        enabled: true
-      }
-    }],
+    ],
+
     turn: {
-      enabled: true
-    }
-  }
+      enabled: true,
+    },
+  },
 }).encode(secret);
 
 void (async () => {
@@ -40,7 +42,6 @@ void (async () => {
   const buttonArea = document.getElementById('button-area');
   const remoteMediaArea = document.getElementById('remote-media-area');
   const channelNameInput = document.getElementById('channel-name');
-
   const myId = document.getElementById('my-id');
   const joinButton = document.getElementById('join');
 

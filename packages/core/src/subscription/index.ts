@@ -1,19 +1,18 @@
-import { EventDisposer, Logger } from '@skyway-sdk/common';
-import { Event } from '@skyway-sdk/common';
+import { Event, EventDisposer, Logger } from '@skyway-sdk/common';
 
-import { SkyWayChannelImpl } from '../channel';
-import { SkyWayContext } from '../context';
+import type { SkyWayChannelImpl } from '../channel';
+import type { SkyWayContext } from '../context';
 import { errors } from '../errors';
-import { Codec } from '../media';
-import { ContentType, WebRTCStats } from '../media/stream';
-import { RemoteStream } from '../media/stream/remote';
-import { RemoteAudioStream } from '../media/stream/remote/audio';
-import { RemoteDataStream } from '../media/stream/remote/data';
-import { RemoteVideoStream } from '../media/stream/remote/video';
-import { Member } from '../member';
-import { RemoteMemberImplInterface } from '../member/remoteMember';
-import { TransportConnectionState } from '../plugin/interface';
-import { Publication, PublicationImpl } from '../publication';
+import type { Codec } from '../media';
+import type { ContentType, WebRTCStats } from '../media/stream';
+import type { RemoteStream } from '../media/stream/remote';
+import type { RemoteAudioStream } from '../media/stream/remote/audio';
+import type { RemoteDataStream } from '../media/stream/remote/data';
+import type { RemoteVideoStream } from '../media/stream/remote/video';
+import type { Member } from '../member';
+import type { RemoteMemberImplInterface } from '../member/remoteMember';
+import type { TransportConnectionState } from '../plugin/interface';
+import type { Publication, PublicationImpl } from '../publication';
 import { createError } from '../util';
 
 export * from './factory';
@@ -24,7 +23,7 @@ export interface Subscription<
   T extends
     | RemoteVideoStream
     | RemoteAudioStream
-    | RemoteDataStream = RemoteStream
+    | RemoteDataStream = RemoteStream,
 > {
   id: string;
   contentType: ContentType;
@@ -74,7 +73,7 @@ export class SubscriptionImpl<
   T extends
     | RemoteVideoStream
     | RemoteAudioStream
-    | RemoteDataStream = RemoteStream
+    | RemoteDataStream = RemoteStream,
 > implements Subscription<T>
 {
   readonly id: string;

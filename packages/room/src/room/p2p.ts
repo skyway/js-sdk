@@ -1,4 +1,4 @@
-import {
+import type {
   LocalPersonAdapter,
   LocalStream,
   PublicationImpl,
@@ -6,12 +6,12 @@ import {
 } from '@skyway-sdk/core';
 
 import {
-  LocalP2PRoomMember,
+  type LocalP2PRoomMember,
   LocalP2PRoomMemberImpl,
 } from '../member/local/p2p';
-import { RoomPublication } from '../publication';
-import { RoomBase, RoomMemberInit } from './base';
-import { Room } from './default';
+import type { RoomPublication } from '../publication';
+import { RoomBase, type RoomMemberInit } from './base';
+import type { Room } from './default';
 
 export interface P2PRoom extends Room {
   /**
@@ -30,14 +30,14 @@ export class P2PRoomImpl extends RoomBase implements P2PRoom {
   }
 
   protected _getTargetPublication(
-    publicationId: string
+    publicationId: string,
   ): RoomPublication<LocalStream> | undefined {
     return this._getPublication(publicationId);
   }
 
   protected _createLocalRoomMember<T extends LocalP2PRoomMemberImpl>(
     local: LocalPersonAdapter,
-    room: this
+    room: this,
   ): T {
     return new LocalP2PRoomMemberImpl(local, room) as T;
   }

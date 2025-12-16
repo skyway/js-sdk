@@ -2,20 +2,20 @@ import { Logger } from '@skyway-sdk/common';
 import {
   createError,
   SkyWayChannel,
-  SkyWayChannelImpl,
-  SkyWayContext,
+  type SkyWayChannelImpl,
+  type SkyWayContext,
 } from '@skyway-sdk/core';
 import {
-  SFUApiOptions,
+  type SFUApiOptions,
   SFUBotPlugin,
-  SFUBotPluginOptions,
+  type SFUBotPluginOptions,
 } from '@skyway-sdk/sfu-bot';
 
 import { errors } from '../errors';
 import { PACKAGE_VERSION } from '../version';
-import { Room, RoomImpl } from './default';
-import { P2PRoom, P2PRoomImpl } from './p2p';
-import { SFURoom, SFURoomImpl } from './sfu';
+import { type Room, RoomImpl } from './default';
+import { type P2PRoom, P2PRoomImpl } from './p2p';
+import { type SFURoom, SFURoomImpl } from './sfu';
 
 const log = new Logger('packages/room/src/room/index.ts');
 
@@ -23,6 +23,7 @@ export type { SFUApiOptions, SFUBotPluginOptions };
 
 export class SkyWayRoom {
   /**@private */
+  // biome-ignore lint/complexity/noUselessConstructor: Private constructor prevents instantiation of static-only class
   constructor() {}
 
   /**
@@ -34,13 +35,13 @@ export class SkyWayRoom {
    */
   static Create = async <Init extends RoomInit>(
     context: SkyWayContext,
-    init: Init
+    init: Init,
   ): Promise<
     Init['type'] extends 'p2p'
       ? P2PRoom
       : Init['type'] extends 'sfu'
-      ? SFURoom
-      : Room
+        ? SFURoom
+        : Room
   > => {
     log.info('room created', {
       operationName: 'SkyWayRoom._Factory',
@@ -50,7 +51,7 @@ export class SkyWayRoom {
     });
 
     const plugin = new SFUBotPlugin(
-      (init as SFURoomInit | DefaultRoomInit)?.sfuOptions
+      (init as SFURoomInit | DefaultRoomInit)?.sfuOptions,
     );
     context.registerPlugin(plugin);
 
@@ -61,7 +62,7 @@ export class SkyWayRoom {
     const room = await SkyWayRoom._Factory(
       context,
       channel as SkyWayChannelImpl,
-      init.type
+      init.type,
     );
 
     return SkyWayRoom._castRoomType(room);
@@ -77,16 +78,16 @@ export class SkyWayRoom {
   static Find = async <Options extends FindOptions>(
     context: SkyWayContext,
     query: { id?: string; name?: string },
-    options?: Options
+    options?: Options,
   ): Promise<
     Options['type'] extends 'p2p'
       ? P2PRoom
       : Options['type'] extends 'sfu'
-      ? SFURoom
-      : Room
+        ? SFURoom
+        : Room
   > => {
     const plugin = new SFUBotPlugin(
-      (options as SFUFindOptions | DefaultFindOptions)?.sfuOptions
+      (options as SFUFindOptions | DefaultFindOptions)?.sfuOptions,
     );
     context.registerPlugin(plugin);
 
@@ -95,7 +96,7 @@ export class SkyWayRoom {
     const room = await SkyWayRoom._Factory(
       context,
       channel as SkyWayChannelImpl,
-      roomType
+      roomType,
     );
 
     return SkyWayRoom._castRoomType(room);
@@ -110,16 +111,16 @@ export class SkyWayRoom {
    */
   static FindOrCreate = async <Init extends RoomInit>(
     context: SkyWayContext,
-    init: Init
+    init: Init,
   ): Promise<
     Init['type'] extends 'p2p'
       ? P2PRoom
       : Init['type'] extends 'sfu'
-      ? SFURoom
-      : Room
+        ? SFURoom
+        : Room
   > => {
     const plugin = new SFUBotPlugin(
-      (init as SFURoomInit | DefaultRoomInit)?.sfuOptions
+      (init as SFURoomInit | DefaultRoomInit)?.sfuOptions,
     );
     context.registerPlugin(plugin);
 
@@ -129,7 +130,7 @@ export class SkyWayRoom {
     const room = await SkyWayRoom._Factory(
       context,
       channel as SkyWayChannelImpl,
-      init.type
+      init.type,
     );
 
     return SkyWayRoom._castRoomType(room);
@@ -138,7 +139,7 @@ export class SkyWayRoom {
   private static _Factory = async (
     context: SkyWayContext,
     channel: SkyWayChannelImpl,
-    roomType?: RoomType
+    roomType?: RoomType,
   ): Promise<P2PRoom | SFURoom | Room> => {
     const type = roomType ?? 'default';
 
@@ -164,8 +165,8 @@ export class SkyWayRoom {
     return room as RoomType extends 'p2p'
       ? P2PRoom
       : RoomType extends 'sfu'
-      ? SFURoom
-      : Room;
+        ? SFURoom
+        : Room;
   };
 }
 

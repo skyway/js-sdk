@@ -1,5 +1,5 @@
-import { Event } from '@skyway-sdk/common';
-import { ChannelEvent } from '@skyway-sdk/rtc-rpc-api-client';
+import type { Event } from '@skyway-sdk/common';
+import type { ChannelEvent } from '@skyway-sdk/rtc-rpc-api-client';
 
 export interface EventObserver {
   onEvent: Event<ChannelEvent>;

@@ -1,4 +1,4 @@
-import { defineConfig, ViteUserConfig } from 'vitest/config';
+import { defineConfig, type ViteUserConfig } from 'vitest/config';
 
 export default defineConfig({
   test: {
@@ -10,7 +10,7 @@ export default defineConfig({
       instances: [
         {
           browser: 'chromium',
-          // @ts-ignore
+          // @ts-expect-error
           launch: {
             args: [
               '--use-fake-ui-for-media-stream',

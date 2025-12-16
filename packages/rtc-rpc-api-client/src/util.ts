@@ -1,4 +1,4 @@
-import { ErrorInfo, SkyWayError } from '@skyway-sdk/common';
+import { type ErrorInfo, SkyWayError } from '@skyway-sdk/common';
 
 export function createError({
   operationName,

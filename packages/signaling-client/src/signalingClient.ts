@@ -1,10 +1,16 @@
 import { validate as uuidValidate } from 'uuid';
 
 import { ClientEvent } from './clientEvent';
-import { AcknowledgePayload, isAcknowledgePayload, isMember, isMessagePayload, Member } from './payloadTypes';
-import { ConnectionState, ServerEvent, Socket } from './socket';
+import {
+  type AcknowledgePayload,
+  isAcknowledgePayload,
+  isMember,
+  isMessagePayload,
+  type Member,
+} from './payloadTypes';
+import { type ConnectionState, type ServerEvent, Socket } from './socket';
 import { Event } from './utils/event';
-import { Logger } from './utils/logger';
+import type { Logger } from './utils/logger';
 
 const SIGNALING_SERVER_DOMAIN = 'signaling.skyway.ntt.com';
 const API_VERSION = 'v1';
@@ -55,17 +61,32 @@ export class SignalingClient {
 
   private readonly _memberName?: string;
 
-  private _connectivityCheckInterval: ReturnType<typeof setInterval> | undefined;
+  private _connectivityCheckInterval:
+    | ReturnType<typeof setInterval>
+    | undefined;
 
-  private _connectivityCheckTimers: Map<string, ReturnType<typeof setTimeout>> = new Map();
+  private _connectivityCheckTimers: Map<string, ReturnType<typeof setTimeout>> =
+    new Map();
 
-  private _responseCallbacks: Map<string, (data: Record<string, unknown>) => void> = new Map();
+  private _responseCallbacks: Map<
+    string,
+    (data: Record<string, unknown>) => void
+  > = new Map();
 
-  private _acknowledgeCallbacks: Map<string, (data: AcknowledgePayload) => void> = new Map();
+  private _acknowledgeCallbacks: Map<
+    string,
+    (data: AcknowledgePayload) => void
+  > = new Map();
 
   constructor(
-    { token, channelId, channelName, memberId, memberName }: SignalingClientParams,
-    options?: SignalingClientOptions
+    {
+      token,
+      channelId,
+      channelName,
+      memberId,
+      memberName,
+    }: SignalingClientParams,
+    options?: SignalingClientOptions,
   ) {
     this._token = token;
     this._channelId = channelId;
@@ -99,7 +120,8 @@ export class SignalingClient {
   async connect(): Promise<void> {
     const WSProtocol = this._options.secure ? 'wss' : 'ws';
 
-    const signalingServerDomain = this._options.signalingServerDomain || SIGNALING_SERVER_DOMAIN;
+    const signalingServerDomain =
+      this._options.signalingServerDomain || SIGNALING_SERVER_DOMAIN;
 
     this._socket = new Socket({
       sessionEndpoint: `${WSProtocol}://${signalingServerDomain}/${API_VERSION}/ws`,
@@ -160,20 +182,25 @@ export class SignalingClient {
           this._acknowledgeCallbacks.delete(clientEvent.eventId);
           this._socket?.reconnect();
           this._logger.debug('connectivity check timer is expired');
-        }, 5 * 1000)
+        }, 5 * 1000),
       );
 
-      this._setAcknowledgeCallback(clientEvent.eventId, (data: Record<string, unknown>) => {
-        const timer = this._connectivityCheckTimers.get(clientEvent.eventId);
-        if (timer) {
-          clearTimeout(timer);
-          this._connectivityCheckTimers.delete(clientEvent.eventId);
-        }
-        if (!data.ok) {
-          this._socket?.reconnect();
-          this._logger.debug('connectivity check response from server was not ok');
-        }
-      });
+      this._setAcknowledgeCallback(
+        clientEvent.eventId,
+        (data: Record<string, unknown>) => {
+          const timer = this._connectivityCheckTimers.get(clientEvent.eventId);
+          if (timer) {
+            clearTimeout(timer);
+            this._connectivityCheckTimers.delete(clientEvent.eventId);
+          }
+          if (!data.ok) {
+            this._socket?.reconnect();
+            this._logger.debug(
+              'connectivity check response from server was not ok',
+            );
+          }
+        },
+      );
     }, this._options.connectivityCheckIntervalSec * 1000);
 
     this._logger.debug('Started connectivity check timer');
@@ -195,7 +222,11 @@ export class SignalingClient {
     this._connectivityCheckTimers.clear();
   }
 
-  request(target: Member, data: Record<string, unknown>, timeoutSec = 10): Promise<Record<string, unknown>> {
+  request(
+    target: Member,
+    data: Record<string, unknown>,
+    timeoutSec = 10,
+  ): Promise<Record<string, unknown>> {
     validateTarget(target);
     validateData(data);
     return new Promise((resolve, reject) => {
@@ -208,24 +239,33 @@ export class SignalingClient {
         dst: target,
         data,
       };
-      const clientEvent = new ClientEvent('sendRequestSignalingMessage', payload);
+      const clientEvent = new ClientEvent(
+        'sendRequestSignalingMessage',
+        payload,
+      );
 
       const timer = setTimeout(() => {
         this._acknowledgeCallbacks.delete(clientEvent.eventId);
         reject(new Error('request timeout'));
       }, timeoutSec * 1000);
 
-      this._setResponseCallback(clientEvent.eventId, (data: Record<string, unknown>) => {
-        clearTimeout(timer);
-        resolve(data);
-      });
-
-      this._setAcknowledgeCallback(clientEvent.eventId, (data: AcknowledgePayload) => {
-        if (!data.ok) {
+      this._setResponseCallback(
+        clientEvent.eventId,
+        (data: Record<string, unknown>) => {
           clearTimeout(timer);
-          reject(data);
-        }
-      });
+          resolve(data);
+        },
+      );
+
+      this._setAcknowledgeCallback(
+        clientEvent.eventId,
+        (data: AcknowledgePayload) => {
+          if (!data.ok) {
+            clearTimeout(timer);
+            reject(data);
+          }
+        },
+      );
 
       this._socket.send(clientEvent).catch((err) => {
         this._acknowledgeCallbacks.delete(clientEvent.eventId);
@@ -239,7 +279,7 @@ export class SignalingClient {
     target: Member,
     requestEventId: string,
     data: Record<string, unknown>,
-    timeoutSec: number
+    timeoutSec: number,
   ): Promise<void> {
     return new Promise((resolve, reject) => {
       validateData(data);
@@ -253,22 +293,28 @@ export class SignalingClient {
         requestEventId,
         data,
       };
-      const clientEvent = new ClientEvent('sendResponseSignalingMessage', payload);
+      const clientEvent = new ClientEvent(
+        'sendResponseSignalingMessage',
+        payload,
+      );
 
       const timer = setTimeout(() => {
         this._acknowledgeCallbacks.delete(clientEvent.eventId);
         reject(new Error('response timeout'));
       }, timeoutSec * 1000);
 
-      this._setAcknowledgeCallback(clientEvent.eventId, (data: AcknowledgePayload) => {
-        clearTimeout(timer);
+      this._setAcknowledgeCallback(
+        clientEvent.eventId,
+        (data: AcknowledgePayload) => {
+          clearTimeout(timer);
 
-        if (data.ok) {
-          resolve();
-        } else {
-          reject(data);
-        }
-      });
+          if (data.ok) {
+            resolve();
+          } else {
+            reject(data);
+          }
+        },
+      );
 
       this._socket.send(clientEvent).catch((err) => {
         this._acknowledgeCallbacks.delete(clientEvent.eventId);
@@ -295,19 +341,22 @@ export class SignalingClient {
         reject(new Error('updateSkyWayAuthToken timeout'));
       }, timeoutSec * 1000);
 
-      this._setAcknowledgeCallback(clientEvent.eventId, (data: AcknowledgePayload) => {
-        clearTimeout(timer);
-        if (data.ok) {
-          if (this._socket === undefined) {
-            reject(new Error('websocket is not connected'));
-            return;
+      this._setAcknowledgeCallback(
+        clientEvent.eventId,
+        (data: AcknowledgePayload) => {
+          clearTimeout(timer);
+          if (data.ok) {
+            if (this._socket === undefined) {
+              reject(new Error('websocket is not connected'));
+              return;
+            }
+            this._socket.updateAuthToken(token);
+            resolve();
+          } else {
+            reject(data);
           }
-          this._socket.updateAuthToken(token);
-          resolve();
-        } else {
-          reject(data);
-        }
-      });
+        },
+      );
 
       this._socket.send(clientEvent).catch((err) => {
         this._acknowledgeCallbacks.delete(clientEvent.eventId);
@@ -365,7 +414,10 @@ export class SignalingClient {
     const src = payload.src;
     const requestEventId = payload.requestEventId;
 
-    const reply = async (data: Record<string, unknown>, timeout = 10): Promise<void> => {
+    const reply = async (
+      data: Record<string, unknown>,
+      timeout = 10,
+    ): Promise<void> => {
       await this._response(src, requestEventId, data, timeout);
     };
 
@@ -382,8 +434,13 @@ export class SignalingClient {
       throw new Error('Invalid payload');
     }
 
-    if (!payload.requestEventId || !this._responseCallbacks.has(payload.requestEventId)) {
-      throw new Error(`received response has unknown eventId: ${payload.requestEventId}`);
+    if (
+      !payload.requestEventId ||
+      !this._responseCallbacks.has(payload.requestEventId)
+    ) {
+      throw new Error(
+        `received response has unknown eventId: ${payload.requestEventId}`,
+      );
     }
 
     const callback = this._responseCallbacks.get(payload.requestEventId);
@@ -393,11 +450,17 @@ export class SignalingClient {
     }
   }
 
-  private _setResponseCallback(eventId: string, callback: (data: Record<string, unknown>) => void) {
+  private _setResponseCallback(
+    eventId: string,
+    callback: (data: Record<string, unknown>) => void,
+  ) {
     this._responseCallbacks.set(eventId, callback);
   }
 
-  private _setAcknowledgeCallback(eventId: string, callback: (data: AcknowledgePayload) => void) {
+  private _setAcknowledgeCallback(
+    eventId: string,
+    callback: (data: AcknowledgePayload) => void,
+  ) {
     this._acknowledgeCallbacks.set(eventId, callback);
   }
 }

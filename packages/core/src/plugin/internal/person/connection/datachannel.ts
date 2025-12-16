@@ -1,5 +1,8 @@
 export class DataChannelNegotiationLabel {
-  constructor(readonly publicationId: string, readonly streamId: string) {}
+  constructor(
+    readonly publicationId: string,
+    readonly streamId: string,
+  ) {}
 
   static fromLabel(label: string) {
     const { p, s } = JSON.parse(label);

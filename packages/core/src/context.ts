@@ -1,26 +1,33 @@
 import {
-  EventInterface,
+  type EventInterface,
   Events,
   Logger,
-  RuntimeInfo,
+  type RuntimeInfo,
   SkyWayError,
-  SkyWayErrorInterface,
+  type SkyWayErrorInterface,
 } from '@skyway-sdk/common';
-import model, { MemberType } from '@skyway-sdk/model';
+import type model from '@skyway-sdk/model';
+import type { MemberType } from '@skyway-sdk/model';
 import { RtcApiClient } from '@skyway-sdk/rtc-api-client';
 import { SkyWayAuthToken } from '@skyway-sdk/token';
 import { v4 as uuidV4 } from 'uuid';
 
-import { SkyWayChannelImpl } from './channel';
+import type { SkyWayChannelImpl } from './channel';
 import {
   ContextConfig,
-  SkyWayConfigOptions,
-  SkyWayContextConfig,
+  type SkyWayConfigOptions,
+  type SkyWayContextConfig,
 } from './config';
 import { errors } from './errors';
-import { AnalyticsSession, setupAnalyticsSession } from './external/analytics';
-import { RemoteMemberImplInterface } from './member/remoteMember';
-import { SkyWayPlugin, SkyWayPluginInterface } from './plugin/interface/plugin';
+import {
+  type AnalyticsSession,
+  setupAnalyticsSession,
+} from './external/analytics';
+import type { RemoteMemberImplInterface } from './member/remoteMember';
+import type {
+  SkyWayPlugin,
+  SkyWayPluginInterface,
+} from './plugin/interface/plugin';
 import { registerPersonPlugin } from './plugin/internal/person/plugin';
 import { UnknownPlugin } from './plugin/internal/unknown/plugin';
 import { createError, getRuntimeInfo } from './util';
@@ -79,7 +86,7 @@ export class SkyWayContext implements SkyWayContextInterface {
    */
   static async Create(
     authTokenString: string,
-    configOptions: Partial<SkyWayConfigOptions> = {}
+    configOptions: Partial<SkyWayConfigOptions> = {},
   ) {
     const config = new ContextConfig(configOptions);
     Logger.level = config.log.level;
@@ -90,7 +97,7 @@ export class SkyWayContext implements SkyWayContextInterface {
     const { osName, osVersion, browserName, browserVersion } = getRuntimeInfo();
     const runtime = {
       sdkName: 'core',
-      sdkVersion: this.version,
+      sdkVersion: SkyWayContext.version,
       osName,
       osVersion,
       browserName,
@@ -192,7 +199,7 @@ export class SkyWayContext implements SkyWayContextInterface {
     public config: ContextConfig,
     public authToken: SkyWayAuthToken,
     /**@internal */
-    readonly info: { endpoint: EndpointInfo; runtime: RuntimeInfo }
+    readonly info: { endpoint: EndpointInfo; runtime: RuntimeInfo },
   ) {
     this._authTokenString = authToken.tokenString!;
     this.appId = this.authToken.getAppId();
@@ -209,7 +216,7 @@ export class SkyWayContext implements SkyWayContextInterface {
           info: errors.rtcApiFatalError,
           error,
           path: log.prefix,
-        })
+        }),
       );
       this.dispose();
     });
@@ -276,7 +283,7 @@ export class SkyWayContext implements SkyWayContextInterface {
     const newAppId = newToken.getAppId();
     log.info(
       { operationName: 'SkyWayContext.updateAuthToken' },
-      { oldToken: this.authToken, newToken }
+      { oldToken: this.authToken, newToken },
     );
 
     if (newAppId !== this.appId) {
@@ -325,7 +332,7 @@ export class SkyWayContext implements SkyWayContextInterface {
   /**@private */
   _createRemoteMember(
     channel: SkyWayChannelImpl,
-    memberDto: model.Member
+    memberDto: model.Member,
   ): RemoteMemberImplInterface {
     log.debug('createRemoteMember', { memberDto });
 
