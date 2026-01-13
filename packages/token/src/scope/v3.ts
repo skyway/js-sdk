@@ -62,6 +62,9 @@ const roomScopeV3SchemaBase = z
     message: 'Either id or name is required.',
   });
 
+/**@internal */
+export type RoomScopeV3Base = z.input<typeof roomScopeV3SchemaBase>;
+
 const roomScopeV3Schema = z.intersection(
   roomScopeV3SchemaBase,
   z
@@ -88,6 +91,12 @@ const roomScopeV3Schema = z.intersection(
           enabled: z.boolean().optional(),
           /**maxSubscribersの上限値の設定。指定しない場合はSFUサーバー側において設定可能な上限値になる。*/
           maxSubscribersLimit: z.number().optional(),
+        })
+        .optional(),
+      stt: z
+        .object({
+          /**文字起こし機能の利用有無。enabledがfalseの場合は文字起こし機能を利用できない。指定しない場合は enabled: true として扱われる。 */
+          enabled: z.boolean().optional(),
         })
         .optional(),
     })

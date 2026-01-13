@@ -15,7 +15,6 @@ import type {
 } from '@skyway-sdk/core';
 import type { PublicationType } from '@skyway-sdk/model';
 import { SFUBotMember, type SFUBotPlugin } from '@skyway-sdk/sfu-bot';
-import { v4 } from 'uuid';
 
 import { errors } from '../errors';
 import type { RoomMember, RoomMemberImpl } from '../member';
@@ -359,7 +358,6 @@ export abstract class RoomBase implements Room {
       });
     }
 
-    roomMemberInit.name = roomMemberInit.name ?? v4();
     const local = await this._channel.join(roomMemberInit);
 
     if (!this._getMember(local.id)) {

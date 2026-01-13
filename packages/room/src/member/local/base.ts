@@ -127,7 +127,17 @@ export abstract class LocalRoomMemberBase
       (m) => m.subtype === SFUBotMember.subtype,
     ) as SFUBotMember;
     if (!bot) {
-      throw sfuErrors.sfuBotNotInChannel;
+      const authToken = this._context.authToken;
+      if (
+        authToken.isSfuCreateBotEnabled({
+          id: this.room._channel.id,
+          name: this.room._channel.name,
+        })
+      ) {
+        throw sfuErrors.sfuBotNotInChannel;
+      } else {
+        throw sfuErrors.insufficientPermissions;
+      }
     }
 
     const forwarding = await bot.startForwarding(origin, {

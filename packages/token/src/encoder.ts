@@ -2,15 +2,16 @@ import { Logger, SkyWayError } from '@skyway-sdk/common';
 import jsrsasign from 'jsrsasign';
 import jwtDecode from 'jwt-decode';
 import { z } from 'zod';
-
 // import { fromZodError } from 'zod-validation-error'; // 下記にかいてある理由によりコメントアウト
 import {
   type AuthToken,
   AuthTokenSchema,
   type AuthTokenV1_2,
   type AuthTokenV3,
+  type RoomScopeV3Base,
   tokenErrors,
 } from '.';
+import { matchScopeIdentifier } from './util';
 
 const log = new Logger('packages/token/src/encoder.ts');
 
@@ -144,6 +145,70 @@ export class SkyWayAuthToken {
       case 3: {
         const scope = this.scope as AuthTokenV3['scope'];
         return scope.analytics?.enabled ?? true;
+      }
+      default:
+        throw new SkyWayError({
+          path: log.prefix,
+          info: tokenErrors.invalidParameter,
+          error: new Error(
+            `invalid token version: version ${this.version} is not supported.`,
+          ),
+        });
+    }
+  }
+
+  /**@internal */
+  isSfuCreateBotEnabled(channel: RoomScopeV3Base): boolean {
+    switch (this.version) {
+      case undefined:
+      case 1:
+      case 2: {
+        const scope = this.scope as AuthTokenV1_2['scope'];
+        if (!scope.app.channels) {
+          return false;
+        }
+
+        const channelsScope = scope.app.channels;
+        const channelScope = channelsScope.find((c) => {
+          return matchScopeIdentifier(channel, c, this.version);
+        });
+        if (!channelScope) {
+          return false;
+        }
+
+        const sfuBotsScope = channelScope.sfuBots;
+        if (!sfuBotsScope || sfuBotsScope.length === 0) {
+          return false;
+        }
+
+        return sfuBotsScope.some((sfuBotScope) => {
+          return (
+            sfuBotScope.actions.includes('create') ||
+            sfuBotScope.actions.includes('write')
+          );
+        });
+      }
+      case 3: {
+        const scope = this.scope as AuthTokenV3['scope'];
+        if (!scope.rooms) {
+          return false;
+        }
+
+        const roomsScope = scope.rooms;
+        const roomScope = roomsScope.find((r) => {
+          return matchScopeIdentifier(channel, r, this.version);
+        });
+
+        if (!roomScope) {
+          return false;
+        }
+
+        // SFUリソースの指定が省略された場合はenabledにtrueが設定されているとみなす
+        if (!roomScope.sfu) {
+          return true;
+        }
+
+        return roomScope.sfu.enabled ?? true;
       }
       default:
         throw new SkyWayError({

@@ -1,6 +1,6 @@
 {
   "name": "@skyway-sdk/token",
-  "version": "2.0.2",
+  "version": "2.1.0",
   "description": "The official Next Generation JavaScript SDK for SkyWay",
   "homepage": "https://skyway.ntt.com/",
   "repository": {
@@ -31,7 +31,8 @@
     "publish:npm": "pnpm dlx can-npm-publish --verbose && pnpm run build && npm publish --access public",
     "watch": "npm-run-all --parallel watch:tsc watch:esbuild",
     "watch:esbuild": "esbuild src/index.ts --bundle --watch --format=esm --target=es6 --outfile=dist/index.mjs",
-    "watch:tsc": "tsc -p tsconfig.build.json -w"
+    "watch:tsc": "tsc -p tsconfig.build.json -w",
+    "test": "vitest run ./__tests__"
   },
   "dependencies": {
     "@skyway-sdk/common": "workspace:*",

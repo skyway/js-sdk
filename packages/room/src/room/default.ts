@@ -159,9 +159,21 @@ export interface Room {
 export class RoomImpl extends RoomBase implements Room {
   protected _disableSignaling = false;
   static async Create(context: SkyWayContext, channel: SkyWayChannelImpl) {
-    const plugin = await RoomImpl._createBot(context, channel);
+    let room: RoomImpl;
 
-    const room = new RoomImpl(channel, plugin);
+    const authToken = context.authToken;
+    if (
+      authToken.isSfuCreateBotEnabled({
+        id: channel.id,
+        name: channel.name,
+      })
+    ) {
+      const plugin = await RoomImpl._createBot(context, channel);
+      room = new RoomImpl(channel, plugin);
+    } else {
+      room = new RoomImpl(channel);
+    }
+
     return room;
   }
 
@@ -169,7 +181,7 @@ export class RoomImpl extends RoomBase implements Room {
 
   private constructor(
     channel: SkyWayChannelImpl,
-    readonly _plugin: SFUBotPlugin,
+    readonly _plugin?: SFUBotPlugin,
   ) {
     super('default', channel);
   }
