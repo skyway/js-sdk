@@ -1,4 +1,4 @@
-@skyway-sdk/room@2.3.0
+@skyway-sdk/room@2.3.1
 
 MIT
 
@@ -91,7 +91,7 @@ SOFTWARE.
 
 ---
 
-@skyway-sdk/sfu-bot@2.1.0
+@skyway-sdk/sfu-bot@2.1.1
 
 MIT
 
@@ -153,7 +153,7 @@ SOFTWARE.
 
 ---
 
-@skyway-sdk/core@2.3.0
+@skyway-sdk/core@2.3.1
 
 MIT
 

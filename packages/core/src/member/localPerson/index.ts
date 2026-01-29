@@ -626,7 +626,6 @@ export class LocalPersonImpl extends MemberImpl implements LocalPerson {
     }
 
     await this._requestQueue.push(() => this.channel._unpublish(publicationId));
-    publication._setStream(undefined);
 
     publication.subscriptions
       .map((s) => s.subscriber)
@@ -639,6 +638,7 @@ export class LocalPersonImpl extends MemberImpl implements LocalPerson {
       });
 
     await this._handleOnStreamUnpublished(publication);
+    publication._setStream(undefined);
 
     log.elapsed(
       timestamp,
