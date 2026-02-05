@@ -1,6 +1,6 @@
 {
   "name": "@skyway-sdk/room",
-  "version": "2.3.1",
+  "version": "2.4.0",
   "description": "The official Next Generation JavaScript SDK for SkyWay",
   "homepage": "https://skyway.ntt.com/",
   "repository": {
@@ -26,6 +26,7 @@
     "doc:md": "rm -rf docs/md && typedoc --excludePrivate --disableSources --excludeInternal --tsconfig ./tsconfig.build.json --out docs/md --plugin typedoc-plugin-markdown ./src/index.ts ",
     "test": "pnpm run e2e",
     "e2e": "npm-run-all -p jest test-large test-extra",
+    "e2e:main": "vitest --config vitest.extra.ts run ./tests/extra/benchmark.test.ts",
     "format": "eslint ./src --fix && eslint ./tests --fix",
     "graph": "dependency-cruiser --include-only '^src' --output-type dot src | dot -T svg > docs/dependencygraph.svg",
     "jest": "jest",

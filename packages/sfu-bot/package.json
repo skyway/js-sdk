@@ -1,6 +1,6 @@
 {
   "name": "@skyway-sdk/sfu-bot",
-  "version": "2.1.1",
+  "version": "2.2.0",
   "description": "The official Next Generation JavaScript SDK for SkyWay",
   "homepage": "https://skyway.ntt.com/",
   "repository": {
@@ -45,7 +45,7 @@
     "@skyway-sdk/core": "workspace:*",
     "mediasoup-client": "^3.18.3",
     "@skyway-sdk/sfu-api-client": "workspace:*",
-    "lodash": "4.17.21"
+    "lodash": "4.17.23"
   },
   "keywords": [
     "webrtc",
@@ -56,6 +56,6 @@
   "devDependencies": {
     "@skyway-sdk/model": "workspace:*",
     "@skyway-sdk/token": "workspace:*",
-    "@types/lodash": "4.17.16"
+    "@types/lodash": "4.17.23"
   }
 }

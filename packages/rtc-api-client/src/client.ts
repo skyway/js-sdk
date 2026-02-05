@@ -43,6 +43,8 @@ export class RtcApiClient {
 
   closed = false;
 
+  readonly onReconnectStart = new Event<void>();
+  readonly onReconnectSuccess = new Event<void>();
   readonly onFatalError = new Event<SkyWayError>();
 
   private constructor(
@@ -54,6 +56,8 @@ export class RtcApiClient {
       channel: Channel,
     ) => EventObserver,
   ) {
+    this.apiClient.onReconnectStart.pipe(this.onReconnectStart);
+    this.apiClient.onReconnectSuccess.pipe(this.onReconnectSuccess);
     this.apiClient.onFatalError.pipe(this.onFatalError);
   }
 

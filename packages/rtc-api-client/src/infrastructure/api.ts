@@ -28,6 +28,8 @@ export class RtcApiImpl implements RtcApi {
   closed = false;
 
   readonly onClose = new Event<void>();
+  readonly onReconnectStart = new Event<void>();
+  readonly onReconnectSuccess = new Event<void>();
   readonly onFatalError = new Event<SkyWayError>();
 
   constructor(private _client: RtcRpcApiClient) {
@@ -35,6 +37,12 @@ export class RtcApiImpl implements RtcApi {
 
     _client.onClose.once(() => {
       this.close();
+    });
+    _client.onReconnectStart.add(() => {
+      this.onReconnectStart.emit();
+    });
+    _client.onReconnectSuccess.add(() => {
+      this.onReconnectSuccess.emit();
     });
     _client.onFatalError.add((e) => {
       this.onFatalError.emit(e);

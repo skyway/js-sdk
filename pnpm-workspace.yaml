@@ -1,5 +1,12 @@
 packages:
-  - 'packages/*'
-  - 'examples/playground'
-  - 'examples/playground-room'
-  - 'examples/sfu-room-for-hosting'
+  - packages/*
+  - examples/playground
+  - examples/playground-room
+  - examples/sfu-room-for-hosting
+onlyBuiltDependencies:
+  - '@parcel/watcher'
+  - '@swc/core'
+  - esbuild
+  - lmdb
+  - msgpackr-extract
+  - nx

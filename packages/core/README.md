@@ -125,6 +125,32 @@ const context = await SkyWayContext.Create(tokenString);
 
 事前にトークンの取得が必要になります。
 
+### 開発用途向けの Context 作成
+
+開発用途では、`appId` と `secretKey` を SDK に渡し、SDK 内部で JWT を自動生成して `SkyWayContext` を作成できる `SkyWayContext.CreateForDevelopment` を利用できます。
+
+**注意**: `secretKey` をクライアントアプリに埋め込むことは認証情報漏えいに直結します。
+この API は **開発用途限定** であり、本番環境での利用は避けてください。
+
+```ts
+import { SkyWayContext } from '@skyway-sdk/core';
+
+// ※開発用途限定。本番では secretKey をアプリに埋め込まないでください。
+const context = await SkyWayContext.CreateForDevelopment(appId, secretKey);
+```
+
+このメソッドが呼ばれるたびに警告ログが出力されます。
+このメソッドが内部で生成するトークンの有効期限は **24時間** です。
+このメソッドで作成した Context は、トークン期限の `config.token.updateRemindSec` 秒前（デフォルト `30` 秒）にトークンを自動的に更新します。
+自動更新タイミングを変更したい場合は `updateRemindSec` を指定してください。
+
+```ts
+const context = await SkyWayContext.CreateForDevelopment(appId, secretKey, {
+  token: { updateRemindSec: 60 },
+});
+```
+手動でトークンを更新したい場合は、`SkyWayContext.Create` を利用してください。
+
 ### トークンの取得方法
 
 SkyWay サービスの JWT トークンはトークンの仕様に基づいて自身で作成するか、`@skyway-sdk/token`ライブラリを使って作成することができます。

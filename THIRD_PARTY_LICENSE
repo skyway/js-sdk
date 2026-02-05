@@ -1,4 +1,4 @@
-@skyway-sdk/room@2.3.1
+@skyway-sdk/room@2.4.0
 
 MIT
 
@@ -91,7 +91,7 @@ SOFTWARE.
 
 ---
 
-@skyway-sdk/sfu-bot@2.1.1
+@skyway-sdk/sfu-bot@2.2.0
 
 MIT
 
@@ -153,7 +153,7 @@ SOFTWARE.
 
 ---
 
-@skyway-sdk/core@2.3.1
+@skyway-sdk/core@2.4.0
 
 MIT
 
@@ -215,7 +215,7 @@ SOFTWARE.
 
 ---
 
-@skyway-sdk/rtc-api-client@2.1.0
+@skyway-sdk/rtc-api-client@2.2.0
 
 MIT
 
@@ -246,7 +246,7 @@ SOFTWARE.
 
 ---
 
-@skyway-sdk/rtc-rpc-api-client@2.0.2
+@skyway-sdk/rtc-rpc-api-client@2.1.0
 
 MIT
 
@@ -1254,7 +1254,7 @@ SOFTWARE.
 
 ---
 
-lodash@4.17.21
+lodash@4.17.23
 
 MIT
 

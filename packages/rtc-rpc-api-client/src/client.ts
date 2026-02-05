@@ -60,9 +60,10 @@ export class RtcRpcApiClient {
     channelId: string;
     event: ChannelEvent;
   }>();
+  readonly onReconnectStart = this._events.make<void>();
+  readonly onReconnectSuccess = this._events.make<void>();
   readonly onFatalError = this._events.make<SkyWayError>();
   readonly onClose = this._events.make<void>();
-  readonly onReconnected = this._events.make<void>();
 
   constructor(readonly config: RtcRpcApiClientConfig) {
     Logger.level = config.log?.level ?? Logger.level;
@@ -117,6 +118,10 @@ export class RtcRpcApiClient {
       );
       this.close();
       return;
+    }
+    // rpc.reconnectingがfalse=初回のみonReconnectStartをemitする
+    if (!this._rpc.reconnecting) {
+      this.onReconnectStart.emit();
     }
     this._rpc.reconnecting = true;
     log.warn(
@@ -192,7 +197,7 @@ export class RtcRpcApiClient {
         }),
       );
 
-      this.onReconnected.emit();
+      this.onReconnectSuccess.emit();
     } catch (error) {
       log.warn(
         '[failed] reconnect',

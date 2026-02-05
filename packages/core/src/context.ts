@@ -11,7 +11,7 @@ import type { MemberType } from '@skyway-sdk/model';
 import { RtcApiClient } from '@skyway-sdk/rtc-api-client';
 import { SkyWayAuthToken } from '@skyway-sdk/token';
 import { v4 as uuidV4 } from 'uuid';
-
+import { createForDevelopmentAuthTokenString } from './auth/createForDevelopmentAuthTokenString';
 import type { SkyWayChannelImpl } from './channel';
 import {
   ContextConfig,
@@ -30,7 +30,7 @@ import type {
 } from './plugin/interface/plugin';
 import { registerPersonPlugin } from './plugin/internal/person/plugin';
 import { UnknownPlugin } from './plugin/internal/unknown/plugin';
-import { createError, getRuntimeInfo } from './util';
+import { createError, createWarnPayload, getRuntimeInfo } from './util';
 import { PACKAGE_VERSION } from './version';
 
 const log = new Logger('packages/core/src/context.ts');
@@ -80,6 +80,59 @@ export class SkyWayContext implements SkyWayContextInterface {
 
   /**@internal */
   static id = uuidV4();
+
+  /**
+   * @description [japanese] 開発用途向けContextの作成
+   */
+  static async CreateForDevelopment(
+    appId: string,
+    secretKey: string,
+    configOptions: Partial<SkyWayConfigOptions> = {},
+  ) {
+    const warningPayload = createWarnPayload({
+      operationName: 'SkyWayContext.CreateForDevelopment',
+      detail:
+        'To prevent leakage of authentication information, please refrain from using this method in release versions of your app.',
+      payload: { appId },
+    });
+
+    console.warn('SkyWayContext.CreateForDevelopment', warningPayload);
+
+    const tokenString = createForDevelopmentAuthTokenString({
+      appId,
+      secretKey,
+    });
+
+    const context = await SkyWayContext.Create(tokenString, configOptions);
+
+    const autoUpdateAuthToken = async (): Promise<void> => {
+      const newTokenString = createForDevelopmentAuthTokenString({
+        appId,
+        secretKey,
+      });
+
+      try {
+        await context.updateAuthToken(newTokenString);
+      } catch (error) {
+        log.warn(
+          '[failed] SkyWayContext.CreateForDevelopment.autoUpdateAuthToken',
+          {
+            detail: error,
+            appId,
+          },
+        );
+      }
+    };
+
+    const { removeListener } = context.onTokenUpdateReminder.add(async () => {
+      await autoUpdateAuthToken();
+    });
+    context.onDisposed.once(() => {
+      removeListener();
+    });
+
+    return context;
+  }
 
   /**
    * @description [japanese] Contextの作成
@@ -178,6 +231,17 @@ export class SkyWayContext implements SkyWayContextInterface {
    * @description [japanese] トークンの期限切れを通知するイベント。このイベントが発火された場合、トークンを更新するまでサービスを利用できない
    */
   readonly onTokenExpired = this._events.make<void>();
+
+  /**
+   * @description [japanese] SkyWayの利用中にネットワークの瞬断などが原因で再接続が開始されたときに発火するイベント
+   */
+  readonly onReconnectStart = this._events.make<void>();
+
+  /**
+   * @description [japanese] SkyWayの再接続が成功したときに発火するイベント
+   */
+  readonly onReconnectSuccess = this._events.make<void>();
+
   /**
    * @description [japanese] 回復不能なエラーが発生したことを通知するイベント。インターネット接続状況を確認した上で別のインスタンスを作り直す必要がある
    */
@@ -207,6 +271,14 @@ export class SkyWayContext implements SkyWayContextInterface {
     registerPersonPlugin(this);
 
     this._api = api;
+    this._api.onReconnectStart.add(() => {
+      log.info('onReconnectStart', { appId: this.appId });
+      this.onReconnectStart.emit();
+    });
+    this._api.onReconnectSuccess.add(() => {
+      log.info('onReconnectSuccess', { appId: this.appId });
+      this.onReconnectSuccess.emit();
+    });
     this._api.onFatalError.once((error) => {
       log.error('onFatalError', { appId: this.appId, error });
       this.onFatalError.emit(

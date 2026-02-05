@@ -9,6 +9,8 @@ import type {
 
 export interface RtcApi {
   readonly onClose: Event<void>;
+  readonly onReconnectStart: Event<void>;
+  readonly onReconnectSuccess: Event<void>;
   readonly onFatalError: Event<SkyWayError>;
   /**@throws {@link SkyWayError} */
   createChannel(

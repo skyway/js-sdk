@@ -48,12 +48,19 @@ export async function createLocalPerson(
   });
 
   await iceManager.updateIceParams().catch((err) => {
-    throw createError({
-      operationName: 'createLocalPerson',
-      context,
-      channel,
-      info: { ...errors.internal, detail: 'updateIceParams failed' },
-      path: log.prefix,
+    const turnPolicy = context.config.rtcConfig.turnPolicy;
+    if (turnPolicy === 'turnOnly') {
+      throw createError({
+        operationName: 'createLocalPerson',
+        context,
+        channel,
+        info: { ...errors.internal, detail: 'updateIceParams failed' },
+        path: log.prefix,
+        error: err,
+      });
+    }
+    log.warn('updateIceParams failed, continuing without TURN servers', {
+      turnPolicy,
       error: err,
     });
   });
