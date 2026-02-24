@@ -85,6 +85,14 @@ export class AnalyticsClient {
     (data: AcknowledgePayload) => void
   > = new Map();
 
+  // _waitForAcknowledgeを外部要因（timeout/dispose）で確実に終了させるためのrejectハンドラ。
+  private _acknowledgeCancelCallbacks: Map<string, (error: Error) => void> =
+    new Map();
+
+  // eventIdごとのACK timeout。ACK/timeout/disposeのいずれでも必ずclearする。
+  private _acknowledgeTimeouts: Map<string, ReturnType<typeof setTimeout>> =
+    new Map();
+
   private _mediaDeviceVersion: Map<string, number> = new Map();
 
   private _encodingsVersion: Map<string, number> = new Map();
@@ -242,8 +250,14 @@ export class AnalyticsClient {
   }
 
   dispose(): void {
+    if (this._isClosed) {
+      return;
+    }
+    this._isClosed = true;
+
     clearInterval(this._sdkLogTimer);
     this._disconnect();
+    this._pendingSdkLogs = [];
     this._cleanupAnalyticsClientMaps();
   }
 
@@ -268,6 +282,16 @@ export class AnalyticsClient {
     this._socket?.destroy();
     this._socket = undefined;
 
+    // dispose後に古いtimeoutが発火しないよう、ここで一括解除する。
+    for (const timeoutId of this._acknowledgeTimeouts.values()) {
+      clearTimeout(timeoutId);
+    }
+    this._acknowledgeTimeouts.clear();
+
+    for (const cancel of this._acknowledgeCancelCallbacks.values()) {
+      cancel(new Error('websocket is not connected'));
+    }
+    this._acknowledgeCancelCallbacks.clear();
     this._responseCallbacks.clear();
     this._acknowledgeCallbacks.clear();
   }
@@ -626,6 +650,7 @@ export class AnalyticsClient {
         this._setAcknowledgeCallback(
           clientEvent.id,
           async (data: AcknowledgePayload) => {
+            this._clearAcknowledgeTimeout(clientEvent.id);
             if (data.ok) {
               this._acknowledgeCallbacks.delete(clientEvent.id);
               resolve();
@@ -638,6 +663,10 @@ export class AnalyticsClient {
         this._logger.debug(
           `pushResendClientEventsQueue and setAcknowledgeCallback. clientEvent.id: ${clientEvent.id}`,
         );
+        // connecting経路でもeventId単位でtimeout管理し、dispose/ACK時に解除可能にする。
+        this._setAcknowledgeTimeout(clientEvent.id, () => {
+          this._acknowledgeCallbacks.delete(clientEvent.id);
+        });
         reject(new Error('websocket is connecting now'));
         return;
       }
@@ -645,17 +674,22 @@ export class AnalyticsClient {
       const executeAsync = async () => {
         const backoff = new BackOff({ times: 6, interval: 500, jitter: 100 });
         for (; !backoff.exceeded; ) {
-          const timer = setTimeout(async () => {
+          this._setAcknowledgeTimeout(clientEvent.id, () => {
             if (this._socket === undefined) {
-              this._acknowledgeCallbacks.delete(clientEvent.id);
-              reject(new Error('Socket closed when trying to resend'));
+              this._cancelAcknowledgeWait(
+                clientEvent.id,
+                new Error('Socket closed when trying to resend'),
+              );
               return;
             } else {
               this._socket.resendAfterReconnect(clientEvent);
             }
-            reject(new Error('Timeout to send data'));
+            this._cancelAcknowledgeWait(
+              clientEvent.id,
+              new Error('Timeout to send data'),
+            );
             return;
-          }, TIMEOUT_SEC * 1000);
+          });
 
           // 送信に失敗した際の再送ロジックはsend()内で処理される
           this._logger.debug(
@@ -663,14 +697,17 @@ export class AnalyticsClient {
           );
           if (this._socket) {
             this._socket.send(clientEvent).catch((err) => {
-              this._acknowledgeCallbacks.delete(clientEvent.id);
-              clearTimeout(timer);
+              this._cancelAcknowledgeWait(clientEvent.id, err);
+              this._clearAcknowledgeTimeout(clientEvent.id);
               reject(err);
               return;
             });
           } else {
-            this._acknowledgeCallbacks.delete(clientEvent.id);
-            clearTimeout(timer);
+            this._cancelAcknowledgeWait(
+              clientEvent.id,
+              new Error('Socket is undefined'),
+            );
+            this._clearAcknowledgeTimeout(clientEvent.id);
             reject(new Error('Socket is undefined'));
             return;
           }
@@ -687,7 +724,12 @@ export class AnalyticsClient {
               return err;
             },
           );
-          clearTimeout(timer);
+          this._clearAcknowledgeTimeout(clientEvent.id);
+
+          if (result instanceof Error) {
+            reject(result);
+            return;
+          }
 
           if (isAcknowledgePayload(result)) {
             if (result.reason === 'unexpected') {
@@ -712,9 +754,16 @@ export class AnalyticsClient {
 
   private async _waitForAcknowledge(clientEventId: string): Promise<void> {
     return new Promise((resolve, reject) => {
+      this._acknowledgeCancelCallbacks.set(clientEventId, (error: Error) => {
+        this._acknowledgeCancelCallbacks.delete(clientEventId);
+        this._acknowledgeCallbacks.delete(clientEventId);
+        reject(error);
+      });
       this._setAcknowledgeCallback(
         clientEventId,
         async (data: AcknowledgePayload) => {
+          this._clearAcknowledgeTimeout(clientEventId);
+          this._acknowledgeCancelCallbacks.delete(clientEventId);
           if (data.ok) {
             this._acknowledgeCallbacks.delete(clientEventId);
             resolve();
@@ -725,6 +774,41 @@ export class AnalyticsClient {
         },
       );
     });
+  }
+
+  private _cancelAcknowledgeWait(clientEventId: string, error: unknown): void {
+    this._clearAcknowledgeTimeout(clientEventId);
+    const parsedError =
+      error instanceof Error ? error : new Error(String(error));
+    const cancel = this._acknowledgeCancelCallbacks.get(clientEventId);
+
+    if (cancel) {
+      cancel(parsedError);
+      return;
+    }
+    this._acknowledgeCallbacks.delete(clientEventId);
+  }
+
+  private _setAcknowledgeTimeout(
+    clientEventId: string,
+    onTimeout: () => void,
+  ): void {
+    // 同一eventIdに古いtimerが残ると後勝ちで誤発火するため、再設定前に必ずclearする。
+    this._clearAcknowledgeTimeout(clientEventId);
+
+    const timeoutId = setTimeout(() => {
+      this._acknowledgeTimeouts.delete(clientEventId);
+      onTimeout();
+    }, TIMEOUT_SEC * 1000);
+    this._acknowledgeTimeouts.set(clientEventId, timeoutId);
+  }
+
+  private _clearAcknowledgeTimeout(clientEventId: string): void {
+    const timeoutId = this._acknowledgeTimeouts.get(clientEventId);
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+      this._acknowledgeTimeouts.delete(clientEventId);
+    }
   }
 
   private async _reconnectWithNewSkyWayAuthToken(): Promise<void> {
@@ -762,7 +846,8 @@ export class AnalyticsClient {
 
     const { eventId } = payload;
     if (!this._acknowledgeCallbacks.has(eventId)) {
-      throw new Error(`acknowledge event has unknown eventId: ${eventId}`);
+      this._logger.debug(`acknowledge event has unknown eventId: ${eventId}`);
+      return;
     }
     const callback = this._acknowledgeCallbacks.get(eventId);
     if (callback) {

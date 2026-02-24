@@ -29,7 +29,7 @@
     "update-mirror": "zx scripts/update-mirror-repo.mjs",
     "changeset": "changeset",
     "changeset:version": "changeset version && pnpm i",
-    "changeset:version:ci": "pnpm run changeset:version && pnpm run doc && pnpm run build",
+    "changeset:version:ci": "pnpm run changeset:version && pnpm run build && pnpm run doc",
     "changeset:publish": "pnpm run build && changeset publish"
   },
   "devDependencies": {

@@ -2,6 +2,7 @@ import {
   AnalyticsClient,
   type ConnectionState,
 } from '@skyway-sdk/analytics-client';
+import type { OnLogForAnalyticsProps } from '@skyway-sdk/common';
 import { Event, Logger } from '@skyway-sdk/common';
 
 import { SkyWayContext } from '../context';
@@ -51,12 +52,23 @@ export async function setupAnalyticsSession(
   );
 
   const analyticsSession = new AnalyticsSession(client, context);
-  Logger._onLogForAnalytics = (props) => {
+  const onLogForAnalytics = (props: OnLogForAnalyticsProps) => {
     if (props.prefix === LOGGER_PREFIX) {
       return; // Avoid logging from this file to avoid infinite loop
     }
+    if (analyticsSession.isClosed() || client.isClosed()) {
+      return;
+    }
     void client.bufferOrSendSdkLog(props);
   };
+  // Logger._onLogForAnalytics はglobal hookなので、close時に解除する前提で登録する。
+  Logger._onLogForAnalytics = onLogForAnalytics;
+  analyticsSession.setOnClose(() => {
+    // 他セッションが後からhookを差し替えている可能性があるため、自分のhookの場合のみ解除する。
+    if (Logger._onLogForAnalytics === onLogForAnalytics) {
+      Logger._onLogForAnalytics = () => {};
+    }
+  });
 
   analyticsSession.connectWithTimeout().catch((error) => {
     analyticsSession.close();
@@ -80,6 +92,7 @@ export class AnalyticsSession {
   readonly onConnectionStateChanged = new Event<ConnectionState>();
   readonly onMessage = new Event<MessageEvent>();
   private _isClosed = false;
+  private _onClose = () => {};
 
   constructor(
     public client: AnalyticsClient,
@@ -160,14 +173,24 @@ export class AnalyticsSession {
   }
 
   close() {
+    if (this._isClosed) {
+      return;
+    }
     this._isClosed = true;
     this.onConnectionFailed.removeAllListeners();
     this.onConnectionStateChanged.removeAllListeners();
     this.onMessage.removeAllListeners();
+    this._onClose();
+    this._onClose = () => {};
   }
 
   isClosed() {
     return this._isClosed;
+  }
+
+  /**@internal */
+  setOnClose(onClose: () => void) {
+    this._onClose = onClose;
   }
 }
 

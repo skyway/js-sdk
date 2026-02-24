@@ -37,6 +37,8 @@ const getReconnectWaitTime = (reconnectCount: number): number => {
 };
 
 export class Socket {
+  private static readonly MAX_RESEND_CLIENT_EVENTS = 200;
+
   private _sessionEndpoint: string;
 
   private _token: string;
@@ -50,6 +52,8 @@ export class Socket {
   private _isOpen = false;
 
   private _isClosed = false;
+
+  private _reconnectClosingWebSocket: WebSocket | undefined;
 
   private _reconnectCount = 0;
 
@@ -70,6 +74,8 @@ export class Socket {
   private _reconnectTimer: ReturnType<typeof setTimeout> | undefined;
 
   private _resendClientEvents: ClientEvent[] = [];
+
+  private _hasWarnedResendQueueOverflow = false;
 
   constructor({
     sessionEndpoint,
@@ -135,6 +141,17 @@ export class Socket {
     ws.onclose = (event) => {
       const logMessage = `Close event fired: ${JSON.stringify({ code: event.code, reason: event.reason, type: event.type })}`;
 
+      // reconnect起因の4000 closeは「対象WebSocketの一致」で判定する。
+      // boolフラグだけだと、既に閉じたソケット経由のreconnect後にサーバー起因4000を誤判定し得る。
+      const isInternalReconnectClose =
+        event.code === 4000 && this._reconnectClosingWebSocket === ws;
+      if (this._reconnectClosingWebSocket === ws) {
+        this._reconnectClosingWebSocket = undefined;
+      }
+      if (isInternalReconnectClose) {
+        return;
+      }
+
       // 1000, 4000~4099: normal case (should not reconnect)
       // 1009, 4100~4199: non-normal case (should not reconnect)
       // 4200~4299: non-normal case (should reconnect)
@@ -175,7 +192,13 @@ export class Socket {
   }
 
   reconnect(): void {
-    if (this._ws !== undefined) {
+    if (
+      this._ws !== undefined &&
+      (this._ws.readyState === WebSocket.CONNECTING ||
+        this._ws.readyState === WebSocket.OPEN)
+    ) {
+      // 次のoncloseで内部closeと判定するため対象ソケットを保持する。
+      this._reconnectClosingWebSocket = this._ws;
       this._ws.close(4000);
     }
     this._ws = undefined;
@@ -205,6 +228,7 @@ export class Socket {
 
   destroy(): void {
     this._setConnectionState('closed');
+    this._reconnectClosingWebSocket = undefined;
 
     this.onConnectionStateChanged.removeAllListeners();
     this.onOpened.removeAllListeners();
@@ -244,10 +268,7 @@ export class Socket {
   }
 
   resendAfterReconnect(data: ClientEvent): void {
-    const isEventExist = this._resendClientEvents.some(
-      (event) => event.id === data.id,
-    );
-    if (!isEventExist) this._resendClientEvents.push(data);
+    this._pushResendClientEvent(data);
     // この関数が複数回呼ばれた際に再接続の試行が重複しないよう、connectionStateを確認してから再接続する
     if (this.connectionState !== 'reconnecting') {
       this.reconnect();
@@ -255,6 +276,28 @@ export class Socket {
   }
 
   pushResendClientEventsQueue(data: ClientEvent): void {
+    this._pushResendClientEvent(data);
+  }
+
+  private _pushResendClientEvent(data: ClientEvent): void {
+    const isEventExist = this._resendClientEvents.some(
+      (event) => event.id === data.id,
+    );
+    if (isEventExist) {
+      return;
+    }
+
+    if (this._resendClientEvents.length >= Socket.MAX_RESEND_CLIENT_EVENTS) {
+      this._resendClientEvents.shift();
+      // 長時間断時の警告スパムを避けるため、同一reconnectサイクルでは初回のみwarnする。
+      if (!this._hasWarnedResendQueueOverflow) {
+        this._logger.warn(
+          `Dropped oldest resend event because queue exceeded limit (${Socket.MAX_RESEND_CLIENT_EVENTS}). Further overflow warnings are suppressed until reconnect succeeds.`,
+        );
+        this._hasWarnedResendQueueOverflow = true;
+      }
+    }
+
     this._resendClientEvents.push(data);
   }
 
@@ -302,6 +345,8 @@ export class Socket {
         this._reconnectCount = 0;
         this._logger.debug('Succeeded to reconnect');
       }
+      // reconnectが成立したら、次の断に備えてwarn抑制状態を解除する。
+      this._hasWarnedResendQueueOverflow = false;
 
       if (this._resendClientEvents.length > 0) {
         for (const event of this._resendClientEvents) {
