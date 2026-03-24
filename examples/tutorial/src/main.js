@@ -1,37 +1,10 @@
 import {
-  nowInSec,
-  SkyWayAuthToken,
   SkyWayContext,
   SkyWayRoom,
   SkyWayStreamFactory,
-  uuidV4,
 } from '@skyway-sdk/room';
 
 import { appId, secret } from '../../../env';
-
-const token = new SkyWayAuthToken({
-  jti: uuidV4(),
-  iat: nowInSec(),
-  exp: nowInSec() + 60 * 60 * 24,
-  version: 3,
-  scope: {
-    appId: appId,
-    rooms: [
-      {
-        name: '*',
-        methods: ['create', 'close', 'updateMetadata'],
-        member: {
-          name: '*',
-          methods: ['publish', 'subscribe', 'updateMetadata'],
-        },
-      },
-    ],
-
-    turn: {
-      enabled: true,
-    },
-  },
-}).encode(secret);
 
 void (async () => {
   const localVideo = document.getElementById('local-video');
@@ -50,7 +23,7 @@ void (async () => {
   joinButton.onclick = async () => {
     if (roomNameInput.value === '') return;
 
-    const context = await SkyWayContext.Create(token);
+    const context = await SkyWayContext.CreateForDevelopment(appId, secret);
     const room = await SkyWayRoom.FindOrCreate(context, {
       name: roomNameInput.value,
     });

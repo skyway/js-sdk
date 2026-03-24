@@ -1,6 +1,7 @@
 import {
   nowInSec,
   type Room,
+  type RoomPublication,
   SkyWayAuthToken,
   SkyWayContext,
   SkyWayRoom,
@@ -53,13 +54,19 @@ void (async () => {
   const localVideo = document.getElementById(
     'js-local-stream',
   ) as HTMLVideoElement;
-  const joinTrigger = document.getElementById('js-join-trigger');
-  const leaveTrigger = document.getElementById('js-leave-trigger');
-  const remoteVideos = document.getElementById('js-remote-streams');
+  const joinTrigger = document.getElementById(
+    'js-join-trigger',
+  ) as HTMLButtonElement;
+  const leaveTrigger = document.getElementById(
+    'js-leave-trigger',
+  ) as HTMLButtonElement;
+  const remoteVideos = document.getElementById(
+    'js-remote-streams',
+  ) as HTMLDivElement;
   const channelName = document.getElementById(
     'js-channel-name',
   ) as HTMLInputElement;
-  const messages = document.getElementById('js-messages');
+  const messages = document.getElementById('js-messages') as HTMLDivElement;
 
   const { audio, video } =
     await SkyWayStreamFactory.createMicrophoneAudioAndCameraStream();
@@ -74,7 +81,7 @@ void (async () => {
     log: { level: 'warn', format: 'object' },
   });
 
-  let room: Room;
+  let room: Room | undefined;
 
   // Register join handler
   joinTrigger.addEventListener('click', async () => {
@@ -93,7 +100,7 @@ void (async () => {
       messages.textContent += `=== ${e.member.id.slice(0, 5)} joined ===\n`;
     });
 
-    const userVideo = {};
+    const userVideo: Record<string, HTMLVideoElement> = {};
 
     member.onPublicationSubscribed.add(async ({ stream, subscription }) => {
       if (stream.contentType === 'data') return;
@@ -127,7 +134,7 @@ void (async () => {
         };
       }
     });
-    const subscribe = async (publication) => {
+    const subscribe = async (publication: RoomPublication) => {
       if (publication.publisher.id === member.id) return;
       await member.subscribe(publication.id);
     };
@@ -167,8 +174,10 @@ void (async () => {
         disposeVideoElement(element as HTMLVideoElement);
       });
       messages.textContent += '== You left ===\n';
-      void room.dispose();
-      room = undefined;
+      if (room) {
+        void room.dispose();
+        room = undefined;
+      }
     });
 
     leaveTrigger.addEventListener('click', () => member.leave(), {

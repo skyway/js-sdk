@@ -39,16 +39,22 @@ export class Logger {
 
   /**@internal */
   static readonly id = Math.random().toString().slice(2, 7);
-  static readonly formatter = new Intl.DateTimeFormat('ja-JP', {
-    timeZone: 'Asia/Tokyo',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: false,
-  });
+
+  private static formatTimestampJst(date: Date): string {
+    const pad = (value: number, length: number) =>
+      value.toString().padStart(length, '0');
+    const jst = new Date(date.getTime() + 9 * 60 * 60 * 1000);
+
+    const year = jst.getUTCFullYear();
+    const month = pad(jst.getUTCMonth() + 1, 2);
+    const day = pad(jst.getUTCDate(), 2);
+    const hour = pad(jst.getUTCHours(), 2);
+    const minute = pad(jst.getUTCMinutes(), 2);
+    const second = pad(jst.getUTCSeconds(), 2);
+    const milliseconds = pad(jst.getUTCMilliseconds(), 3);
+
+    return `${year}-${month}-${day}T${hour}:${minute}:${second}.${milliseconds}+09:00`;
+  }
 
   /**@internal */
   prefix: string;
@@ -91,13 +97,7 @@ export class Logger {
     const logLevel = logLevelTypes.indexOf(Logger.level);
 
     const now = new Date();
-    const parts = Logger.formatter.formatToParts(now);
-    const get = (type: Intl.DateTimeFormatPartTypes) =>
-      parts.find((p) => p.type === type)?.value;
-    const milliseconds = String(now.getMilliseconds()).padStart(3, '0');
-    const timestamp = `${get('year')}-${get('month')}-${get('day')}T${get(
-      'hour',
-    )}:${get('minute')}:${get('second')}.${milliseconds}+09:00`;
+    const timestamp = Logger.formatTimestampJst(now);
 
     if (logLevel >= logType) {
       const parsed = [this.prefix, ...msg].map((m) => {

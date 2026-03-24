@@ -1,16 +1,13 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
-    "target": "ES2015",
-    "lib": ["DOM", "ES2020"],
-    "sourceMap": true,
-    "declaration": true,
-    "declarationMap": true,
-    "noEmitOnError": true,
+    "target": "ES2022",
+    "module": "ESNext",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "types": ["vite/client"],
     "skipLibCheck": true,
-    "esModuleInterop": true,
-    "strict": false,
-    "strictNullChecks": false
+    "moduleResolution": "bundler",
+    "isolatedModules": true,
+    "noEmit": true
   },
-  "exclude": ["node_modules", "lib"]
+  "include": ["src"]
 }

@@ -1,4 +1,4 @@
-@skyway-sdk/room@2.4.1
+@skyway-sdk/room@2.4.2
 
 MIT
 
@@ -29,7 +29,7 @@ SOFTWARE.
 
 ---
 
-@skyway-sdk/token@2.1.0
+@skyway-sdk/token@2.1.1
 
 MIT
 
@@ -60,7 +60,7 @@ SOFTWARE.
 
 ---
 
-@skyway-sdk/common@2.0.2
+@skyway-sdk/common@2.0.3
 
 MIT
 
@@ -91,7 +91,7 @@ SOFTWARE.
 
 ---
 
-@skyway-sdk/sfu-bot@2.2.1
+@skyway-sdk/sfu-bot@2.2.2
 
 MIT
 
@@ -122,7 +122,7 @@ SOFTWARE.
 
 ---
 
-@skyway-sdk/sfu-api-client@2.0.2
+@skyway-sdk/sfu-api-client@2.0.3
 
 MIT
 
@@ -153,7 +153,7 @@ SOFTWARE.
 
 ---
 
-@skyway-sdk/core@2.4.1
+@skyway-sdk/core@2.4.2
 
 MIT
 
@@ -215,7 +215,7 @@ SOFTWARE.
 
 ---
 
-@skyway-sdk/rtc-api-client@2.2.0
+@skyway-sdk/rtc-api-client@2.2.1
 
 MIT
 
@@ -246,7 +246,7 @@ SOFTWARE.
 
 ---
 
-@skyway-sdk/rtc-rpc-api-client@2.1.0
+@skyway-sdk/rtc-rpc-api-client@2.1.1
 
 MIT
 
@@ -501,7 +501,7 @@ SOFTWARE.
 
 ---
 
-axios@1.12.0
+axios@1.13.5
 
 MIT
 
@@ -909,7 +909,7 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-form-data@4.0.4
+form-data@4.0.5
 
 MIT
 

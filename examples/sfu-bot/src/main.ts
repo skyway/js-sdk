@@ -39,13 +39,15 @@ const token = new SkyWayAuthToken({
 
 void (async () => {
   const localVideo = document.getElementById('local-video') as HTMLVideoElement;
-  const buttonArea = document.getElementById('button-area');
-  const remoteMediaArea = document.getElementById('remote-media-area');
+  const buttonArea = document.getElementById('button-area') as HTMLDivElement;
+  const remoteMediaArea = document.getElementById(
+    'remote-media-area',
+  ) as HTMLDivElement;
   const channelNameInput = document.getElementById(
     'channel-name',
   ) as HTMLInputElement;
-  const myId = document.getElementById('my-id');
-  const joinButton = document.getElementById('join');
+  const myId = document.getElementById('my-id') as HTMLSpanElement;
+  const joinButton = document.getElementById('join') as HTMLButtonElement;
 
   const { audio, video } =
     await SkyWayStreamFactory.createMicrophoneAudioAndCameraStream();
@@ -89,7 +91,7 @@ void (async () => {
     const createSubscribeButton = (publication: Publication) => {
       if (
         publication.publisher.subtype !== SFUBotMember.subtype ||
-        publication.origin.publisher.id === me.id
+        publication.origin?.publisher.id === me.id
       ) {
         return;
       }

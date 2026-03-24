@@ -1,6 +1,6 @@
 {
   "name": "@skyway-sdk/common",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "description": "The official Next Generation JavaScript SDK for SkyWay",
   "homepage": "https://skyway.ntt.com/",
   "repository": {
@@ -26,12 +26,13 @@
     "lint": "eslint ./src --fix",
     "graph": "dependency-cruiser --include-only '^src' --output-type dot src | dot -T svg > docs/dependencygraph.svg",
     "publish:npm": "pnpm dlx can-pnpm-publish --verbose && pnpm run build && npm publish --access public",
+    "test": "vitest run ./test",
     "watch": "npm-run-all --parallel watch:tsc watch:esbuild",
     "watch:esbuild": "esbuild src/index.ts --bundle --watch --format=esm --target=es6 --outfile=dist/index.mjs",
     "watch:tsc": "tsc -p tsconfig.build.json -w"
   },
   "dependencies": {
-    "axios": "^1.7.7"
+    "axios": "^1.13.5"
   },
   "keywords": [
     "webrtc",

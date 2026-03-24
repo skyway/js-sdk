@@ -1,5 +1,6 @@
 import {
   nowInSec,
+  type RoomPublication,
   SkyWayAuthToken,
   SkyWayContext,
   SkyWayRoom,
@@ -37,13 +38,15 @@ const token = new SkyWayAuthToken({
 
 void (async () => {
   const localVideo = document.getElementById('local-video') as HTMLVideoElement;
-  const buttonArea = document.getElementById('button-area');
-  const remoteMediaArea = document.getElementById('remote-media-area');
+  const buttonArea = document.getElementById('button-area') as HTMLDivElement;
+  const remoteMediaArea = document.getElementById(
+    'remote-media-area',
+  ) as HTMLDivElement;
   const channelNameInput = document.getElementById(
     'channel-name',
   ) as HTMLInputElement;
-  const myId = document.getElementById('my-id');
-  const joinButton = document.getElementById('join');
+  const myId = document.getElementById('my-id') as HTMLSpanElement;
+  const joinButton = document.getElementById('join') as HTMLButtonElement;
 
   const { audio, video } =
     await SkyWayStreamFactory.createMicrophoneAudioAndCameraStream();
@@ -70,7 +73,7 @@ void (async () => {
       ],
     });
 
-    const subscribeAndAttach = (publication) => {
+    const subscribeAndAttach = (publication: RoomPublication) => {
       if (publication.publisher.id === me.id) return;
 
       const subscribeButton = document.createElement('button');

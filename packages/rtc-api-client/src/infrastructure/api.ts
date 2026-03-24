@@ -125,12 +125,16 @@ export class RtcApiImpl implements RtcApi {
         });
       case 403:
       case 4030:
-        return createError({
-          operationName: method,
-          info: errors.insufficientPermissions,
-          path: log.prefix,
-          error: detail,
-        });
+        // ここではinsufficientPermissionsのみを捕捉する．他のものはそれぞれの操作内で判定する．
+        if (detail?.info?.error?.data?.code === 403000) {
+          return createError({
+            operationName: method,
+            info: errors.insufficientPermissions,
+            path: log.prefix,
+            error: detail,
+          });
+        }
+        break;
       case 429:
         return createError({
           operationName: method,
@@ -393,6 +397,14 @@ export class RtcApiImpl implements RtcApi {
           throw error;
         }
         switch (info?.error?.code) {
+          case 403:
+          case 4030:
+            throw createError({
+              operationName: 'RtcApiImpl.addMember',
+              path: log.prefix,
+              info: errors.membersPerRoomLimitExceeded,
+              error: e,
+            });
           case 404:
             throw createError({
               operationName: 'RtcApiImpl.addMember',
@@ -604,6 +616,31 @@ export class RtcApiImpl implements RtcApi {
           throw error;
         }
         switch (info?.error?.code) {
+          case 403:
+          case 4030:
+            switch (info?.error?.data?.code) {
+              case 403002:
+                throw createError({
+                  operationName: 'RtcApiImpl.publish',
+                  path: log.prefix,
+                  info: errors.publicationsPerRoomLimitExceeded,
+                  error: e,
+                });
+              case 403004:
+                throw createError({
+                  operationName: 'RtcApiImpl.publish',
+                  path: log.prefix,
+                  info: errors.publicationsPerMemberLimitExceeded,
+                  error: e,
+                });
+              default:
+                throw createError({
+                  operationName: 'RtcApiImpl.publish',
+                  path: log.prefix,
+                  info: errors.internalError,
+                  error: e,
+                });
+            }
           default:
             throw createError({
               operationName: 'RtcApiImpl.publish',
@@ -794,6 +831,31 @@ export class RtcApiImpl implements RtcApi {
           throw error;
         }
         switch (info?.error?.code) {
+          case 403:
+          case 4030:
+            switch (info?.error?.data?.code) {
+              case 403003:
+                throw createError({
+                  operationName: 'RtcApiImpl.subscribeStream',
+                  path: log.prefix,
+                  info: errors.subscriptionsPerRoomLimitExceeded,
+                  error: e,
+                });
+              case 403006:
+                throw createError({
+                  operationName: 'RtcApiImpl.subscribeStream',
+                  path: log.prefix,
+                  info: errors.subscriptionsPerMemberLimitExceeded,
+                  error: e,
+                });
+              default:
+                throw createError({
+                  operationName: 'RtcApiImpl.subscribeStream',
+                  path: log.prefix,
+                  info: errors.internalError,
+                  error: e,
+                });
+            }
           case 404:
             throw createError({
               operationName: 'RtcApiImpl.subscribeStream',

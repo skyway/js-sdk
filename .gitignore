@@ -29,3 +29,5 @@ packages/signaling-client/examples
 packages/analytics-client/examples
 jest
 test-*.json
+AGENTS.md
+CLAUDE.md

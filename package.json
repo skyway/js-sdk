@@ -4,8 +4,8 @@
   "scripts": {
     "build": "lerna run build",
     "build:example": "pnpm run build && lerna run build:example",
-    "clean": "pnpm run clean:example && lerna clean -y && rm -rf ./packages/*/dist && rm -rf ./packages/*/node_modules && rm -rf ./packages/*/bundler && rm -rf ./.parcel-cache && rm -rf node_modules",
-    "clean:example": "rm -rf ./examples/*/dist && rm -rf ./examples/*/.parcel-cache && rm -rf ./examples/*/node_modules",
+    "clean": "pnpm run clean:example && lerna clean -y && rm -rf ./packages/*/dist && rm -rf ./packages/*/node_modules && rm -rf ./packages/*/bundler && rm -rf node_modules",
+    "clean:example": "rm -rf ./examples/*/dist && rm -rf ./examples/*/node_modules",
     "type": "lerna run type",
     "compile": "lerna run compile && lerna run type",
     "doc": "pnpm run compile && pnpm run doc:update",
@@ -58,7 +58,7 @@
     "zx": "^8.4.0"
   },
   "engines": {
-    "node": ">=20.0.0",
+    "node": ">=22.0.0",
     "npm": ">=10.8.1"
   },
   "packageManager": "pnpm@10.5.2+sha512.da9dc28cd3ff40d0592188235ab25d3202add8a207afbedc682220e4a0029ffbff4562102b9e6e46b4e3f9e8bd53e6d05de48544b0c57d4b0179e22c76d1199b"

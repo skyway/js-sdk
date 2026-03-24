@@ -1,5 +1,6 @@
 import {
   nowInSec,
+  type Publication,
   SkyWayAuthToken,
   SkyWayChannel,
   SkyWayContext,
@@ -54,17 +55,19 @@ const token = new SkyWayAuthToken({
 
 void (async () => {
   const localVideo = document.getElementById('local-video') as HTMLVideoElement;
-  const buttonArea = document.getElementById('button-area');
-  const remoteMediaArea = document.getElementById('remote-media-area');
+  const buttonArea = document.getElementById('button-area') as HTMLDivElement;
+  const remoteMediaArea = document.getElementById(
+    'remote-media-area',
+  ) as HTMLDivElement;
   const channelNameInput = document.getElementById(
     'channel-name',
   ) as HTMLInputElement;
   const dataStreamInput = document.getElementById(
     'data-stream',
   ) as HTMLInputElement;
-  const myId = document.getElementById('my-id');
-  const joinButton = document.getElementById('join');
-  const writeButton = document.getElementById('write');
+  const myId = document.getElementById('my-id') as HTMLSpanElement;
+  const joinButton = document.getElementById('join') as HTMLButtonElement;
+  const writeButton = document.getElementById('write') as HTMLButtonElement;
 
   const { audio, video } =
     await SkyWayStreamFactory.createMicrophoneAudioAndCameraStream();
@@ -92,7 +95,7 @@ void (async () => {
     await me.publish(video);
     await me.publish(data);
 
-    const subscribeAndAttach = (publication) => {
+    const subscribeAndAttach = (publication: Publication) => {
       if (publication.publisher.id === me.id) return;
 
       const subscribeButton = document.createElement('button');

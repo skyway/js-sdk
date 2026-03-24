@@ -110,6 +110,31 @@ export const errors = {
     solution:
       'typeを正しい値に設定してください。 "p2p" または "sfu" のいずれかを指定できます。',
   },
+  membersPerRoomLimitExceeded: {
+    name: 'membersPerRoomLimitExceeded',
+    detail: '1Room内に作成できるMember上限数を超えています',
+    solution: '他のMemberがleaveした後に再度joinしてください。',
+  },
+  publicationsPerRoomLimitExceeded: {
+    name: 'publicationsPerRoomLimitExceeded',
+    detail: '1Room内に作成できるPublication上限数を超えています',
+    solution: '不要なPublicationを削除してから再度publishしてください。',
+  },
+  publicationsPerMemberLimitExceeded: {
+    name: 'publicationsPerMemberLimitExceeded',
+    detail: '1Memberが作成できるPublication上限数を超えています',
+    solution: '不要なPublicationを削除してから再度publishしてください。',
+  },
+  subscriptionsPerRoomLimitExceeded: {
+    name: 'subscriptionsPerRoomLimitExceeded',
+    detail: '1Room内に作成できるSubscription上限数を超えています',
+    solution: '不要なSubscriptionを削除してから再度subscribeしてください。',
+  },
+  subscriptionsPerMemberLimitExceeded: {
+    name: 'subscriptionsPerMemberLimitExceeded',
+    detail: '1Memberが作成できるSubscription上限数を超えています',
+    solution: '不要なSubscriptionを削除してから再度subscribeしてください。',
+  },
 } as const;
 
 export type ErrorName = keyof typeof errors;
