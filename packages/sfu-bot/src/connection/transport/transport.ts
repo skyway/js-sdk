@@ -121,8 +121,12 @@ export class SFUTransport {
           operationName: 'onMediasoupConnectionStateChanged',
           channel: this._bot.channel,
         })
-          .then((debug) => {
-            log.debug(debug, { state, transportId: this.id, bot: _bot });
+          .then((payload) => {
+            log.info('onMediasoupConnectionStateChanged', payload, {
+              state,
+              transportId: this.id,
+              bot: _bot,
+            });
           })
           .catch(() => {});
 

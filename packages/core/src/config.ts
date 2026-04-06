@@ -20,6 +20,10 @@ export type SkyWayConfigOptions = {
      * */
     timeout?: number;
     turnPolicy?: TurnPolicy;
+    /**
+     * @internal
+     */
+    stunPolicy?: 'enable' | 'disable';
     turnProtocol?: TurnProtocol;
     /**
      * @internal
@@ -104,6 +108,7 @@ export class ContextConfig implements SkyWayConfigOptions {
     timeout: 30_000,
     turnPolicy: 'enable',
     turnProtocol: 'all',
+    stunPolicy: 'enable',
     iceDisconnectBufferTimeout: 5000,
   };
   token: Required<SkyWayConfigOptions['token']> = {

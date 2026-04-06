@@ -1,3 +1,5 @@
+require('../../scripts/jest.textEncodingPolyfill');
+
 class MockRTCRtpTransceiver {
   constructor() {
     this.receiver = {};

@@ -1,6 +1,7 @@
 import { Event, Logger } from '@skyway-sdk/common';
 import {
   createError,
+  createLogPayload,
   type LocalAudioStream,
   type LocalCustomVideoStream,
   type LocalPersonImpl,
@@ -109,7 +110,14 @@ export class SFUConnection implements SkyWayConnection {
       );
       throw e;
     });
-    log.elapsed(ts, '[end] _startSubscribing consume');
+    log.elapsed(
+      ts,
+      '[end] _startSubscribing consume',
+      await createLogPayload({
+        operationName: 'SFUConnection.startSubscribing',
+        channel: this.channel,
+      }),
+    );
 
     stream.setIsEnabled(subscription.publication.state === 'enabled');
     subscription.codec = codec;

@@ -1,4 +1,4 @@
-@skyway-sdk/room@2.4.2
+@skyway-sdk/room@2.4.3
 
 MIT
 
@@ -91,7 +91,7 @@ SOFTWARE.
 
 ---
 
-@skyway-sdk/sfu-bot@2.2.2
+@skyway-sdk/sfu-bot@2.2.3
 
 MIT
 
@@ -153,7 +153,7 @@ SOFTWARE.
 
 ---
 
-@skyway-sdk/core@2.4.2
+@skyway-sdk/core@2.4.3
 
 MIT
 
@@ -1215,7 +1215,7 @@ SOFTWARE.
 
 ---
 
-jsrsasign@11.1.0
+jsrsasign@11.1.1
 
 MIT
 
@@ -1254,7 +1254,7 @@ SOFTWARE.
 
 ---
 
-lodash@4.17.23
+lodash@4.18.1
 
 MIT
 

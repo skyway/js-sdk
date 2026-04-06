@@ -80,10 +80,20 @@ export class IceManager {
   }
 
   get iceServers(): RTCIceServer[] {
-    let iceServers: RTCIceServer[] = [...this._stunServers];
+    const { rtcConfig } = this.context.config;
+
+    let iceServers: RTCIceServer[] = [];
+
+    if (
+      rtcConfig.turnPolicy !== 'turnOnly' &&
+      rtcConfig.stunPolicy !== 'disable'
+    ) {
+      iceServers = [...this._stunServers];
+    }
+
     const turnServers = this._turnServers.filter((t) => {
       const url = t.urls as string;
-      switch (this.context.config.rtcConfig.turnProtocol) {
+      switch (rtcConfig.turnProtocol) {
         case 'all':
           return true;
         case 'udp':
@@ -97,7 +107,7 @@ export class IceManager {
       }
     });
 
-    if (this.context.config.rtcConfig.turnPolicy !== 'disable') {
+    if (rtcConfig.turnPolicy !== 'disable') {
       iceServers = [...iceServers, ...turnServers];
     }
 

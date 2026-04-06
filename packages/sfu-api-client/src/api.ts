@@ -128,12 +128,14 @@ export class SFURestApiClient {
     maxSubscribers,
     contentType,
     publisherId,
+    forceTCP,
   }: {
     botId: string;
     publicationId: string;
     maxSubscribers: number;
     contentType: ContentType;
     publisherId: string;
+    forceTCP?: boolean;
   }) {
     const backOff = new BackOff();
 
@@ -142,6 +144,7 @@ export class SFURestApiClient {
       maxSubscribers,
       contentType: contentType[0].toUpperCase() + contentType.slice(1),
       publisherId,
+      forceTCP,
     };
 
     const res = await this.http
@@ -232,6 +235,7 @@ export class SFURestApiClient {
     subscriberId,
     spatialLayer,
     originPublicationId,
+    forceTCP,
   }: {
     botId: string;
     forwardingId: string;
@@ -240,6 +244,7 @@ export class SFURestApiClient {
     subscriberId: string;
     spatialLayer?: number;
     originPublicationId: string;
+    forceTCP?: boolean;
   }) {
     const backOff = new BackOff({ times: 5, interval: 100 }); // 5.5sec
 
@@ -249,12 +254,14 @@ export class SFURestApiClient {
       subscriberId: string;
       spatialLayer?: number;
       originPublicationId: string;
+      forceTCP?: boolean;
     } = {
       rtpCapabilities,
       subscriptionId,
       subscriberId,
       spatialLayer,
       originPublicationId,
+      forceTCP,
     };
 
     const res = await this.http

@@ -146,6 +146,8 @@ export class Sender {
       maxSubscribers: configure.maxSubscribers,
     });
 
+    const { forceTCP } = this._bot.options;
+
     const {
       forwardingId,
       broadcasterTransportId,
@@ -159,6 +161,7 @@ export class Sender {
       contentType: this.publication.contentType,
       maxSubscribers: configure.maxSubscribers,
       publisherId: this.publication.publisher.id,
+      forceTCP,
     });
     this.forwardingId = forwardingId;
 

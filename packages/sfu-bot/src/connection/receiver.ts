@@ -98,6 +98,8 @@ export class Receiver {
 
     log.debug('[start] createConsumer', { subscription: this.subscription });
 
+    const { forceTCP } = this._bot.options;
+
     const { consumerOptions, transportOptions, transportId, producerId } =
       await this._api.createConsumer({
         botId: this._bot.id,
@@ -107,6 +109,7 @@ export class Receiver {
         subscriberId: this.subscription.subscriber.id,
         spatialLayer,
         originPublicationId: this.subscription.publication.origin!.id,
+        forceTCP,
       });
     if (transportOptions) {
       this._transportRepository.createTransport(

@@ -1,6 +1,6 @@
 {
   "name": "@skyway-sdk/core",
-  "version": "2.4.2",
+  "version": "2.4.3",
   "description": "The official Next Generation JavaScript SDK for SkyWay",
   "homepage": "https://skyway.ntt.com/",
   "repository": {
@@ -53,7 +53,7 @@
     "@skyway-sdk/token": "workspace:*",
     "bowser": "^2.11.0",
     "deepmerge": "^4.3.1",
-    "lodash": "4.17.23",
+    "lodash": "4.18.1",
     "sdp-transform": "^2.14.2",
     "ua-parser-js": "^1.0.35",
     "uuid": "^9.0.0"

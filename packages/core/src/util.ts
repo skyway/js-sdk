@@ -98,6 +98,19 @@ export async function createLogPayload({
               outbound: stats.find((s) => s.type.includes('outbound-rtp')),
               localCandidate,
             };
+
+            const rawStats = await p.getRTCPeerConnection(memberId)?.getStats();
+            if (rawStats) {
+              const stats = statsToArray(rawStats);
+              const localCandidates = stats.filter(
+                (s) => s.type === 'local-candidate',
+              );
+              const remoteCandidates = stats.filter(
+                (s) => s.type === 'remote-candidate',
+              );
+              publication.stats[memberId].localCandidates = localCandidates;
+              publication.stats[memberId].remoteCandidates = remoteCandidates;
+            }
           }
         }
         if (p.stream) {
@@ -131,6 +144,19 @@ export async function createLogPayload({
           );
           subscription.transportType = iceCandidate?.protocol;
           subscription.relayProtocol = iceCandidate?.relayProtocol;
+
+          const rawStats = await s.getRTCPeerConnection()?.getStats();
+          if (rawStats) {
+            const stats = statsToArray(rawStats);
+            const localCandidates = stats.filter(
+              (s) => s.type === 'local-candidate',
+            );
+            const remoteCandidates = stats.filter(
+              (s) => s.type === 'remote-candidate',
+            );
+            subscription.localCandidates = localCandidates;
+            subscription.remoteCandidates = remoteCandidates;
+          }
         }
         if (s.stream) {
           subscription.connectionState = s.stream._getConnectionState();
