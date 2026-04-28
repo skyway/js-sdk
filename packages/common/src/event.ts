@@ -22,7 +22,19 @@ export interface EventInterface<T> {
   ) => Promise<T>;
 }
 
-export class Event<T> implements EventInterface<T> {
+interface PrivateEventInterface<T> extends EventInterface<T> {
+  asPromise: (
+    timeLimit?: number,
+    disposer?: PrivateEventDisposerInterface,
+  ) => Promise<T>;
+  watch: (
+    callback: (arg: T) => boolean | undefined | null,
+    timeLimit?: number,
+    disposer?: PrivateEventDisposerInterface,
+  ) => Promise<T>;
+}
+
+export class Event<T> implements PrivateEventInterface<T> {
   private _stack: {
     execute: EventExecute<T>;
     id: number;
@@ -88,19 +100,47 @@ export class Event<T> implements EventInterface<T> {
    * イベントが起きた時に Promise が resolve される
    * @param timeLimit ms
    */
-  asPromise = (timeLimit?: number) =>
+  asPromise = (timeLimit?: number, disposer?: PrivateEventDisposerInterface) =>
     new Promise<T>((resolve, reject) => {
-      const timeout =
-        timeLimit &&
-        setTimeout(() => {
+      const off = this.once((arg) => {
+        if (settled) {
+          return;
+        }
+        settled = true;
+        cleanup();
+        resolve(arg);
+      });
+      let timeout: ReturnType<typeof setTimeout> | undefined;
+      let settled = false;
+      let cancel = () => {};
+      const cleanup = () => {
+        off.removeListener();
+        if (timeout) {
+          clearTimeout(timeout);
+          timeout = undefined;
+        }
+        disposer?.remove(cancel);
+      };
+      cancel = () => {
+        if (settled) {
+          return;
+        }
+        settled = true;
+        cleanup();
+      };
+      if (timeLimit) {
+        timeout = setTimeout(() => {
+          if (settled) {
+            return;
+          }
+          settled = true;
+          cleanup();
           reject(
             new SerializableError(`Event asPromise timeout : ${timeLimit}`),
           );
         }, timeLimit);
-      this.once((arg) => {
-        if (timeout) clearTimeout(timeout);
-        resolve(arg);
-      });
+      }
+      disposer?.push(cancel);
     });
 
   /**
@@ -111,22 +151,49 @@ export class Event<T> implements EventInterface<T> {
     callback: (arg: T) => boolean | undefined | null,
     /**ms */
     timeLimit?: number,
+    disposer?: PrivateEventDisposerInterface,
   ) =>
     new Promise<T>((resolve, reject) => {
-      const timeout =
-        timeLimit &&
-        setTimeout(() => {
-          reject(new SerializableError(`Event watch timeout : ${timeLimit}`));
-        }, timeLimit);
-
-      const { removeListener } = this.add((arg) => {
+      const off = this.add((arg) => {
         const done = callback(arg);
         if (done) {
-          if (timeout) clearTimeout(timeout);
-          removeListener();
+          if (settled) {
+            return;
+          }
+          settled = true;
+          cleanup();
           resolve(arg);
         }
       });
+      let timeout: ReturnType<typeof setTimeout> | undefined;
+      let settled = false;
+      let cancel = () => {};
+      const cleanup = () => {
+        off.removeListener();
+        if (timeout) {
+          clearTimeout(timeout);
+          timeout = undefined;
+        }
+        disposer?.remove(cancel);
+      };
+      cancel = () => {
+        if (settled) {
+          return;
+        }
+        settled = true;
+        cleanup();
+      };
+      if (timeLimit) {
+        timeout = setTimeout(() => {
+          if (settled) {
+            return;
+          }
+          settled = true;
+          cleanup();
+          reject(new SerializableError(`Event watch timeout : ${timeLimit}`));
+        }, timeLimit);
+      }
+      disposer?.push(cancel);
     });
 
   /**@internal */
@@ -159,12 +226,20 @@ export interface EventDisposerInterface {
   dispose: () => void;
 }
 
+interface PrivateEventDisposerInterface extends EventDisposerInterface {
+  remove: (disposer: () => void) => void;
+}
+
 /**@internal */
-export class EventDisposer {
+export class EventDisposer implements PrivateEventDisposerInterface {
   private _disposer: (() => void)[] = [];
 
   push(disposer: () => void) {
     this._disposer.push(disposer);
+  }
+
+  remove(disposer: () => void) {
+    this._disposer = this._disposer.filter((item) => item !== disposer);
   }
 
   dispose() {

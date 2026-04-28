@@ -166,8 +166,10 @@ export class StreamFactory {
    * PCブラウザでのみ利用可能なAPI。
    * VideoStreamは常に取得される（AudioStreamのみ取得することはできない）
    * audioオプションを有効にするとAudioStreamを取得することができる。
-   * audioオプションはWindowsのChromeにしか対応しておらず、
+   * audioオプションは一部のブラウザにしか対応しておらず、
    * それ以外の環境では有効にしても戻り値のaudioにはundefinedが返される。
+   * 各ブラウザの最新のaudioオプション対応状況はMDNのAudio capture supportの項目をご確認ください。
+   * https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getDisplayMedia#browser_compatibility
    */
   async createDisplayStreams<T extends DisplayStreamOptions>(
     options: T = {} as T,

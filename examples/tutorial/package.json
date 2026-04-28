@@ -12,6 +12,6 @@
     "@skyway-sdk/room": "latest"
   },
   "devDependencies": {
-    "vite": "^7.3.1"
+    "vite": "^8.0.8"
   }
 }

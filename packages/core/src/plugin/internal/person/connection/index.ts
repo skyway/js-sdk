@@ -8,10 +8,11 @@ import type { IceManager } from '../../../../external/ice';
 import type { SignalingSession } from '../../../../external/signaling';
 import type { LocalPersonImpl } from '../../../../member/localPerson';
 import type { RemoteMember } from '../../../../member/remoteMember';
-import { type Publication, PublicationImpl } from '../../../../publication';
+import type { Publication, PublicationImpl } from '../../../../publication';
 import type { Subscription, SubscriptionImpl } from '../../../../subscription';
 import { createError } from '../../../../util';
 import type { SkyWayConnection } from '../../../interface/connection';
+import type { PeerRole } from './peer';
 import { Receiver } from './receiver';
 import { Sender } from './sender';
 
@@ -88,6 +89,7 @@ export class P2PConnection implements SkyWayConnection {
               this.startSendSubscriptionStatsReportTimer(
                 publication,
                 subscriptionId,
+                'sender',
               );
             }
           }
@@ -101,6 +103,7 @@ export class P2PConnection implements SkyWayConnection {
               this.startSendSubscriptionStatsReportTimer(
                 subscription,
                 subscriptionId,
+                'receiver',
               );
             }
           }
@@ -129,7 +132,11 @@ export class P2PConnection implements SkyWayConnection {
       });
 
       if (this._analytics.client.isConnectionEstablished()) {
-        this.startSendSubscriptionStatsReportTimer(publication, subscriptionId);
+        this.startSendSubscriptionStatsReportTimer(
+          publication,
+          subscriptionId,
+          'sender',
+        );
       } else {
         // AnalyticsServerに初回接続できなかった場合はキューに入れる
         this._waitingSendSubscriptionStatsReportsFromPublish.set(
@@ -208,6 +215,7 @@ export class P2PConnection implements SkyWayConnection {
           this.startSendSubscriptionStatsReportTimer(
             subscription,
             subscription.id,
+            'receiver',
           );
         } else {
           // AnalyticsServerに初回接続できなかった場合はキューに入れる
@@ -297,9 +305,9 @@ export class P2PConnection implements SkyWayConnection {
   private startSendSubscriptionStatsReportTimer(
     stream: Publication | Subscription,
     subscriptionId: string,
+    role: PeerRole,
   ) {
     if (this._analytics) {
-      const role = stream instanceof PublicationImpl ? 'sender' : 'receiver';
       const intervalSec = this._analytics.client.getIntervalSec();
       this.sendSubscriptionStatsReportTimers.set(
         stream.id,

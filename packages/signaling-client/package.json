@@ -1,6 +1,6 @@
 {
   "name": "@skyway-sdk/signaling-client",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "The official Next Generation JavaScript SDK for SkyWay",
   "homepage": "https://skyway.ntt.com/",
   "repository": {
@@ -42,12 +42,9 @@
   },
   "devDependencies": {
     "@types/isomorphic-fetch": "^0.0.39",
-    "@types/jest": "^27.0.0",
     "@types/node": "^18.12.0",
     "@types/uuid": "^9.0.1",
-    "@types/ws": "^8.5.10",
-    "jest": "^27.0.6",
-    "ts-jest": "^27.0.3"
+    "@types/ws": "^8.5.10"
   },
   "keywords": [
     "webrtc",

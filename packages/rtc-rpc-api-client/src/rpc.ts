@@ -1,4 +1,9 @@
-import { Events, Logger, type SkyWayError } from '@skyway-sdk/common';
+import {
+  EventDisposer,
+  Events,
+  Logger,
+  type SkyWayError,
+} from '@skyway-sdk/common';
 import WebSocket from 'isomorphic-ws';
 import { v4 as uuidV4 } from 'uuid';
 
@@ -24,6 +29,7 @@ export class RPC {
     return this._reconnecting;
   }
   private _pendingRequests: object[] = [];
+  private _disposerManager = new EventDisposer();
 
   private readonly _events = new Events();
   private readonly _onMessage = this._events.make<
@@ -167,6 +173,22 @@ export class RPC {
       executeSend().catch(f);
     });
 
+  private _withEventDisposer<T>(
+    task: (disposer: EventDisposer, isDisposed: () => boolean) => Promise<T>,
+  ) {
+    const disposer = new EventDisposer();
+    let disposed = false;
+    const dispose = () => {
+      disposed = true;
+      disposer.dispose();
+    };
+    this._disposerManager.push(dispose);
+    return task(disposer, () => disposed).finally(() => {
+      this._disposerManager.remove(dispose);
+      dispose();
+    });
+  }
+
   /**
    * @throws {@link SkyWayError}
    */
@@ -189,18 +211,25 @@ export class RPC {
     let promiseResolved = false;
     try {
       const request = buildRequest(method, params);
+      const neverDone = <T>() => new Promise<T>(() => {});
+      const createClosedWhileRequestingError = () =>
+        createError({
+          operationName: 'RPC.request',
+          info: errors.onClosedWhileRequesting,
+          path: log.prefix,
+          payload: { method, params },
+        });
 
-      const handleMessage = async (): Promise<
+      const handleMessage = async (
+        disposer?: EventDisposer,
+      ): Promise<
         ResponseMessage & {
           result: Result;
         }
       > =>
         (await this._onMessage
-          .watch((msg) => msg.id === request.id, rpcTimeout)
+          .watch((msg) => msg.id === request.id, rpcTimeout, disposer)
           .catch(() => {
-            if (promiseResolved) {
-              return;
-            }
             throw createError({
               operationName: 'RPC.request',
               info: {
@@ -219,54 +248,66 @@ export class RPC {
           })) as ResponseMessage & { result: Result };
 
       const pendingRequest = async (): Promise<
-        ResponseMessage & {
-          result: Result;
-        }
-      > => {
-        log.warn(
-          '[start] reconnecting. pending request',
-          createWarnPayload({
-            operationName: 'RPC.request',
-            detail: '[start] reconnecting. pending request',
-            payload: { request, id: this._id },
-          }),
-        );
-        // 再接続後に再送する
-        this._pendingRequests.push(request);
+        ResponseMessage & { result: Result }
+      > =>
+        this._withEventDisposer<ResponseMessage & { result: Result }>(
+          async (disposer, isDisposed) => {
+            log.warn(
+              '[start] reconnecting. pending request',
+              createWarnPayload({
+                operationName: 'RPC.request',
+                detail: '[start] reconnecting. pending request',
+                payload: { request, id: this._id },
+              }),
+            );
+            // 再接続後に再送する
+            this._pendingRequests.push(request);
 
-        const message = await Promise.race([
-          handleMessage(),
-          this.onFatalError.asPromise(rpcTimeout + 100).then((e) => {
-            if (!promiseResolved) {
-              log.error(
-                '[failed] reconnecting. pending request',
-                createError({
-                  operationName: 'RPC.request',
-                  info: {
-                    ...errors.internalError,
-                    detail: 'onFatalError while request',
-                  },
-                  path: log.prefix,
+            const message = await Promise.race([
+              handleMessage(disposer),
+              this.onClosed.asPromise(rpcTimeout + 100, disposer).then(() => {
+                if (isDisposed()) {
+                  return neverDone<ResponseMessage & { result: Result }>();
+                }
+                throw createClosedWhileRequestingError();
+              }),
+              this.onFatalError
+                .asPromise(rpcTimeout + 100, disposer)
+                .then((e) => {
+                  if (isDisposed()) {
+                    return neverDone<ResponseMessage & { result: Result }>();
+                  }
+                  if (!promiseResolved) {
+                    log.error(
+                      '[failed] reconnecting. pending request',
+                      createError({
+                        operationName: 'RPC.request',
+                        info: {
+                          ...errors.internalError,
+                          detail: 'onFatalError while request',
+                        },
+                        path: log.prefix,
+                      }),
+                      e,
+                    );
+                  }
+                  throw e;
                 }),
-                e,
-              );
-            }
-            throw e;
-          }),
-        ]);
-        promiseResolved = true;
+            ]);
+            promiseResolved = true;
 
-        log.warn(
-          '[end] reconnecting. pending request',
-          createWarnPayload({
-            operationName: 'RPC.request',
-            detail: '[end] reconnecting. pending request',
-            payload: { request, id: this._id },
-          }),
+            log.warn(
+              '[end] reconnecting. pending request',
+              createWarnPayload({
+                operationName: 'RPC.request',
+                detail: '[end] reconnecting. pending request',
+                payload: { request, id: this._id },
+              }),
+            );
+
+            return message;
+          },
         );
-
-        return message;
-      };
 
       let message: ResponseMessage & { result: Result };
 
@@ -275,59 +316,60 @@ export class RPC {
           log.error('send error', e);
         });
 
-        message = await Promise.race([
-          handleMessage(),
-          // 返信待ち中に接続が切れた場合
-          (async (): Promise<ResponseMessage & { result: Result }> => {
-            await this.onDisconnected.asPromise(rpcTimeout + 100);
-            if (promiseResolved) {
-              return {} as any;
-            }
+        message = await this._withEventDisposer<
+          ResponseMessage & { result: Result }
+        >((disposer, isDisposed) =>
+          Promise.race([
+            handleMessage(disposer),
+            // 返信待ち中に接続が切れた場合
+            (async (): Promise<ResponseMessage & { result: Result }> => {
+              await this.onDisconnected.asPromise(rpcTimeout + 100, disposer);
+              if (isDisposed()) {
+                return neverDone<ResponseMessage & { result: Result }>();
+              }
 
-            try {
-              const message = await pendingRequest();
-              log.warn(
-                createWarnPayload({
-                  operationName: 'request.pendingRequest',
-                  detail: 'success to handle disconnected',
-                }),
-              );
-              return message;
-            } catch (error: any) {
-              throw createError({
-                operationName: 'RPC.request',
-                info: errors.connectionDisconnected,
-                path: log.prefix,
-                error,
-              });
-            }
-          })(),
-          this.onFatalError.asPromise(rpcTimeout + 100).then((e) => {
-            if (promiseResolved) {
-              return {} as any;
-            }
-            throw createError({
-              operationName: 'RPC.request',
-              info: {
-                ...errors.internalError,
-                detail: 'onFatalError while requesting',
-              },
-              path: log.prefix,
-              error: e,
-            });
-          }),
-          this.onClosed.asPromise(rpcTimeout + 100).then(() => {
-            if (promiseResolved) {
-              return {} as any;
-            }
-            throw createError({
-              operationName: 'RPC.request',
-              info: errors.onClosedWhileRequesting,
-              path: log.prefix,
-              payload: { method, params },
-            });
-          }),
-        ]);
+              try {
+                const message = await pendingRequest();
+                log.warn(
+                  createWarnPayload({
+                    operationName: 'request.pendingRequest',
+                    detail: 'success to handle disconnected',
+                  }),
+                );
+                return message;
+              } catch (error: any) {
+                throw createError({
+                  operationName: 'RPC.request',
+                  info: errors.connectionDisconnected,
+                  path: log.prefix,
+                  error,
+                });
+              }
+            })(),
+            this.onFatalError
+              .asPromise(rpcTimeout + 100, disposer)
+              .then((e) => {
+                if (isDisposed()) {
+                  return neverDone<ResponseMessage & { result: Result }>();
+                }
+                throw createError({
+                  operationName: 'RPC.request',
+                  info: {
+                    ...errors.internalError,
+                    detail: 'onFatalError while requesting',
+                  },
+                  path: log.prefix,
+                  error: e,
+                });
+              }),
+            this.onClosed.asPromise(rpcTimeout + 100, disposer).then(() => {
+              if (isDisposed()) {
+                return neverDone<ResponseMessage & { result: Result }>();
+              }
+              throw createClosedWhileRequestingError();
+            }),
+          ]),
+        );
         promiseResolved = true;
       } else {
         message = await pendingRequest();
