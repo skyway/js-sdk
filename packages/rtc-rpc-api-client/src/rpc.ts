@@ -37,21 +37,30 @@ export class RPC {
   >();
   readonly onNotify = this._events.make<{ method: string; params: object }>();
   readonly onFatalError = this._events.make<SkyWayError>();
-  readonly onDisconnected = this._events.make<void>();
+  readonly onDisconnected = this._events.make<{ code: number }>();
   readonly onClosed = this._events.make<void>();
 
   async connect({
     domain,
     token,
     secure,
+    contextId,
+    leaveWhenDisconnected,
   }: {
     domain: string;
     token: string;
     secure: boolean;
+    contextId: string;
+    leaveWhenDisconnected?: boolean;
   }) {
     const subProtocol = token;
+    const params = new URLSearchParams();
+    params.set('contextId', contextId);
+    if (leaveWhenDisconnected) {
+      params.set('leaveWhenDisconnected', 'true');
+    }
     this._ws = new WebSocket(
-      `${secure ? 'wss' : 'ws'}://${domain}/ws`,
+      `${secure ? 'wss' : 'ws'}://${domain}/ws?${params.toString()}`,
       subProtocol,
     );
 
@@ -70,7 +79,7 @@ export class RPC {
         // USAGE_LIMIT_EXCEEDED_WS_CLOSE_CODEはProjectUsageLimitExceededエラーに起因してWebSocket接続が閉じられたことを示すSkyWay特有のカスタムコード
         this.close();
       } else {
-        this.onDisconnected.emit();
+        this.onDisconnected.emit({ code: e.code });
       }
     };
 

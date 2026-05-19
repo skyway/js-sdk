@@ -14,6 +14,8 @@ const log = new Logger('packages/rtc-api-client/src/client.ts');
 export type RtcApiClientArgs = {
   appId: string;
   token: string;
+  contextId: string;
+  leaveWhenDisconnected?: boolean;
 } & Partial<ConfigOptions>;
 
 export class RtcApiClient {
@@ -30,6 +32,8 @@ export class RtcApiClient {
       ...config.rtcApi,
       token: args.token,
       log: config.log,
+      contextId: args.contextId,
+      leaveWhenDisconnected: args.leaveWhenDisconnected,
     });
 
     const api = new RtcApiImpl(rpc);

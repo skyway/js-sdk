@@ -37,4 +37,9 @@ export const errors = {
     detail: 'updateMemberTTLを再試行しましたが、失敗しました',
     solution: 'インターネット接続状況を確認してください',
   },
+  membersLeftByDisconnection: {
+    name: 'membersLeftByDisconnection',
+    detail: 'サーバとの接続が切断されMemberが削除されました',
+    solution: 'インターネット接続状況を確認してください',
+  },
 } as const;

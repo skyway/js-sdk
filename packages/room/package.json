@@ -1,6 +1,6 @@
 {
   "name": "@skyway-sdk/room",
-  "version": "2.4.4",
+  "version": "2.4.5",
   "description": "The official Next Generation JavaScript SDK for SkyWay",
   "homepage": "https://skyway.ntt.com/",
   "repository": {
@@ -49,11 +49,11 @@
     "@skyway-sdk/core": "workspace:*",
     "@skyway-sdk/sfu-bot": "workspace:*",
     "@skyway-sdk/token": "workspace:*",
-    "uuid": "^9.0.0"
+    "uuid": "^14.0.0"
   },
   "devDependencies": {
     "@skyway-sdk/model": "workspace:*",
-    "@types/uuid": "^9.0.1"
+    "@types/uuid": "^11.0.0"
   },
   "keywords": [
     "webrtc",

@@ -35,7 +35,15 @@ export type SkyWayConfigOptions = {
   log: Partial<{ level: LogLevel; format: LogFormat }>;
   /**@internal */
   internal: { disableDPlane?: boolean };
-  member: Partial<LocalMemberConfig>;
+  member: Partial<
+    LocalMemberConfig & {
+      /**
+       * @internal
+       * @readonly
+       * */
+      leaveWhenDisconnected?: boolean;
+    }
+  >;
 };
 
 /**
@@ -126,6 +134,7 @@ export class ContextConfig implements SkyWayConfigOptions {
     keepaliveIntervalGapSec: 30,
     keepaliveIntervalSec: 30,
     preventAutoLeaveOnBeforeUnload: false,
+    leaveWhenDisconnected: false,
   };
   /**@internal */
   constructor(options: Partial<SkyWayConfigOptions> = {}) {

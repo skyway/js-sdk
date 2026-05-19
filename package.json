@@ -9,7 +9,7 @@
     "type": "lerna run type",
     "compile": "lerna run compile && lerna run type",
     "doc": "pnpm run compile && pnpm run doc:update",
-    "doc:update": "lerna run doc && zx ./scripts/update-api-reference.mjs && zx ./scripts/insert-gtm-script.mjs",
+    "doc:update": "lerna run doc && zx ./scripts/update-api-reference.mjs && zx ./scripts/sanitize-docs.mjs && zx ./scripts/insert-gtm-script.mjs",
     "format": "lerna run format",
     "lint": "biome check . --error-on-warnings",
     "lint:fix": "biome check . --write --error-on-warnings",
@@ -60,6 +60,11 @@
   "engines": {
     "node": ">=22.0.0",
     "npm": ">=10.8.1"
+  },
+  "pnpm": {
+    "overrides": {
+      "axios": "1.15.2"
+    }
   },
   "packageManager": "pnpm@10.5.2+sha512.da9dc28cd3ff40d0592188235ab25d3202add8a207afbedc682220e4a0029ffbff4562102b9e6e46b4e3f9e8bd53e6d05de48544b0c57d4b0179e22c76d1199b"
 }

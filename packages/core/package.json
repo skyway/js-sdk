@@ -1,6 +1,6 @@
 {
   "name": "@skyway-sdk/core",
-  "version": "2.4.4",
+  "version": "2.4.5",
   "description": "The official Next Generation JavaScript SDK for SkyWay",
   "homepage": "https://skyway.ntt.com/",
   "repository": {
@@ -56,14 +56,14 @@
     "lodash": "4.18.1",
     "sdp-transform": "^2.14.2",
     "ua-parser-js": "^1.0.35",
-    "uuid": "^9.0.0"
+    "uuid": "^14.0.0"
   },
   "devDependencies": {
     "@skyway-sdk/model": "workspace:*",
     "@types/lodash": "4.17.23",
     "@types/sdp-transform": "^2.4.9",
     "@types/ua-parser-js": "^0.7.39",
-    "@types/uuid": "^9.0.1"
+    "@types/uuid": "^11.0.0"
   },
   "keywords": [
     "webrtc",

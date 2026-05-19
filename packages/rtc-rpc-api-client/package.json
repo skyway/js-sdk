@@ -1,6 +1,6 @@
 {
   "name": "@skyway-sdk/rtc-rpc-api-client",
-  "version": "2.1.2",
+  "version": "2.1.3",
   "description": "The official Next Generation JavaScript SDK for SkyWay",
   "homepage": "https://skyway.ntt.com/",
   "repository": {
@@ -21,7 +21,9 @@
     "compile": "pnpm run compile:tsc && pnpm run compile:esbuild",
     "compile:esbuild": "esbuild src/index.ts --bundle --format=esm --target=es6 --outfile=dist/index.mjs",
     "compile:tsc": "rm -rf dist && tsc -p tsconfig.build.json",
-    "e2e": "jest ./e2e --forceExit --coverage",
+    "e2e": "jest ./tests/e2e --forceExit --coverage",
+    "test-small": "jest ./tests/small --forceExit",
+    "test-all": "npm-run-all -p e2e test-small",
     "format": "eslint ./src --fix",
     "license": "zx ../../scripts/license.mjs @skyway-sdk/rtc-rpc-api-client",
     "lint": "eslint ./src --fix",
@@ -37,11 +39,11 @@
     "@skyway-sdk/common": "workspace:*",
     "@skyway-sdk/model": "workspace:*",
     "isomorphic-ws": "^4.0.1",
-    "uuid": "^9.0.0"
+    "uuid": "^14.0.0"
   },
   "devDependencies": {
     "@skyway-sdk/token": "workspace:*",
-    "@types/uuid": "^9.0.1"
+    "@types/uuid": "^11.0.0"
   },
   "keywords": [
     "webrtc",

@@ -177,6 +177,8 @@ export class SkyWayContext implements SkyWayContextInterface {
         token: authTokenString,
         log: config.log,
         rtcApi: config.rtcApi,
+        contextId: SkyWayContext.id,
+        leaveWhenDisconnected: config.member.leaveWhenDisconnected,
       });
       const context = new SkyWayContext(api, config, token, {
         endpoint,
@@ -281,15 +283,19 @@ export class SkyWayContext implements SkyWayContextInterface {
     });
     this._api.onFatalError.once((error) => {
       log.error('onFatalError', { appId: this.appId, error });
-      this.onFatalError.emit(
-        createError({
-          operationName: 'SkyWayContext._api.onFatalError',
-          context: this,
-          info: errors.rtcApiFatalError,
-          error,
-          path: log.prefix,
-        }),
-      );
+      if (error.name === 'membersLeftByDisconnection') {
+        this.onFatalError.emit(error);
+      } else {
+        this.onFatalError.emit(
+          createError({
+            operationName: 'SkyWayContext._api.onFatalError',
+            context: this,
+            info: errors.rtcApiFatalError,
+            error,
+            path: log.prefix,
+          }),
+        );
+      }
       this.dispose();
     });
   }

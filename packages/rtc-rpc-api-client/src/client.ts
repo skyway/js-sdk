@@ -37,6 +37,8 @@ export interface RtcRpcApiConfig {
 export type RtcRpcApiClientConfig = RtcRpcApiConfig & {
   token: string;
   log?: Partial<{ level: LogLevel; format: LogFormat }>;
+  contextId: string;
+  leaveWhenDisconnected?: boolean;
 };
 
 export class RtcRpcApiClient {
@@ -45,6 +47,9 @@ export class RtcRpcApiClient {
   private readonly _domain = this.config.domain ?? defaultDomain;
   private _secure = this.config.secure ?? true;
   private _token = this.config.token;
+  private readonly _contextId = this.config.contextId;
+  private readonly _leaveWhenDisconnected =
+    this.config.leaveWhenDisconnected ?? false;
   /**@private */
   _rpc = new RPC();
   private _subscribingChannelEvents = new Set<string>();
@@ -82,12 +87,31 @@ export class RtcRpcApiClient {
       }
     });
 
-    this._rpc.onDisconnected.add(async () => {
+    this._rpc.onDisconnected.add(async ({ code }) => {
       if (
         this._rpc.negotiated &&
         !this._rpc.closed &&
         !this._rpc.reconnecting
       ) {
+        if (this._leaveWhenDisconnected && code !== 4001) {
+          log.warn(
+            'leaveWhenDisconnected: skip reconnect',
+            createWarnPayload({
+              operationName: 'RtcRpcApiClient.onDisconnected',
+              detail: 'leaveWhenDisconnected is true, skipping reconnect',
+              payload: { code },
+            }),
+          );
+          this.onFatalError.emit(
+            createError({
+              operationName: 'RtcRpcApiClient.onDisconnected',
+              info: errors.membersLeftByDisconnection,
+              path: log.prefix,
+            }),
+          );
+          this.close();
+          return;
+        }
         await this._reconnect();
       }
     });
@@ -248,6 +272,8 @@ export class RtcRpcApiClient {
         domain: this._domain,
         token: this.token,
         secure: this._secure,
+        contextId: this._contextId,
+        leaveWhenDisconnected: this._leaveWhenDisconnected,
       })
       .catch((e) => {
         throw createError({
@@ -455,7 +481,7 @@ export class RtcRpcApiClient {
         authToken: this.token,
       });
     } catch (e: any) {
-      if (!backoff.exceeded) {
+      if (!backoff.exceeded && !this.closed) {
         log.warn(
           'retry updateMemberTtl',
           createWarnPayload({
@@ -697,7 +723,7 @@ export class RtcRpcApiClient {
       });
       return res.unixtime;
     } catch (error) {
-      if (!backoff.exceeded) {
+      if (!backoff.exceeded && !this.closed) {
         log.warn(
           createWarnPayload({
             operationName: 'RtcRpcApiClient.getServerUnixtime',
