@@ -25,29 +25,98 @@ export function getBitrateFromPeerConnection(
   selector: Member | string,
 ) {
   let preBytes = 0;
-  const id = setInterval(async () => {
-    const stats = await stream._getStats(selector);
-    const stat = stats.find((v) => {
-      if (direction === 'inbound') {
-        return (
-          v?.id.includes('InboundRTPVideo') || v?.type.includes('inbound-rtp')
+  const id = setInterval(() => {
+    stream
+      ._getStats(selector)
+      .then((stats) => {
+        const stat = stats.find((v) => {
+          if (direction === 'inbound') {
+            return (
+              v?.id.includes('InboundRTPVideo') ||
+              v?.type.includes('inbound-rtp')
+            );
+          }
+          return (
+            v?.id.includes('OutboundRTPVideo') ||
+            v?.type.includes('outbound-rtp')
+          );
+        });
+        if (!stat) {
+          return;
+        }
+        const totalBytes =
+          direction === 'inbound' ? stat.bytesReceived : stat.bytesSent;
+        const bitrate = (totalBytes - preBytes) * 8;
+        cb(bitrate);
+        preBytes = totalBytes;
+      })
+      .catch((error) => {
+        log.warn(
+          'get bitrate stats failed',
+          createWarnPayload({
+            operationName: 'getBitrateFromPeerConnection',
+            detail: 'get bitrate stats failed',
+            payload: { direction },
+          }),
+          error,
         );
-      }
-      return (
-        v?.id.includes('OutboundRTPVideo') || v?.type.includes('outbound-rtp')
-      );
-    });
-    if (!stat) {
-      return;
-    }
-    const totalBytes =
-      direction === 'inbound' ? stat.bytesReceived : stat.bytesSent;
-    const bitrate = (totalBytes - preBytes) * 8;
-    cb(bitrate);
-    preBytes = totalBytes;
+      });
   }, 1000);
   return () => clearInterval(id);
 }
+
+const getRawStatsForLog = async (
+  pc: RTCPeerConnection | undefined,
+  operationName: string,
+): Promise<RTCStatsReport | undefined> => {
+  if (!pc) {
+    return undefined;
+  }
+
+  return pc.getStats().catch((error) => {
+    log.warn(
+      'get raw stats for log failed',
+      createWarnPayload({
+        operationName,
+        detail: 'get raw stats for log failed',
+      }),
+      error,
+    );
+    return undefined;
+  });
+};
+
+const getStreamStatsForLog = async (
+  getStats: () => Promise<WebRTCStats>,
+  operationName: string,
+): Promise<WebRTCStats> =>
+  getStats().catch((error) => {
+    log.warn(
+      'get stream stats for log failed',
+      createWarnPayload({
+        operationName,
+        detail: 'get stream stats for log failed',
+      }),
+      error,
+    );
+    return [];
+  });
+
+const getAllStreamStatsForLog = async (
+  stream: LocalStream,
+  operationName: string,
+) =>
+  stream._getStatsAll().catch((error) => {
+    log.warn(
+      'get all stream stats for log failed',
+      createWarnPayload({
+        operationName,
+        detail: 'get all stream stats for log failed',
+      }),
+      error,
+    );
+    return [] as { memberId: string; stats: WebRTCStats }[];
+  });
 
 /**@internal */
 export function statsToArray(stats: RTCStatsReport) {
@@ -84,7 +153,10 @@ export async function createLogPayload({
           connectionStats: {},
         };
         if (p.stream) {
-          for (const { memberId, stats } of await p.stream._getStatsAll()) {
+          for (const { memberId, stats } of await getAllStreamStatsForLog(
+            p.stream,
+            operationName,
+          )) {
             const localCandidate = stats.find((s) =>
               s.type.includes('local-candidate'),
             );
@@ -99,7 +171,10 @@ export async function createLogPayload({
               localCandidate,
             };
 
-            const rawStats = await p.getRTCPeerConnection(memberId)?.getStats();
+            const rawStats = await getRawStatsForLog(
+              p.getRTCPeerConnection(memberId),
+              operationName,
+            );
             if (rawStats) {
               const stats = statsToArray(rawStats);
               const localCandidates = stats.filter(
@@ -135,7 +210,11 @@ export async function createLogPayload({
         };
         subscription.callType = s.publication.publisher.subtype;
         if (s.stream) {
-          const stats = await s.stream._getStats();
+          const stream = s.stream;
+          const stats = await getStreamStatsForLog(
+            () => stream._getStats(),
+            operationName,
+          );
           subscription.stats = stats.find((s) =>
             s.type.includes('inbound-rtp'),
           );
@@ -145,7 +224,10 @@ export async function createLogPayload({
           subscription.transportType = iceCandidate?.protocol;
           subscription.relayProtocol = iceCandidate?.relayProtocol;
 
-          const rawStats = await s.getRTCPeerConnection()?.getStats();
+          const rawStats = await getRawStatsForLog(
+            s.getRTCPeerConnection(),
+            operationName,
+          );
           if (rawStats) {
             const stats = statsToArray(rawStats);
             const localCandidates = stats.filter(

@@ -444,6 +444,9 @@ export class SkyWayContext implements SkyWayContextInterface {
     this._onDisposed.emit();
     this.onDisposed.emit();
     this._events.dispose();
+    if (this.analyticsSession) {
+      this.analyticsSession.close();
+    }
 
     this._api.close();
 

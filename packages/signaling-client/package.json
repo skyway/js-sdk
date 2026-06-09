@@ -1,6 +1,6 @@
 {
   "name": "@skyway-sdk/signaling-client",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "description": "The official Next Generation JavaScript SDK for SkyWay",
   "homepage": "https://skyway.ntt.com/",
   "repository": {
@@ -37,13 +37,13 @@
   "dependencies": {
     "isomorphic-fetch": "^3.0.0",
     "isomorphic-ws": "^4.0.1",
-    "uuid": "^14.0.0",
+    "uuid": "^11.1.1",
     "ws": "^8.20.1"
   },
   "devDependencies": {
     "@types/isomorphic-fetch": "^0.0.39",
     "@types/node": "^18.12.0",
-    "@types/uuid": "^11.0.0",
+    "@types/uuid": "^9.0.1",
     "@types/ws": "^8.18.1"
   },
   "keywords": [

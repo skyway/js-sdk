@@ -51,6 +51,33 @@ export function convertConnectionState(
 }
 
 /**@internal */
+export const createEmptyStatsReport = () => new Map() as RTCStatsReport;
+
+/**@internal */
+export const hasSenderTrack = (
+  pc: RTCPeerConnection,
+  track: MediaStreamTrack,
+) => pc.getSenders().some((sender) => sender.track === track);
+
+/**@internal */
+export const hasReceiverTrack = (
+  pc: RTCPeerConnection,
+  track: MediaStreamTrack,
+) => pc.getReceivers().some((receiver) => receiver.track === track);
+
+/**@internal */
+export const isInvalidStatsSelectorError = (error: unknown) => {
+  if (!(error instanceof Error)) {
+    return false;
+  }
+
+  return (
+    error.name === 'InvalidAccessError' &&
+    error.message.includes('There is no sender or receiver for the track')
+  );
+};
+
+/**@internal */
 export const statsToJson = (report: RTCStatsReport) => {
   const stats: any[] = [];
   report.forEach((stat) => {

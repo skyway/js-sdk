@@ -95,7 +95,7 @@ export class SFUConnection implements SkyWayConnection {
     this._receivers[subscription.id] = receiver;
 
     const ts = log.debug('[start] _startSubscribing consume');
-    const { stream, codec } = await receiver.consume().catch((e) => {
+    const { stream, codec } = await receiver.consume().catch(async (e) => {
       log.error(
         '[failed] _startSubscribing consume',
         createError({
@@ -108,6 +108,20 @@ export class SFUConnection implements SkyWayConnection {
           payload: { subscription: subscription.toJSON() },
         }),
       );
+
+      // consume失敗時はchannel側のsubscriptionを解除してRTCAPI/SFUの状態整合を取る
+      // SFU側のreceiverクリーンアップはonPublicationUnsubscribed経由でstopSubscribingが行う
+      await this.localPerson
+        .unsubscribe(subscription.id)
+        .catch((unsubscribeError) => {
+          // unsubscribe自体の失敗は元のconsumeエラーを覆い隠さないようログのみに留める
+          log.warn('unsubscribe after consume failure also failed', {
+            error: unsubscribeError,
+            subscriptionId: subscription.id,
+            publicationId: subscription.publication.id,
+          });
+        });
+
       throw e;
     });
     log.elapsed(

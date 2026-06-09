@@ -27,7 +27,11 @@ import {
   statsToArray,
 } from '../../../../util';
 import type { TransportConnectionState } from '../../../interface';
-import { convertConnectionState } from '../util';
+import {
+  convertConnectionState,
+  hasReceiverTrack,
+  isInvalidStatsSelectorError,
+} from '../util';
 import type { P2PMessage } from '.';
 import { DataChannelNegotiationLabel } from './datachannel';
 import { type IceCandidateMessage, Peer } from './peer';
@@ -249,12 +253,29 @@ export class Receiver extends Peer {
       connectionState: convertConnectionState(this.pc.connectionState),
     });
     stream._getStats = async () => {
+      if (this.pc.connectionState === 'closed') {
+        return [];
+      }
+
       if (stream.contentType === 'data') {
         const stats = await this.pc.getStats();
         const arr = statsToArray(stats);
         return arr;
       }
-      const stats = await this.pc.getStats(stream.track);
+
+      if (!hasReceiverTrack(this.pc, stream.track)) {
+        return [];
+      }
+
+      const stats = await this.pc.getStats(stream.track).catch((error) => {
+        if (isInvalidStatsSelectorError(error)) {
+          return undefined;
+        }
+        throw error;
+      });
+      if (!stats) {
+        return [];
+      }
       const arr = statsToArray(stats);
       return arr;
     };
@@ -328,8 +349,33 @@ export class Receiver extends Peer {
     return false;
   }
 
+  /**@private */
+  _closeDataStream(publicationId: string) {
+    const stream = this.streams[publicationId];
+    if (!stream || stream.contentType !== 'data') {
+      return;
+    }
+
+    const { _datachannel } = stream;
+    if (
+      _datachannel.readyState !== 'closing' &&
+      _datachannel.readyState !== 'closed'
+    ) {
+      // Receiver 側では少なくとも本ファイル内で RTCDataChannel.onerror を
+      // 登録しておらず、close に伴う dataChannelGeneralError をここから
+      // 発火させる経路はない。そのため Sender 側のような
+      // "close 中フラグ" によるエラー抑制は不要で、readyState を確認した
+      // 上で通常の close のみを行う。
+      _datachannel.close();
+    }
+  }
+
   close() {
     this._log.debug('closed');
+
+    Object.keys(this.streams).forEach((publicationId) => {
+      this._closeDataStream(publicationId);
+    });
 
     this.unSetPeerConnectionListener();
     this.pc.close();
@@ -348,6 +394,8 @@ export class Receiver extends Peer {
     delete this._subscriptions[subscription.id];
 
     const publicationId = subscription.publication.id;
+    this._closeDataStream(publicationId);
+
     const stream = this.streams[publicationId];
     if (!stream) return;
     delete this.streams[publicationId];

@@ -952,10 +952,6 @@ export class LocalPersonImpl extends MemberImpl implements LocalPerson {
       this._signaling.close();
     }
 
-    if (this._analytics) {
-      this._analytics.close();
-    }
-
     this._getRemoteMemberConnections().forEach((c) => {
       c.close({ reason: 'localPerson disposed' });
     });

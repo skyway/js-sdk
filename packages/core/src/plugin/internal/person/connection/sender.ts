@@ -33,7 +33,12 @@ import {
   statsToArray,
 } from '../../../../util';
 import type { TransportConnectionState } from '../../../interface';
-import { isSafari, setEncodingParams } from '../util';
+import {
+  hasSenderTrack,
+  isInvalidStatsSelectorError,
+  isSafari,
+  setEncodingParams,
+} from '../util';
 import type { P2PMessage } from '.';
 import { DataChannelNegotiationLabel } from './datachannel';
 import { type IceCandidateMessage, Peer } from './peer';
@@ -55,6 +60,14 @@ export class Sender extends Peer {
   private readonly promiseQueue = new PromiseQueue();
   private _disposer = new EventDisposer();
   private _ms = new MediaStream();
+  /**
+   * browser が想定どおりの close callback を踏まない場合でも、
+   * close 済み DataChannel を GC できるように WeakSet を使う。
+   * strong collection へ変更すると解放されない要素を保持しやすいので、
+   * weak reference のまま維持すること。
+   * @private
+   */
+  _closingDataChannels = new WeakSet<RTCDataChannel>();
   private _backoffIceRestarted = new BackOff({
     times: 8,
     interval: 100,
@@ -471,15 +484,26 @@ export class Sender extends Peer {
       };
 
       dc.onclose = () => {
+        this._closingDataChannels.delete(dc);
         stream.onUnwritable.emit(dataStreamSubscriber);
       };
 
       dc.onerror = (err) => {
+        // SDK が意図して実行した正常 close では error ログを抑制する。
+        // transport/data channel の予期しない異常は従来どおり記録する。
+        if (this._shouldSuppressDataChannelError(dc)) {
+          this._log.debug('suppress datachannel error during normal close', {
+            publicationId: publication.id,
+            err,
+          });
+          return;
+        }
+
         if (
           'error' in err &&
           (err as any).error.errorDetail.includes('data-channel')
         ) {
-          this._log.error(
+          this._log.warn(
             'datachannel.send failed',
             createError({
               operationName: 'RTCDataChannel.onerror',
@@ -490,7 +514,7 @@ export class Sender extends Peer {
             }),
           );
         } else {
-          this._log.error(
+          this._log.warn(
             'datachannel operation failed',
             createError({
               operationName: 'RTCDataChannel.onerror',
@@ -525,7 +549,7 @@ export class Sender extends Peer {
               dc.send(data as any);
             });
           } else {
-            this._log.error(
+            this._log.warn(
               'datachannel.send failed',
               createError({
                 operationName: 'RTCDataChannel.onerror',
@@ -664,6 +688,10 @@ export class Sender extends Peer {
       connectionState: this._connectionState,
     });
     stream._getStatsCallbacks[this.endpoint.id] = async () => {
+      if (this.pc.connectionState === 'closed') {
+        return [];
+      }
+
       if (stream.contentType === 'data') {
         const stats = await this.pc.getStats();
         const arr = statsToArray(stats);
@@ -674,7 +702,19 @@ export class Sender extends Peer {
         await stream._onReplacingTrackDone.asPromise(200);
       }
 
-      const stats = await this.pc.getStats(stream.track);
+      if (!hasSenderTrack(this.pc, stream.track)) {
+        return [];
+      }
+
+      const stats = await this.pc.getStats(stream.track).catch((error) => {
+        if (isInvalidStatsSelectorError(error)) {
+          return undefined;
+        }
+        throw error;
+      });
+      if (!stats) {
+        return [];
+      }
       const arr = statsToArray(stats);
       return arr;
     };
@@ -712,6 +752,29 @@ export class Sender extends Peer {
     return cleanupCallbacks;
   }
 
+  /**@private */
+  _closeDataChannel(publicationId: string) {
+    const dc = this.datachannels[publicationId];
+    if (!dc) {
+      return;
+    }
+
+    if (dc.readyState === 'closed') {
+      this._closingDataChannels.delete(dc);
+      return;
+    }
+
+    this._closingDataChannels.add(dc);
+    if (dc.readyState !== 'closing') {
+      dc.close();
+    }
+  }
+
+  /**@private */
+  _shouldSuppressDataChannelError(dc: RTCDataChannel) {
+    return this._closingDataChannels.has(dc);
+  }
+
   /**@throws {SkyWayError} */
   async remove(publicationId: string) {
     const publication = this.publications[publicationId];
@@ -733,6 +796,11 @@ export class Sender extends Peer {
     // この時点でpublicationを削除しないと、このConnectionのcloseIfNeedが
     // 正常に動作しなくなる
     delete this.publications[publicationId];
+
+    if (publication.stream?.contentType === 'data') {
+      this._closeDataChannel(publicationId);
+      delete this.datachannels[publicationId];
+    }
 
     if (this._isNegotiating || this.pc.signalingState !== 'stable') {
       this._pendingPublications.push(publicationId);
@@ -763,8 +831,8 @@ export class Sender extends Peer {
     }
 
     if (stream.contentType === 'data') {
-      const dc = this.datachannels[publicationId];
-      dc.close();
+      // pending経路で先にclose済みでも、安全に再実行できる
+      this._closeDataChannel(publicationId);
       delete this.datachannels[publicationId];
     } else {
       const transceiver = this.transceivers[publicationId];
@@ -942,6 +1010,10 @@ export class Sender extends Peer {
   close() {
     this._log.debug('closed');
 
+    Object.keys(this.datachannels).forEach((publicationId) => {
+      this._closeDataChannel(publicationId);
+    });
+    this.datachannels = {};
     this.unSetPeerConnectionListener();
     Object.values(this._unsubscribeStreamEnableChange).forEach((f) => {
       f();

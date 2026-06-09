@@ -10,8 +10,14 @@ import type { LocalPersonImpl } from '../../../../member/localPerson';
 import type { RemoteMember } from '../../../../member/remoteMember';
 import type { Publication, PublicationImpl } from '../../../../publication';
 import type { Subscription, SubscriptionImpl } from '../../../../subscription';
-import { createError } from '../../../../util';
+import { createError, createWarnPayload } from '../../../../util';
 import type { SkyWayConnection } from '../../../interface/connection';
+import {
+  createEmptyStatsReport,
+  hasReceiverTrack,
+  hasSenderTrack,
+  isInvalidStatsSelectorError,
+} from '../util';
 import type { PeerRole } from './peer';
 import { Receiver } from './receiver';
 import { Sender } from './sender';
@@ -263,16 +269,45 @@ export class P2PConnection implements SkyWayConnection {
         channel: this.localPerson.channel,
       });
     }
+
     if (stream.side === 'local') {
+      if (this.sender.pc.connectionState === 'closed') {
+        return createEmptyStatsReport();
+      }
+
       if (stream.contentType === 'data') {
         return this.sender.pc.getStats();
       }
-      return this.sender.pc.getStats(stream.track);
+
+      if (!hasSenderTrack(this.sender.pc, stream.track)) {
+        return createEmptyStatsReport();
+      }
+
+      return this.sender.pc.getStats(stream.track).catch((error) => {
+        if (isInvalidStatsSelectorError(error)) {
+          return createEmptyStatsReport();
+        }
+        throw error;
+      });
     } else {
+      if (this.receiver.pc.connectionState === 'closed') {
+        return createEmptyStatsReport();
+      }
+
       if (stream.contentType === 'data') {
         return this.receiver.pc.getStats();
       }
-      return this.receiver.pc.getStats(stream.track);
+
+      if (!hasReceiverTrack(this.receiver.pc, stream.track)) {
+        return createEmptyStatsReport();
+      }
+
+      return this.receiver.pc.getStats(stream.track).catch((error) => {
+        if (isInvalidStatsSelectorError(error)) {
+          return createEmptyStatsReport();
+        }
+        throw error;
+      });
     }
   }
 
@@ -312,21 +347,21 @@ export class P2PConnection implements SkyWayConnection {
       this.sendSubscriptionStatsReportTimers.set(
         stream.id,
         setInterval(async () => {
-          if (!this._analytics) {
-            throw createError({
-              operationName: 'P2PConnection.sendSubscriptionStatsReportTimer',
-              info: {
-                ...errors.missingProperty,
+          const analytics = this._analytics;
+          if (!analytics) {
+            this._log.warn(
+              'analytics session not found',
+              createWarnPayload({
+                operationName: 'P2PConnection.sendSubscriptionStatsReportTimer',
                 detail: 'AnalyticsSession not exist',
-              },
-              path: log.prefix,
-              context: this._context,
-              channel: this.localPerson.channel,
-            });
+                channel: this.localPerson.channel,
+              }),
+            );
+            return;
           }
 
           // AnalyticsSessionがcloseされていたらタイマーを止める
-          if (this._analytics.isClosed()) {
+          if (analytics.isClosed()) {
             const subscriptionStatsReportTimer =
               this.sendSubscriptionStatsReportTimers.get(stream.id);
             if (subscriptionStatsReportTimer) {
@@ -336,15 +371,50 @@ export class P2PConnection implements SkyWayConnection {
             return;
           }
 
-          const stats = await this.getStats(stream);
-          if (stats) {
+          const stats = await this.getStats(stream).catch((error) => {
+            this._log.warn(
+              'get subscription stats failed',
+              createWarnPayload({
+                operationName: 'P2PConnection.sendSubscriptionStatsReportTimer',
+                detail: 'get subscription stats failed',
+                channel: this.localPerson.channel,
+                payload: {
+                  subscriptionId,
+                  role,
+                  contentType: stream.contentType,
+                },
+              }),
+              error,
+            );
+            return undefined;
+          });
+
+          if (stats && stats.size !== 0) {
             // 再送時に他の処理をブロックしないためにawaitしない
-            void this._analytics.client.sendSubscriptionStatsReport(stats, {
-              subscriptionId: subscriptionId,
-              role: role,
-              contentType: stream.contentType,
-              createdAt: Date.now(),
-            });
+            void analytics.client
+              .sendSubscriptionStatsReport(stats, {
+                subscriptionId: subscriptionId,
+                role: role,
+                contentType: stream.contentType,
+                createdAt: Date.now(),
+              })
+              .catch((error) => {
+                this._log.warn(
+                  'send subscription stats report failed',
+                  createWarnPayload({
+                    operationName:
+                      'P2PConnection.sendSubscriptionStatsReportTimer',
+                    detail: 'send subscription stats report failed',
+                    channel: this.localPerson.channel,
+                    payload: {
+                      subscriptionId,
+                      role,
+                      contentType: stream.contentType,
+                    },
+                  }),
+                  error,
+                );
+              });
           }
         }, intervalSec * 1000),
       );

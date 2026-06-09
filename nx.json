@@ -1,0 +1,170 @@
+{
+  "targetDefaults": {
+    "build": {
+      "cache": true,
+      "dependsOn": ["^build"],
+      "outputs": ["{projectRoot}/dist"]
+    },
+    "compile": {
+      "cache": true,
+      "dependsOn": ["^compile"],
+      "outputs": ["{projectRoot}/dist"]
+    },
+    "compile:esbuild": {
+      "cache": true,
+      "dependsOn": ["^compile:esbuild"],
+      "inputs": [
+        "{workspaceRoot}/tsconfig.build.json",
+        "{workspaceRoot}/tsconfig.json",
+        "{workspaceRoot}/package.json",
+        "{workspaceRoot}/pnpm-workspace.yaml",
+        "{workspaceRoot}/pnpm-lock.yaml",
+        "{projectRoot}/src/**/*",
+        "{projectRoot}/tsconfig.json",
+        "{projectRoot}/package.json"
+      ],
+      "outputs": ["{projectRoot}/dist"]
+    },
+    "compile:tsc": {
+      "cache": true,
+      "dependsOn": ["^compile:tsc"],
+      "inputs": [
+        "{workspaceRoot}/tsconfig.build.json",
+        "{workspaceRoot}/package.json",
+        "{workspaceRoot}/pnpm-workspace.yaml",
+        "{workspaceRoot}/pnpm-lock.yaml",
+        "{projectRoot}/src/**/*",
+        "{projectRoot}/tsconfig.build.json",
+        "{projectRoot}/package.json"
+      ],
+      "outputs": ["{projectRoot}/dist"]
+    },
+    "fix": {
+      "cache": true,
+      "dependsOn": []
+    },
+    "format": {
+      "cache": true,
+      "dependsOn": []
+    },
+    "graph": {
+      "dependsOn": []
+    },
+    "license": {
+      "dependsOn": []
+    },
+    "lint": {
+      "cache": true,
+      "dependsOn": []
+    },
+    "publish:npm": {
+      "dependsOn": []
+    },
+    "test": {
+      "dependsOn": []
+    },
+    "test:console": {
+      "dependsOn": []
+    },
+    "type": {
+      "cache": true,
+      "dependsOn": []
+    },
+    "watch": {
+      "dependsOn": []
+    },
+    "watch:esbuild": {
+      "dependsOn": []
+    },
+    "watch:tsc": {
+      "dependsOn": []
+    },
+    "doc": {
+      "cache": true,
+      "dependsOn": [],
+      "outputs": ["{projectRoot}/docs"]
+    },
+    "doc:html": {
+      "cache": true,
+      "dependsOn": [],
+      "outputs": ["{projectRoot}/docs/html"]
+    },
+    "doc:md": {
+      "cache": true,
+      "dependsOn": [],
+      "outputs": ["{projectRoot}/docs/md"]
+    },
+    "e2e": {
+      "dependsOn": []
+    },
+    "pre:test": {
+      "dependsOn": []
+    },
+    "test-all": {
+      "dependsOn": []
+    },
+    "test-large": {
+      "dependsOn": []
+    },
+    "test-large:dev": {
+      "dependsOn": []
+    },
+    "test-middle": {
+      "dependsOn": []
+    },
+    "test-middle:dev": {
+      "dependsOn": []
+    },
+    "test-small": {
+      "dependsOn": []
+    },
+    "test-small:dev": {
+      "dependsOn": []
+    },
+    "type:main": {
+      "cache": true,
+      "dependsOn": [],
+      "inputs": [
+        "{workspaceRoot}/tsconfig.build.json",
+        "{workspaceRoot}/tsconfig.json",
+        "{workspaceRoot}/package.json",
+        "{workspaceRoot}/pnpm-workspace.yaml",
+        "{workspaceRoot}/pnpm-lock.yaml",
+        "{projectRoot}/**/*.ts",
+        "{projectRoot}/tsconfig.json",
+        "{projectRoot}/package.json"
+      ]
+    },
+    "type:prod": {
+      "cache": true,
+      "dependsOn": [],
+      "inputs": [
+        "{workspaceRoot}/tsconfig.build.json",
+        "{workspaceRoot}/package.json",
+        "{workspaceRoot}/pnpm-workspace.yaml",
+        "{workspaceRoot}/pnpm-lock.yaml",
+        "{projectRoot}/**/*.ts",
+        "{projectRoot}/tsconfig.build.json",
+        "{projectRoot}/package.json"
+      ]
+    },
+    "gen": {
+      "dependsOn": []
+    },
+    "jest": {
+      "dependsOn": []
+    },
+    "test-extra": {
+      "dependsOn": []
+    },
+    "test-extra:dev": {
+      "dependsOn": []
+    },
+    "e2e:dev": {
+      "dependsOn": []
+    },
+    "test:dev": {
+      "dependsOn": []
+    }
+  }
+}
