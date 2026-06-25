@@ -33,7 +33,8 @@ export interface Subscription<
   /** @description [japanese] SubscriptionにStreamが紐つけられた時に発火するイベント */
   onStreamAttached: Event<void>;
   /**
-   * @description [japanese] メディア通信の状態が変化した時に発火するイベント
+   * @description [japanese] メディア通信の状態が変化した時に発火するイベント。
+   * 状態の現在値を参照する場合はgetConnectionStateメソッドを利用してください。
    */
   onConnectionStateChanged: Event<TransportConnectionState>;
   /**
@@ -63,7 +64,8 @@ export interface Subscription<
    */
   getRTCPeerConnection(): RTCPeerConnection | undefined;
   /**
-   * @description [japanese] メディア通信の状態を取得する
+   * @description [japanese] メディア通信の状態を取得する。
+   * 状態が変化したことはonConnectionStateChangedイベントで通知されます。
    */
   getConnectionState(): TransportConnectionState;
 }
@@ -141,11 +143,15 @@ export class SubscriptionImpl<
   /**@internal */
   _setStream(stream: T) {
     this._stream = stream;
-    this.onStreamAttached.emit();
     stream._onConnectionStateChanged.add((e) => {
       log.debug('onConnectionStateChanged', this.id, e);
       this.onConnectionStateChanged.emit(e);
     });
+    const state = stream._getTransport()?.connectionState;
+    if (state) {
+      stream._setConnectionState(state);
+    }
+    this.onStreamAttached.emit();
   }
 
   get stream() {

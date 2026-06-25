@@ -74,7 +74,11 @@ export class IceManager {
         },
       ];
     }
-    this._stunServers = [{ urls: `stun:${stun.domain}:${stun.port}` }];
+    // stunPortsの妥当性はContextConfigの構築時に検証済み。デフォルトは443
+    const { stunPorts } = this.context.config.rtcConfig;
+    this._stunServers = stunPorts.map((port) => ({
+      urls: `stun:${stun.domain}:${port}`,
+    }));
 
     log.debug('[end] fetch iceParams', { turn, stun });
   }

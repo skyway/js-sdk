@@ -72,9 +72,10 @@ export interface RoomPublication<T extends LocalStream = LocalStream> {
   /**@description [japanese] このPublicationの有効化状態が変化したときに発火するイベント */
   readonly onStateChanged: Event<void>;
   /**
-   * @description [japanese] メディア通信の状態が変化した時に発火するイベント
-   * SFURoomの場合、remoteMemberはundefinedになる
-   * SFURoomの場合、memberがルームを離れたときのみ発火する
+   * @description [japanese] メディア通信の状態が変化した時に発火するイベント。
+   * 状態の現在値を参照する場合はgetConnectionStateメソッドを利用してください。
+   * DataStreamを利用している場合、書き込み可能になったことはLocalDataStream.onWritableイベントで別途通知されます。
+   * SFU通信の場合、remoteMemberはundefinedになり、memberがルームを離れたときのみ発火します。
    */
   readonly onConnectionStateChanged: Event<{
     remoteMember?: RoomMember;
@@ -117,7 +118,8 @@ export interface RoomPublication<T extends LocalStream = LocalStream> {
     selector: RoomMember | string,
   ): RTCPeerConnection | undefined;
   /**
-   * @description [japanese] メディア通信の状態を取得する
+   * @description [japanese] メディア通信の状態を取得する。
+   * 状態が変化したことはonConnectionStateChangedイベントで通知されます。
    * @param selector [japanese] 接続相手
    */
   getConnectionState(selector: RoomMember | string): TransportConnectionState;

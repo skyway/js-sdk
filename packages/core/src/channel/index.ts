@@ -19,9 +19,10 @@ import {
   LocalPersonAdapter,
   type LocalPersonImpl,
 } from '../member/localPerson';
-import type {
-  RemoteMember,
-  RemoteMemberImplInterface,
+import {
+  isRemoteMember,
+  type RemoteMember,
+  type RemoteMemberImplInterface,
 } from '../member/remoteMember';
 import type { Publication, PublicationImpl } from '../publication';
 import { createPublication } from '../publication/factory';
@@ -428,6 +429,10 @@ export class SkyWayChannelImpl implements Channel {
     const member = this._getMember(memberDto.id);
     this._removeMember(member.id);
     member._left();
+
+    if (isRemoteMember(member)) {
+      member._dispose();
+    }
 
     this.onMemberLeft.emit({ member });
   }

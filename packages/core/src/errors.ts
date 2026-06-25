@@ -13,6 +13,12 @@ export const errors = {
     detail: '引数の値が不正です',
     solution: '正しい値を引数に渡してください',
   },
+  invalidStunPorts: {
+    name: 'invalidStunPorts',
+    detail: 'stunPortsには443, 3478のどちらか又は両方を指定できます',
+    solution:
+      'stunPortsに [443]、[3478]、[443, 3478] のいずれかを指定してください',
+  },
   invalidContentType: {
     name: 'invalidContentType',
     detail: 'contentTypeが正しくありません',

@@ -749,6 +749,10 @@ export class Sender extends Peer {
       })
       .disposer(this._disposer);
 
+    if (this._connectionState !== 'new') {
+      stream._setConnectionState(this.endpoint, this._connectionState);
+    }
+
     return cleanupCallbacks;
   }
 

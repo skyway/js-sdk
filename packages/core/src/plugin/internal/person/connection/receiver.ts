@@ -250,8 +250,15 @@ export class Receiver extends Peer {
   private _setupTransportAccessForStream(stream: RemoteStream) {
     stream._getTransport = () => ({
       rtcPeerConnection: this.pc,
-      connectionState: convertConnectionState(this.pc.connectionState),
+      connectionState:
+        this._connectionState !== 'new'
+          ? this._connectionState
+          : convertConnectionState(this.pc.connectionState),
     });
+    const state = stream._getTransport()?.connectionState;
+    if (state && state !== 'new') {
+      stream._setConnectionState(state);
+    }
     stream._getStats = async () => {
       if (this.pc.connectionState === 'closed') {
         return [];

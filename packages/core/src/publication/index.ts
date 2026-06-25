@@ -63,7 +63,9 @@ export interface Publication<T extends LocalStream = LocalStream> {
   /** @description [japanese] stateが変化した時に発火するイベント */
   onStateChanged: Event<void>;
   /**
-   * @description [japanese] メディア通信の状態が変化した時に発火するイベント
+   * @description [japanese] メディア通信の状態が変化した時に発火するイベント。
+   * 状態の現在値を参照する場合はgetConnectionStateメソッドを利用してください。
+   * DataStreamを利用している場合、書き込み可能になったことはLocalDataStream.onWritableイベントで別途通知されます。
    */
   onConnectionStateChanged: Event<{
     remoteMember: RemoteMember;
@@ -111,7 +113,8 @@ export interface Publication<T extends LocalStream = LocalStream> {
     selector: Member | string,
   ): RTCPeerConnection | undefined;
   /**
-   * @description [japanese] メディア通信の状態を取得する
+   * @description [japanese] メディア通信の状態を取得する。
+   * 状態が変化したことはonConnectionStateChangedイベントで通知されます。
    * @param selector [japanese] 接続相手
    */
   getConnectionState(selector: Member | string): TransportConnectionState;

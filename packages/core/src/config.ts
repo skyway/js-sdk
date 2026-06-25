@@ -1,8 +1,13 @@
-import type { LogFormat, LogLevel } from '@skyway-sdk/common';
+import { type LogFormat, Logger, type LogLevel } from '@skyway-sdk/common';
 import type { RtcApiConfig, RtcRpcApiConfig } from '@skyway-sdk/rtc-api-client';
 import deepmerge from 'deepmerge';
 
+import { errors } from './errors';
+import { createError } from './util';
+
 export type { RtcApiConfig, RtcRpcApiConfig };
+
+const log = new Logger('packages/core/src/config.ts');
 
 export type SkyWayConfigOptions = {
   /**@internal */
@@ -24,6 +29,10 @@ export type SkyWayConfigOptions = {
      * @internal
      */
     stunPolicy?: 'enable' | 'disable';
+    /**
+     * @description [japanese] STUNサーバーへの接続に使用するポート番号。443, 3478のどちらか又は両方を指定できる。デフォルトは443。
+     */
+    stunPorts?: (443 | 3478)[];
     turnProtocol?: TurnProtocol;
     /**
      * @internal
@@ -112,11 +121,13 @@ export class ContextConfig implements SkyWayConfigOptions {
     domain: 'analytics-logging.skyway.ntt.com',
     secure: true,
   };
+  // stunPortsのデフォルトは443。未指定の場合443に接続する
   rtcConfig: Required<SkyWayConfigOptions['rtcConfig']> = {
     timeout: 30_000,
     turnPolicy: 'enable',
     turnProtocol: 'all',
     stunPolicy: 'enable',
+    stunPorts: [443],
     iceDisconnectBufferTimeout: 5000,
   };
   token: Required<SkyWayConfigOptions['token']> = {
@@ -139,5 +150,28 @@ export class ContextConfig implements SkyWayConfigOptions {
   /**@internal */
   constructor(options: Partial<SkyWayConfigOptions> = {}) {
     Object.assign(this, deepmerge(this, options));
+    // stunPortsはデフォルト[443]と結合せず、指定があれば上書きする
+    if (options.rtcConfig?.stunPorts) {
+      this.rtcConfig.stunPorts = options.rtcConfig.stunPorts;
+    }
+    this._validateStunPorts();
+  }
+
+  // stunPortsは443または3478を1つまたは2つ指定できる（空配列・3つ以上・重複・それ以外の値はエラー）
+  private _validateStunPorts() {
+    const { stunPorts } = this.rtcConfig;
+    const isValid =
+      Array.isArray(stunPorts) &&
+      stunPorts.length >= 1 &&
+      stunPorts.length <= 2 &&
+      stunPorts.every((port) => [443, 3478].includes(port)) &&
+      new Set(stunPorts).size === stunPorts.length;
+    if (!isValid) {
+      throw createError({
+        operationName: 'ContextConfig._validateStunPorts',
+        info: errors.invalidStunPorts,
+        path: log.prefix,
+      });
+    }
   }
 }
