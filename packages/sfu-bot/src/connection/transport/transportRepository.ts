@@ -7,13 +7,14 @@ import {
   type SkyWayContext,
 } from '@skyway-sdk/core';
 import type { SFURestApiClient } from '@skyway-sdk/sfu-api-client';
-import { Device } from 'mediasoup-client';
-import type { RtpCapabilities } from 'mediasoup-client/lib/RtpParameters';
-import type { TransportOptions } from 'mediasoup-client/lib/Transport';
+import { Device, type types } from 'mediasoup-client';
 
 import { errors } from '../../errors';
 import type { SFUBotMember } from '../../member';
 import { SFUTransport } from './transport';
+
+type RtpCapabilities = types.RtpCapabilities;
+type TransportOptions = types.TransportOptions;
 
 const log = new Logger(
   'packages/sfu-bot/src/connection/transport/transportRepository.ts',
@@ -26,11 +27,28 @@ export class TransportRepository {
   /**@private */
   _transports: { [id: string]: SFUTransport } = {};
 
-  get rtpCapabilities() {
+  /** 受信用の RTP capabilities。Consumer の作成時に SFU へ渡す */
+  get recvRtpCapabilities() {
     if (!this._device.loaded) {
       return undefined;
     }
-    return this._device.rtpCapabilities;
+    return this._device.recvRtpCapabilities;
+  }
+
+  /**
+   * 受信用の RTP capabilities。既存の参照との互換性のために残している
+   * @deprecated 受信用であることが分かる {@link recvRtpCapabilities} を使う
+   */
+  get rtpCapabilities() {
+    return this.recvRtpCapabilities;
+  }
+
+  /** 送信用の RTP capabilities。Producer のコーデック選択に使う */
+  get sendRtpCapabilities() {
+    if (!this._device.loaded) {
+      return undefined;
+    }
+    return this._device.sendRtpCapabilities;
   }
 
   constructor(
@@ -65,7 +83,8 @@ export class TransportRepository {
         });
       log.debug('device loaded', {
         routerRtpCapabilities: rtpCapabilities,
-        rtpCapabilities: this._device.rtpCapabilities,
+        recvRtpCapabilities: this._device.recvRtpCapabilities,
+        sendRtpCapabilities: this._device.sendRtpCapabilities,
       });
     }
   }

@@ -66,6 +66,8 @@ export interface Publication<T extends LocalStream = LocalStream> {
    * @description [japanese] メディア通信の状態が変化した時に発火するイベント。
    * 状態の現在値を参照する場合はgetConnectionStateメソッドを利用してください。
    * DataStreamを利用している場合、書き込み可能になったことはLocalDataStream.onWritableイベントで別途通知されます。
+   * ローカルでPublishしたPublicationでのみ発火します。
+   * リモートのPublicationでは発火しません。
    */
   onConnectionStateChanged: Event<{
     remoteMember: RemoteMember;
@@ -115,6 +117,8 @@ export interface Publication<T extends LocalStream = LocalStream> {
   /**
    * @description [japanese] メディア通信の状態を取得する。
    * 状態が変化したことはonConnectionStateChangedイベントで通知されます。
+   * ローカルでPublishしたPublicationでのみ利用可能です。
+   * リモートのPublicationではメディア通信の状態を取得できず、SkyWayErrorがthrowされます。
    * @param selector [japanese] 接続相手
    */
   getConnectionState(selector: Member | string): TransportConnectionState;
@@ -540,12 +544,15 @@ export class PublicationImpl<T extends LocalStream = LocalStream>
       this.stream.setIsEnabled(true);
     } else {
       await this.stream.setEnabled(true).catch((e) => {
-        log.warn(
+        // Publicationはenabledのまま、Streamはdisabled（空trackを送信）のまま残る。
+        // enable() を呼び直しても何もしないので、disable() → enable() するまで回復しない
+        log.error(
           createWarnPayload({
             channel: this._channel,
-            operationName: 'Publication._disableStream',
+            operationName: 'Publication._enableStream',
             payload: e,
-            detail: 'setEnabled failed',
+            detail:
+              'setEnabled failed. the stream stays disabled until disable() and enable() are called again',
           }),
         );
       });
@@ -708,7 +715,11 @@ export const sortEncodingParameters = (
 };
 
 export type ReplaceStreamOptions = {
-  /**@description [japanese] 入れ替え前のstreamを開放する。デフォルトで有効 */
+  /**
+   * @description [japanese] 入れ替え前のstreamを解放する。デフォルトで有効。
+   * 入れ替え前のstreamがLocalAudioStream / LocalVideoStreamの場合は、disabled（mute）の状態でも、streamに渡した元のtrackをstopします。
+   * trackを使い続けたい場合はfalseを指定するか、`track.clone()`したものをstreamに渡してください。
+   */
   releaseOldStream?: boolean;
 };
 

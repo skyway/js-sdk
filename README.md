@@ -99,7 +99,8 @@ corepack enable pnpm
 pnpm run first
 ```
 
-- `env.ts.template`を`env.ts`にリネームし、ファイル中の appId と secret にダッシュボードで発行した appId と secret を入力する
+- `pnpm run first`の実行時に`env.ts`が自動生成される（`env.ts`は Git 追跡外。既に存在する場合は上書きされない）
+- 生成された`env.ts`の`appIdProd`と`secretProd`にダッシュボードで発行した appId と secret を入力する
   - appId と secret の発行方法は[こちら](https://skyway.ntt.com/ja/docs/user-guide/javascript-sdk/quickstart/#199)
 
 ## 更新時

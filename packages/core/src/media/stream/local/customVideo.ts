@@ -2,7 +2,7 @@ import { Logger, PromiseQueue } from '@skyway-sdk/common';
 
 import type { VideoMediaTrackConstraints } from '../../factory';
 import {
-  emptyVideoTrack,
+  createEmptyTrack,
   LocalMediaStreamBase,
   type LocalMediaStreamOptions,
 } from './media';
@@ -23,7 +23,7 @@ export class LocalCustomVideoStream extends LocalMediaStreamBase {
   constructor(
     options: VideoMediaTrackConstraints & Partial<LocalMediaStreamOptions> = {},
   ) {
-    super(emptyVideoTrack, 'video', options);
+    super(createEmptyTrack('video'), 'video', options);
     this._stream = null;
   }
 
@@ -49,6 +49,10 @@ export class LocalCustomVideoStream extends LocalMediaStreamBase {
     this._onEnableChanged.emit(track);
   }
 
+  // LocalMediaStreamBase.release のTSDoc（元のtrackをstopする説明）を継承しないよう上書きしている
+  /**
+   * @description [japanese] Streamを解放します。
+   */
   release(): void {
     this._stream?.dispose().catch(() => {
       log.error('release failed');

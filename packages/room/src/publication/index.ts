@@ -76,6 +76,8 @@ export interface RoomPublication<T extends LocalStream = LocalStream> {
    * 状態の現在値を参照する場合はgetConnectionStateメソッドを利用してください。
    * DataStreamを利用している場合、書き込み可能になったことはLocalDataStream.onWritableイベントで別途通知されます。
    * SFU通信の場合、remoteMemberはundefinedになります。
+   * ローカルでPublishしたPublicationでのみ発火します。
+   * リモートのPublicationでは発火しません。
    */
   readonly onConnectionStateChanged: Event<{
     remoteMember?: RoomMember;
@@ -120,6 +122,8 @@ export interface RoomPublication<T extends LocalStream = LocalStream> {
   /**
    * @description [japanese] メディア通信の状態を取得する。
    * 状態が変化したことはonConnectionStateChangedイベントで通知されます。
+   * ローカルでPublishしたPublicationでのみ利用可能です。
+   * リモートのPublicationではメディア通信の状態を取得できず、SkyWayErrorがthrowされます。
    * @param selector [japanese] 接続相手
    */
   getConnectionState(selector: RoomMember | string): TransportConnectionState;

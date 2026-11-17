@@ -1,6 +1,6 @@
 {
   "name": "@skyway-sdk/sfu-bot",
-  "version": "2.2.8",
+  "version": "2.2.9",
   "description": "The official Next Generation JavaScript SDK for SkyWay",
   "homepage": "https://skyway.ntt.com/",
   "repository": {
@@ -43,7 +43,7 @@
   "dependencies": {
     "@skyway-sdk/common": "workspace:*",
     "@skyway-sdk/core": "workspace:*",
-    "mediasoup-client": "^3.18.3",
+    "mediasoup-client": "3.26.0",
     "@skyway-sdk/sfu-api-client": "workspace:*",
     "lodash": "4.18.1"
   },

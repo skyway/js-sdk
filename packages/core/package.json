@@ -1,6 +1,6 @@
 {
   "name": "@skyway-sdk/core",
-  "version": "2.5.1",
+  "version": "2.5.2",
   "description": "The official Next Generation JavaScript SDK for SkyWay",
   "homepage": "https://skyway.ntt.com/",
   "repository": {
@@ -27,11 +27,12 @@
     "e2e": "pnpm run test-large",
     "format": "eslint ./src --fix && eslint ./tests --fix",
     "graph": "dependency-cruiser --include-only '^src' --output-type dot src | dot -T svg > docs/dependencygraph.svg",
+    "jest": "jest",
     "license": "zx ../../scripts/license.mjs @skyway-sdk/core",
     "lint": "eslint ./src --fix && eslint ./tests --fix",
     "pre:test": "cd ../../ && pnpm run build && cd packages/core",
     "publish:npm": "pnpm dlx can-npm-publish --verbose && pnpm run build && npm publish --access public",
-    "test-all": "npm-run-all -p test-large test-middle test-small",
+    "test-all": "npm-run-all jest -p test-large test-middle test-small",
     "test-large": "vitest --config vitest.large.ts run ./tests/large",
     "test-large:dev": "vitest --config vitest.large.ts --browser.headless=false run ./tests/large",
     "test-middle": "vitest --config vitest.middle.ts run ./tests/middle",

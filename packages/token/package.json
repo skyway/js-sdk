@@ -1,6 +1,6 @@
 {
   "name": "@skyway-sdk/token",
-  "version": "2.1.5",
+  "version": "2.1.6",
   "description": "The official Next Generation JavaScript SDK for SkyWay",
   "homepage": "https://skyway.ntt.com/",
   "repository": {
@@ -28,18 +28,19 @@
     "license": "zx ../../scripts/license.mjs @skyway-sdk/token",
     "lint": "eslint ./src --fix",
     "graph": "dependency-cruiser --include-only '^src' --output-type dot src | dot -T svg > docs/dependencygraph.svg",
+    "jest": "jest",
     "publish:npm": "pnpm dlx can-npm-publish --verbose && pnpm run build && npm publish --access public",
     "watch": "npm-run-all --parallel watch:tsc watch:esbuild",
     "watch:esbuild": "esbuild src/index.ts --bundle --watch --format=esm --target=es6 --outfile=dist/index.mjs",
     "watch:tsc": "tsc -p tsconfig.build.json -w",
-    "test": "vitest run ./__tests__"
+    "type": "tsc --noEmit -p ./tsconfig.json",
+    "test": "jest && vitest run ./__tests__"
   },
   "dependencies": {
     "@skyway-sdk/common": "workspace:*",
     "jsrsasign": "^11.1.1",
     "jwt-decode": "3.1.2",
-    "zod": "^3.24.1",
-    "zod-validation-error": "^3.4.0"
+    "zod": "^4.6.6"
   },
   "devDependencies": {
     "@types/jsrsasign": "^10.5.14"

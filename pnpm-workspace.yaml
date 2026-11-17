@@ -4,7 +4,7 @@ packages:
   - examples/playground-room
   - examples/sfu-room-for-hosting
 overrides:
-  axios: 1.16.0
+  axios: 1.20.0
   tmp: '>=0.2.6'
   brace-expansion: '>=5.0.6'
   ip-address: '>=10.1.1'
@@ -13,6 +13,21 @@ onlyBuiltDependencies:
   - esbuild
   - nx
   - unrs-resolver
+
+# Supply chain security settings
+# Prevent installing packages published less than 1 day ago
+minimumReleaseAge: 1440
+# Fail resolution if no version satisfies minimumReleaseAge (default true when minimumReleaseAge is set)
+minimumReleaseAgeStrict: true
+# Fail if registry metadata does not include the time field (instead of skipping the check)
+minimumReleaseAgeIgnoreMissingTime: false
+# Fail if a package's trust level has decreased compared to previous releases
+trustPolicy: no-downgrade
+trustPolicyExclude:
+  - "@octokit/endpoint"
+  - "semver"
+  - "ua-parser-js"
+  - "undici-types"
 allowBuilds:
   esbuild: true
   nx: true

@@ -1,4 +1,9 @@
-import { ClientEvent } from './clientEvent';
+import {
+  ClientEvent,
+  encodeClientEvent,
+  getByteLength,
+  MAX_PAYLOAD_LENGTH,
+} from './clientEvent';
 import {
   type AcknowledgePayload,
   isAcknowledgePayload,
@@ -233,13 +238,9 @@ export class SignalingClient {
         return;
       }
 
-      const payload = {
-        dst: target,
-        data,
-      };
       const clientEvent = new ClientEvent(
         'sendRequestSignalingMessage',
-        payload,
+        createRequestPayload(target, data),
       );
 
       const timer = setTimeout(() => {
@@ -461,6 +462,28 @@ export class SignalingClient {
   ) {
     this._acknowledgeCallbacks.set(eventId, callback);
   }
+}
+
+function createRequestPayload(dst: Member, data: Record<string, unknown>) {
+  return { dst, data };
+}
+
+/**
+ * @internal
+ * @description dst へ request するとき、data を JSON 化した文字列に使える UTF-8 の最大バイト数
+ */
+export function getMaxRequestDataLength(dst: Member): number {
+  const emptyData = {};
+  const envelope = encodeClientEvent(
+    'sendRequestSignalingMessage',
+    globalThis.crypto.randomUUID(),
+    createRequestPayload(dst, emptyData),
+  );
+  return (
+    MAX_PAYLOAD_LENGTH -
+    getByteLength(envelope) +
+    getByteLength(JSON.stringify(emptyData))
+  );
 }
 
 function validateData(data: Record<string, unknown>): void {

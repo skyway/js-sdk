@@ -24,6 +24,7 @@ docs
 scripts
 e2e
 tests
+tests-shared
 __tests__
 packages/signaling-client/examples
 packages/analytics-client/examples
@@ -31,3 +32,4 @@ jest
 test-*.json
 AGENTS.md
 CLAUDE.md
+.sak*

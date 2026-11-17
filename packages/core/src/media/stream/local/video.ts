@@ -1,4 +1,4 @@
-import { Logger, PromiseQueue } from '@skyway-sdk/common';
+import { Logger } from '@skyway-sdk/common';
 
 import { errors } from '../../../errors';
 import { createError } from '../../../util';
@@ -12,8 +12,6 @@ const log = new Logger('packages/core/src/media/stream/local/video.ts');
 
 export class LocalVideoStream extends LocalMediaStreamBase {
   readonly contentType = 'video';
-  private _isEnabled = true;
-  private _promiseQueue = new PromiseQueue();
 
   constructor(
     track: MediaStreamTrack,
@@ -35,35 +33,11 @@ export class LocalVideoStream extends LocalMediaStreamBase {
 
   /**@internal */
   async setEnabled(enabled: boolean) {
-    await this._promiseQueue.push(async () => {
-      // mute
-      if (this._isEnabled === true && enabled === false) {
-        this._isEnabled = enabled;
-
-        this._disable('video');
-
-        log.debug('stopped', this.toJSON());
-      }
-      // unmute
-      else if (this._isEnabled === false && enabled === true) {
-        this._isEnabled = enabled;
-
-        if (this._options.stopTrackWhenDisabled) {
-          const track =
-            this._options.isDisplayMedia === true
-              ? await this.enableDisplay()
-              : await this.enableCamera();
-
-          this._updateTrack(track);
-          this._onEnableChanged.emit(track);
-        } else if (this._oldTrack) {
-          this._updateTrack(this._oldTrack);
-          this._onEnableChanged.emit(this._oldTrack);
-        }
-
-        log.debug('resumed', this.toJSON());
-      }
-    });
+    await this._setDeviceStreamEnabled(enabled, () =>
+      this._options.isDisplayMedia === true
+        ? this.enableDisplay()
+        : this.enableCamera(),
+    );
   }
 
   private async enableCamera() {

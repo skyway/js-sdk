@@ -12,7 +12,8 @@
       "!**/dist",
       "!**/node_modules",
       "!**/docs",
-      "!**/coverage"
+      "!**/coverage",
+      "!**/.sak-context"
     ]
   },
   "formatter": {

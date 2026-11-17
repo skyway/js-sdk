@@ -2,6 +2,7 @@ import { BackOff, Event, EventDisposer, Logger } from '@skyway-sdk/common';
 import type { Member } from '@skyway-sdk/model';
 import {
   type ConnectionState,
+  getMaxRequestDataLength,
   SignalingClient,
 } from '@skyway-sdk/signaling-client';
 import { uuidV4 } from '@skyway-sdk/token';
@@ -204,10 +205,12 @@ export class SignalingSession {
     try {
       const payload = JSON.stringify(data);
       const id = uuidV4();
+      const dst: SignalingDestination = { id: target.id, name: target.name };
+      const maxChunkLength = getMaxChunkLength(dst, id);
 
       // chunking message
-      if (payload.length > 20480) {
-        const split = payload.match(/.{1,20480}/g) ?? [];
+      if (encodedLength(payload) > maxChunkLength) {
+        const split = splitByEncodedLength(payload, maxChunkLength);
 
         let offset = 0;
         for (const chunk of split) {
@@ -218,11 +221,7 @@ export class SignalingSession {
             chunk,
             id,
           };
-          await this._client.request(
-            target,
-            chunkMessage as any,
-            timeout / 1000,
-          );
+          await this._client.request(dst, chunkMessage as any, timeout / 1000);
         }
       } else {
         const chunkMessage: SignalingMessageChunk = {
@@ -232,7 +231,7 @@ export class SignalingSession {
           chunk: payload,
           id,
         };
-        await this._client.request(target, chunkMessage as any, timeout / 1000);
+        await this._client.request(dst, chunkMessage as any, timeout / 1000);
       }
     } catch (error: any) {
       if (this.closed || target.state !== 'joined') return;
@@ -250,6 +249,79 @@ export class SignalingSession {
 }
 
 const messageType = 'signalingMessage' as const;
+
+type SignalingDestination = Pick<Member, 'id' | 'name'>;
+
+const textEncoder = new TextEncoder();
+
+/** 文字列を JSON の文字列値として埋め込んだときの UTF-8 のバイト数（両端の `"` を除く） */
+const encodedLength = (text: string) =>
+  textEncoder.encode(JSON.stringify(text)).length - 2;
+
+/** 1 コードポイント分の文字列を JSON の文字列値として埋め込んだときの UTF-8 のバイト数 */
+const encodedCharLength = (char: string) => {
+  const code = char.codePointAt(0) ?? 0;
+  // 制御文字・`"`・`\`・ペアになっていないサロゲートは、ASCII のエスケープ表記になる
+  if (
+    code < 0x20 ||
+    code === 0x22 ||
+    code === 0x5c ||
+    (code >= 0xd800 && code <= 0xdfff)
+  ) {
+    return JSON.stringify(char).length - 2;
+  }
+  if (code < 0x80) return 1;
+  if (code < 0x800) return 2;
+  if (code < 0x10000) return 3;
+  return 4;
+};
+
+/** 1 回の送信に載せられる chunk の長さ（エスケープ後の UTF-8 のバイト数）を返す */
+const getMaxChunkLength = (dst: SignalingDestination, id: string) => {
+  // length と offset は実際の値によらず、最大の桁数で見積もる
+  const emptyChunk: SignalingMessageChunk = {
+    type: messageType,
+    length: Number.MAX_SAFE_INTEGER,
+    offset: Number.MAX_SAFE_INTEGER,
+    chunk: '',
+    id,
+  };
+  const maxDataLength = getMaxRequestDataLength(dst);
+  const wrapperLength = textEncoder.encode(JSON.stringify(emptyChunk)).length;
+  const maxChunkLength = maxDataLength - wrapperLength;
+  // dst だけで上限を使い切る場合は、上限を超える送信をせずにここで失敗させる
+  if (maxChunkLength <= 0) {
+    throw new Error(
+      `signaling message destination is too large: ${maxDataLength} bytes are available for data, but the chunk wrapper takes ${wrapperLength} bytes`,
+    );
+  }
+  return maxChunkLength;
+};
+
+/**
+ * エスケープ後の UTF-8 のバイト数が maxLength 以下になるように文字列を分割する。
+ * サロゲートペアを分けないようにコードポイント単位で区切る。
+ */
+const splitByEncodedLength = (text: string, maxLength: number) => {
+  const chunks: string[] = [];
+  let start = 0;
+  let end = 0;
+  let chunkLength = 0;
+  for (const char of text) {
+    const charLength = encodedCharLength(char);
+    if (end > start && chunkLength + charLength > maxLength) {
+      chunks.push(text.slice(start, end));
+      start = end;
+      chunkLength = 0;
+    }
+    chunkLength += charLength;
+    end += char.length;
+  }
+  if (end > start) {
+    chunks.push(text.slice(start, end));
+  }
+  return chunks;
+};
 
 interface SignalingMessageChunk {
   type: typeof messageType;

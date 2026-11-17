@@ -21,19 +21,21 @@ import {
 } from '@skyway-sdk/core';
 import type { SFURestApiClient } from '@skyway-sdk/sfu-api-client';
 import isEqual from 'lodash/isEqual';
-import type { Producer, ProducerOptions } from 'mediasoup-client/lib/Producer';
-import type {
-  RtpCodecCapability,
-  RtpCodecParameters,
-  RtpParameters,
-} from 'mediasoup-client/lib/RtpParameters';
+import type { types } from 'mediasoup-client';
 
 import { errors } from '../errors';
 import { Forwarding, type ForwardingConfigure } from '../forwarding';
 import type { SFUBotMember } from '../member';
 import { createWarnPayload } from '../util';
+import { selectCodec } from './selectCodec';
 import type { SFUTransport } from './transport/transport';
 import type { TransportRepository } from './transport/transportRepository';
+
+type Producer = types.Producer;
+type ProducerOptions = types.ProducerOptions;
+type RtpCodecCapability = types.RtpCodecCapability;
+type RtpCodecParameters = types.RtpCodecParameters;
+type RtpParameters = types.RtpParameters;
 
 const log = new Logger('packages/sfu-bot/src/connection/sender.ts');
 
@@ -379,6 +381,11 @@ export class Sender {
         await this._replaceTrack(newStream.track);
       })
       .disposer(this._disposer);
+    // startForwarding は stream.setEnabled を通らずに stream.track をproduceする。
+    // disabledのStreamの空trackがendedになっていると（アプリが stream.track.stop() した場合など） produce が track ended で失敗するので、先に差し替える。
+    // _listenStreamEnableChange より前に呼ぶので、作り直しに失敗したときの _onEnableChanged(null) はこのsenderには届かず、
+    // produce が track ended で失敗して startForwarding が reject する
+    stream._recreateEmptyTrackIfEnded();
     this._listenStreamEnableChange(stream);
 
     const transactionId = uuidV4();
@@ -404,31 +411,12 @@ export class Sender {
       .disposer(this._disposer);
 
     const codecCapabilities = this.publication.codecCapabilities;
+    // 送信するコーデックを選ぶので、受信用ではなく送信用の capabilities を使う
     const deviceCodecs =
-      this._transportRepository.rtpCapabilities?.codecs ?? [];
+      this._transportRepository.sendRtpCapabilities?.codecs ?? [];
     log.debug('select codec', { codecCapabilities, deviceCodecs });
 
-    const [codec] = codecCapabilities.map((cap) => {
-      if (cap.mimeType.toLowerCase().includes('video')) {
-        const codec = deviceCodecs.find((c) => {
-          if (c.mimeType.toLowerCase() !== cap.mimeType.toLowerCase()) {
-            return false;
-          }
-          if (
-            Object.keys(cap.parameters ?? {}).length > 0 &&
-            !isEqual(cap.parameters, c.parameters)
-          ) {
-            return false;
-          }
-          return true;
-        });
-        return codec;
-      }
-      const codec = deviceCodecs.find(
-        (c) => c.mimeType.toLowerCase() === cap.mimeType.toLowerCase(),
-      );
-      return codec;
-    });
+    const codec = selectCodec(codecCapabilities, deviceCodecs);
     log.debug('selected codec', { codec });
 
     if (codec) {

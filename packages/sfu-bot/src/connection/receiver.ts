@@ -11,13 +11,15 @@ import {
   uuidV4,
 } from '@skyway-sdk/core';
 import type { SFURestApiClient } from '@skyway-sdk/sfu-api-client';
-import type { Consumer } from 'mediasoup-client/lib/Consumer';
+import type { types } from 'mediasoup-client';
 
 import { errors } from '../errors';
 import type { SFUBotMember } from '../member';
 import { getLayerFromEncodings } from '../util';
 import type { SFUTransport } from './transport/transport';
 import type { TransportRepository } from './transport/transportRepository';
+
+type Consumer = types.Consumer;
 
 const log = new Logger('packages/sfu-bot/src/connection/receiver.ts');
 
@@ -67,7 +69,7 @@ export class Receiver {
 
   /**@throws {maxSubscriberExceededError} */
   async consume() {
-    let rtpCapabilities = this._transportRepository.rtpCapabilities;
+    let rtpCapabilities = this._transportRepository.recvRtpCapabilities;
     if (!rtpCapabilities) {
       log.debug('[start] getCapabilities');
       rtpCapabilities = await this._api.getRtpCapabilities({

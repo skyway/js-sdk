@@ -1,7 +1,11 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "types": ["vitest/globals"]
+    "types": ["vitest/globals"],
+    // 型チェック(--noEmit)専用。テストは Vite でビルドされ import.meta.env で
+    // 環境変数を参照するため esnext module を許可する。ビルドは tsconfig.build.json を使う。
+    "module": "esnext",
+    "moduleResolution": "node"
   },
   "exclude": ["example"]
 }

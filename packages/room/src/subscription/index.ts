@@ -33,6 +33,8 @@ export interface RoomSubscription<
   /**
    * @description [japanese] メディア通信の状態が変化した時に発火するイベント。
    * 状態の現在値を参照する場合はgetConnectionStateメソッドを利用してください。
+   * ローカルでSubscribeしたSubscriptionでのみ発火します。
+   * リモートのSubscriptionでは発火しません。
    */
   onConnectionStateChanged: Event<TransportConnectionState>;
   readonly subscriber: RoomMember;
@@ -63,6 +65,8 @@ export interface RoomSubscription<
   /**
    * @description [japanese] メディア通信の状態を取得する。
    * 状態が変化したことはonConnectionStateChangedイベントで通知されます。
+   * ローカルでSubscribeしたSubscriptionでのみ利用可能です。
+   * リモートのSubscriptionではメディア通信の状態を取得できず、SkyWayErrorがthrowされます。
    */
   getConnectionState(): TransportConnectionState;
 }

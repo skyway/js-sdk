@@ -39,6 +39,16 @@ export class RPC {
   readonly onDisconnected = this._events.make<{ code: number }>();
   readonly onClosed = this._events.make<void>();
 
+  constructor() {
+    // 再接続でも同じ RPC を使い回すため、connect のたびに張ると listener が
+    // 増え続け、onNotify が接続回数ぶん多重発火する。
+    this._onMessage.add((msg) => {
+      if (isNotifyMessage(msg)) {
+        this.onNotify.emit(msg);
+      }
+    });
+  }
+
   async connect({
     domain,
     token,
@@ -81,12 +91,6 @@ export class RPC {
         this.onDisconnected.emit({ code: e.code });
       }
     };
-
-    this._onMessage.add((msg) => {
-      if (isNotifyMessage(msg)) {
-        this.onNotify.emit(msg);
-      }
-    });
 
     const error = await new Promise<void>((r, f) => {
       const timeout = setTimeout(() => {

@@ -1,4 +1,4 @@
-@skyway-sdk/room@2.5.1
+@skyway-sdk/room@2.5.2
 
 MIT
 
@@ -29,7 +29,7 @@ SOFTWARE.
 
 ---
 
-@skyway-sdk/token@2.1.5
+@skyway-sdk/token@2.1.6
 
 MIT
 
@@ -60,7 +60,7 @@ SOFTWARE.
 
 ---
 
-@skyway-sdk/common@2.0.6
+@skyway-sdk/common@2.0.7
 
 MIT
 
@@ -91,7 +91,7 @@ SOFTWARE.
 
 ---
 
-@skyway-sdk/sfu-bot@2.2.8
+@skyway-sdk/sfu-bot@2.2.9
 
 MIT
 
@@ -122,7 +122,7 @@ SOFTWARE.
 
 ---
 
-@skyway-sdk/sfu-api-client@2.0.6
+@skyway-sdk/sfu-api-client@2.0.7
 
 MIT
 
@@ -153,7 +153,7 @@ SOFTWARE.
 
 ---
 
-@skyway-sdk/core@2.5.1
+@skyway-sdk/core@2.5.2
 
 MIT
 
@@ -184,7 +184,7 @@ SOFTWARE.
 
 ---
 
-@skyway-sdk/signaling-client@2.0.4
+@skyway-sdk/signaling-client@2.0.5
 
 MIT
 
@@ -215,7 +215,7 @@ SOFTWARE.
 
 ---
 
-@skyway-sdk/rtc-api-client@2.2.5
+@skyway-sdk/rtc-api-client@2.2.6
 
 MIT
 
@@ -246,7 +246,7 @@ SOFTWARE.
 
 ---
 
-@skyway-sdk/rtc-rpc-api-client@2.1.5
+@skyway-sdk/rtc-rpc-api-client@2.1.6
 
 MIT
 
@@ -277,7 +277,7 @@ SOFTWARE.
 
 ---
 
-@skyway-sdk/model@2.0.0
+@skyway-sdk/model@2.0.1
 
 MIT
 
@@ -308,7 +308,7 @@ SOFTWARE.
 
 ---
 
-@skyway-sdk/analytics-client@2.0.5
+@skyway-sdk/analytics-client@2.0.6
 
 MIT
 
@@ -377,7 +377,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-@types/debug@4.1.12
+@types/debug@4.1.13
 
 MIT
 
@@ -470,6 +470,14 @@ https://github.com/DefinitelyTyped/DefinitelyTyped
 
 ---
 
+agent-base@6.0.2
+
+MIT
+
+https://github.com/TooTallNate/node-agent-base
+
+---
+
 asynckit@0.4.0
 
 MIT
@@ -501,7 +509,7 @@ SOFTWARE.
 
 ---
 
-axios@1.16.0
+axios@1.20.0
 
 MIT
 
@@ -867,7 +875,7 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-form-data@4.0.5
+form-data@4.0.6
 
 MIT
 
@@ -1060,7 +1068,7 @@ SOFTWARE.
 
 ---
 
-hasown@2.0.3
+hasown@2.0.4
 
 MIT
 
@@ -1088,6 +1096,14 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
+
+---
+
+https-proxy-agent@5.0.1
+
+MIT
+
+https://github.com/TooTallNate/node-https-proxy-agent
 
 ---
 
@@ -1502,7 +1518,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-supports-color@10.2.2
+supports-color@11.0.0
 
 MIT
 
@@ -1621,7 +1637,7 @@ https://github.com/jsdom/whatwg-url
 
 ---
 
-ws@8.20.1
+ws@8.21.0
 
 MIT
 
@@ -1651,7 +1667,37 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-zod@3.25.67
+ws@8.22.0
+
+MIT
+
+https://github.com/websockets/ws
+
+Copyright (c) 2011 Einar Otto Stangvik <einaros@gmail.com>
+Copyright (c) 2013 Arnout Kazemier and contributors
+Copyright (c) 2016 Luigi Pinca and contributors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+---
+
+zod@4.6.6
 
 MIT
 
@@ -1682,26 +1728,7 @@ SOFTWARE.
 
 ---
 
-zod-validation-error@3.5.2
-
-MIT
-
-https://github.com/causaly/zod-validation-error
-
-(The MIT License)
-
-Copyright 2022 Causaly, Inc <front-end@causaly.com>
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-
----
-
-awaitqueue@3.3.0
+awaitqueue@3.3.1
 
 ISC
 
@@ -1751,7 +1778,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 ---
 
-h264-profile-level-id@2.3.1
+h264-profile-level-id@2.3.3
 
 ISC
 
@@ -1776,7 +1803,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 ---
 
-mediasoup-client@3.18.3
+mediasoup-client@3.26.0
 
 ISC
 

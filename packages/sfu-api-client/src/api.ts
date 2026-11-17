@@ -6,16 +6,16 @@ import {
   Logger,
   type LogLevel,
 } from '@skyway-sdk/common';
-import type { ConsumerOptions } from 'mediasoup-client/lib/Consumer';
-import type { RtpCapabilities } from 'mediasoup-client/lib/RtpParameters';
-import type {
-  IceParameters,
-  TransportOptions,
-} from 'mediasoup-client/lib/Transport';
+import type { types } from 'mediasoup-client';
 
 import { defaultSFUApiOptions } from './const';
 import { errors } from './errors';
 import { createError, createWarnPayload } from './util';
+
+type ConsumerOptions = types.ConsumerOptions;
+type RtpCapabilities = types.RtpCapabilities;
+type IceParameters = types.IceParameters;
+type TransportOptions = types.TransportOptions;
 
 const log = new Logger('packages/sfu-api-client/src/api.ts');
 

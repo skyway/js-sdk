@@ -2,7 +2,7 @@
   "compilerOptions": {
     "module": "commonjs",
     "target": "ES2015",
-    "lib": ["DOM", "ES2020", "DOM.Iterable"],
+    "lib": ["DOM", "ES2020", "DOM.Iterable", "ESNext.Disposable"],
     "sourceMap": true,
     "declaration": true,
     "declarationMap": true,

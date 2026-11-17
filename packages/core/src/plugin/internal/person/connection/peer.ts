@@ -135,7 +135,7 @@ export abstract class Peer {
     }
   };
 
-  private _onICECandidateError = async (ev: globalThis.Event) => {
+  private _onICECandidateError = async (ev: RTCPeerConnectionIceErrorEvent) => {
     if (
       this.localPerson._analytics &&
       !this.localPerson._analytics.isClosed()
@@ -145,7 +145,13 @@ export abstract class Peer {
         rtcPeerConnectionId: this.rtcPeerConnectionId,
         type: 'iceCandidateError',
         data: {
-          event: JSON.stringify(ev),
+          event: JSON.stringify({
+            url: ev.url,
+            errorCode: ev.errorCode,
+            errorText: ev.errorText,
+            address: ev.address,
+            port: ev.port,
+          }),
         },
         createdAt: Date.now(),
       });

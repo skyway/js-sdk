@@ -9,20 +9,18 @@ import {
   type TransportConnectionState,
 } from '@skyway-sdk/core';
 import type { SFURestApiClient } from '@skyway-sdk/sfu-api-client';
-import type { DataProducerOptions } from 'mediasoup-client/lib/DataProducer';
-import type {
-  MediaKind,
-  RtpParameters,
-} from 'mediasoup-client/lib/RtpParameters';
-import type {
-  ConnectionState,
-  DtlsParameters,
-  Transport,
-} from 'mediasoup-client/lib/Transport';
+import type { types } from 'mediasoup-client';
 
 import { errors } from '../../errors';
 import type { SFUBotMember } from '../../member';
 import { createWarnPayload } from '../../util';
+
+type DataProducerOptions = types.DataProducerOptions;
+type MediaKind = types.MediaKind;
+type RtpParameters = types.RtpParameters;
+type ConnectionState = types.ConnectionState;
+type DtlsParameters = types.DtlsParameters;
+type Transport = types.Transport;
 
 const log = new Logger(
   'packages/sfu-bot/src/connection/transport/transport.ts',

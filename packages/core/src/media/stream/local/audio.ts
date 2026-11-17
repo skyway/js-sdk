@@ -1,4 +1,4 @@
-import { Logger, PromiseQueue } from '@skyway-sdk/common';
+import { Logger } from '@skyway-sdk/common';
 
 import { errors } from '../../../errors';
 import { createError } from '../../../util';
@@ -21,8 +21,6 @@ export class LocalAudioStream
   implements LocalAudioStreamInterface
 {
   readonly contentType = 'audio';
-  private _isEnabled = true;
-  private _promiseQueue = new PromiseQueue();
   private _audioLevel: AudioLevel | undefined;
 
   constructor(
@@ -43,35 +41,11 @@ export class LocalAudioStream
 
   /**@internal */
   async setEnabled(enabled: boolean) {
-    await this._promiseQueue.push(async () => {
-      // mute
-      if (this._isEnabled === true && enabled === false) {
-        this._isEnabled = enabled;
-
-        this._disable('audio');
-
-        log.debug('stopped');
-      }
-      // unmute
-      else if (this._isEnabled === false && enabled === true) {
-        this._isEnabled = enabled;
-
-        if (this._options.stopTrackWhenDisabled) {
-          const track =
-            this._options.isDisplayMedia === true
-              ? await this.enableDisplay()
-              : await this.enableMic();
-
-          this._updateTrack(track);
-          this._onEnableChanged.emit(track);
-        } else if (this._oldTrack) {
-          this._updateTrack(this._oldTrack);
-          this._onEnableChanged.emit(this._oldTrack);
-        }
-
-        log.debug('resumed');
-      }
-    });
+    await this._setDeviceStreamEnabled(enabled, () =>
+      this._options.isDisplayMedia === true
+        ? this.enableDisplay()
+        : this.enableMic(),
+    );
   }
 
   private async enableMic() {

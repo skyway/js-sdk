@@ -1,6 +1,7 @@
 {
   "name": "sfu-bot-example",
   "private": true,
+  "packageManager": "npm@11.16.0",
   "version": "1.0.0",
   "type": "module",
   "scripts": {
@@ -13,7 +14,7 @@
     "@skyway-sdk/sfu-bot": "latest"
   },
   "devDependencies": {
-    "typescript": "^5.7.3",
+    "typescript": "^5.9.3",
     "vite": "^8.0.8"
   }
 }

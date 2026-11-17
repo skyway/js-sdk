@@ -2,7 +2,6 @@ import { Logger, SkyWayError } from '@skyway-sdk/common';
 import jsrsasign from 'jsrsasign';
 import jwtDecode from 'jwt-decode';
 import { z } from 'zod';
-// import { fromZodError } from 'zod-validation-error'; // 下記にかいてある理由によりコメントアウト
 import {
   type AuthToken,
   AuthTokenSchema,
@@ -32,25 +31,14 @@ export class SkyWayAuthToken {
       parsedProps = AuthTokenSchema.parse(props);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        // TODO: zod-validation-errorを利用するとkarmaでエラーが発生するため，今後エラーメッセージ生成の対応をする
-        /**
-        const validationError = fromZodError(error);
         throw new SkyWayError({
           path: log.prefix,
           info: {
             ...tokenErrors.invalidParameter,
-            detail: validationError.toString(), // detailをzodでのvalidationエラーに変更
+            // detail を zod のバリデーションエラーの内容に変更する
+            detail: z.prettifyError(error),
           },
-          error: validationError,
-        });
-        */
-
-        throw new SkyWayError({
-          path: log.prefix,
-          info: tokenErrors.invalidParameter,
-          error: new Error(
-            'Received invalid token. Please check your SkyWayAuthToken.',
-          ),
+          error,
         });
       } else {
         throw new SkyWayError({
